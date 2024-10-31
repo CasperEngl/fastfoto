@@ -57,7 +57,7 @@ export function CreateAlbumForm({
     mutationFn: createAlbum,
     onSuccess: (album) => {
       toast.success("Album created successfully");
-      router.push(`/admin/albums/${album.id}/edit`);
+      router.push(`/p/albums/${album.id}/edit`);
       router.refresh();
     },
     onError: (error) => {

@@ -64,7 +64,7 @@ export default async function AdminPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Albums</CardTitle>
             <Button variant="ghost" asChild>
-              <Link href="/admin/albums">View all</Link>
+              <Link href="/p/albums">View all</Link>
             </Button>
           </CardHeader>
           <CardContent>

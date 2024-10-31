@@ -15,6 +15,6 @@ export async function createAlbum(data: InferInsertModel<typeof Albums>) {
     })
     .returning();
 
-  revalidatePath("/admin/albums");
+  revalidatePath("/p/albums");
   return album;
 }

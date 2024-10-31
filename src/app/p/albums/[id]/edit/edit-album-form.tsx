@@ -1,11 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { InferSelectModel } from "drizzle-orm";
-import { Trash2 } from "lucide-react";
-import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useOptimistic, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -32,6 +27,12 @@ import {
   SelectValue,
 } from "~/components/ui/select";
 import { deletePhoto } from "~/app/p/albums/[id]/edit/actions";
+import Image from "next/image";
+import { Trash2 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { InferSelectModel } from "drizzle-orm";
+import { updateAlbum } from "~/app/p/albums/actions";
+import invariant from "invariant";
 
 const albumFormSchema = z.object({
   name: z.string().min(2, {
@@ -45,17 +46,17 @@ type AlbumFormValues = z.infer<typeof albumFormSchema>;
 
 export function EditAlbumForm({
   album,
-  updateAlbum,
   users,
 }: {
   album: InferSelectModel<typeof Albums> & {
     photos: InferSelectModel<typeof Photos>[];
   };
-  updateAlbum: (data: AlbumFormValues & { photos: string[] }) => Promise<void>;
   users: InferSelectModel<typeof Users>[];
 }) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
+  const params = useParams();
+  const [isUpdating, startUpdateTransition] = useTransition();
+  const [isRemoving, startRemoveTransition] = useTransition();
 
   const [optimisticPhotos, addOptimisticPhoto] = useOptimistic(
     album.photos,
@@ -71,46 +72,25 @@ export function EditAlbumForm({
     },
   });
 
-  const updateAlbumMutation = useMutation({
-    mutationFn: (values: AlbumFormValues) =>
-      updateAlbum({
-        ...values,
-        photos: [],
-      }),
-    onSuccess: () => {
-      toast.success("Album updated successfully");
-    },
-    onError: () => {
-      toast.error("Failed to update album");
-    },
-  });
-
-  const removePhotoMutation = useMutation({
-    mutationFn: async (key: string) => {
-      await deletePhoto(key);
-    },
-    onMutate: (key: string) => {
-      startTransition(() => {
-        const newPhotos = optimisticPhotos.filter((photo) => photo.key !== key);
-        addOptimisticPhoto(newPhotos);
-      });
-    },
-    onSuccess: () => {
-      toast.success("Photo deleted successfully");
-      router.refresh();
-    },
-    onError: () => {
-      toast.error("Failed to delete photo");
-      startTransition(() => {
-        addOptimisticPhoto(album.photos);
-      });
-    },
-  });
-
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => updateAlbumMutation.mutate(data))}
+        onSubmit={form.handleSubmit((values) => {
+          startUpdateTransition(async () => {
+            invariant(params.id, "id is required");
+
+            try {
+              await updateAlbum(params.id.toString(), {
+                name: values.name,
+                description: values.description || null,
+                userId: values.userId,
+              });
+              toast.success("Album updated successfully");
+            } catch (error) {
+              toast.error("Failed to update album");
+            }
+          });
+        })}
         className="space-y-8"
       >
         <FormField
@@ -174,8 +154,8 @@ export function EditAlbumForm({
           )}
         />
 
-        <Button type="submit" disabled={updateAlbumMutation.isPending}>
-          {updateAlbumMutation.isPending ? "Saving..." : "Save Changes"}
+        <Button type="submit" disabled={isUpdating}>
+          {isUpdating ? "Saving..." : "Save Changes"}
         </Button>
 
         <div className="space-y-4">
@@ -194,7 +174,23 @@ export function EditAlbumForm({
                   variant="destructive"
                   size="sm"
                   className="absolute right-2 top-2"
-                  onClick={() => removePhotoMutation.mutate(photo.key)}
+                  disabled={isRemoving}
+                  onClick={() => {
+                    startRemoveTransition(async () => {
+                      try {
+                        const newPhotos = optimisticPhotos.filter(
+                          (p) => p.key !== photo.key,
+                        );
+                        addOptimisticPhoto(newPhotos);
+                        await deletePhoto(photo.key);
+                        toast.success("Photo deleted successfully");
+                        router.refresh();
+                      } catch (error) {
+                        toast.error("Failed to delete photo");
+                        addOptimisticPhoto(album.photos);
+                      }
+                    });
+                  }}
                 >
                   <Trash2 className="h-4 w-4" />
                   <span className="sr-only">Delete photo</span>
@@ -211,7 +207,7 @@ export function EditAlbumForm({
               }}
               onClientUploadComplete={(res) => {
                 if (res) {
-                  startTransition(() => {
+                  startUpdateTransition(() => {
                     addOptimisticPhoto([
                       ...optimisticPhotos,
                       ...res.map((photo) => ({

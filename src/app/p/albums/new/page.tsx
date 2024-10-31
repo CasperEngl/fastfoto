@@ -14,7 +14,7 @@ export default async function CreateAlbumPage() {
     <div className="container mx-auto py-10">
       <div className="mb-8 flex items-center gap-4">
         <Button variant="ghost" size="icon" className="rounded-full" asChild>
-          <Link href="/admin/albums">
+          <Link href="/p/albums">
             <ArrowLeft className="h-4 w-4" />
             <span className="sr-only">Back to Albums</span>
           </Link>

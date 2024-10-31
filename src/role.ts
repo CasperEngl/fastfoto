@@ -5,9 +5,19 @@ export function isAdmin(user?: User) {
 }
 
 export function isClient(user?: User) {
+  if (isAdmin(user)) {
+    return true;
+  }
+
   return user?.type === "client";
 }
 
-export function isPhotographer(user?: User) {
+export function isPhotographer(
+  user?: User,
+): user is User & { type: "photographer" } {
+  if (isAdmin(user)) {
+    return true;
+  }
+
   return user?.type === "photographer";
 }

@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { z } from "zod";
 import { DeleteAlbumButton } from "~/app/p/albums/[id]/edit/delete-album-button";
 import { EditAlbumForm } from "~/app/p/albums/[id]/edit/edit-album-form";
 import { updateAlbum } from "~/app/p/albums/actions";
@@ -9,16 +10,17 @@ import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
+import { isPhotographer } from "~/role";
 
 export default async function AlbumEditPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: Promise<unknown>;
 }) {
-  const { id } = await params;
+  const { id } = z.object({ id: z.string() }).parse(await params);
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isPhotographer(session?.user)) {
     return notFound();
   }
 
@@ -37,7 +39,7 @@ export default async function AlbumEditPage({
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <Button variant="ghost" size="icon" className="rounded-full" asChild>
-            <Link href="/admin/albums">
+            <Link href="/p/albums">
               <ArrowLeft className="h-4 w-4" />
               <span className="sr-only">Back to Albums</span>
             </Link>
@@ -46,18 +48,7 @@ export default async function AlbumEditPage({
         </div>
         <DeleteAlbumButton albumId={id} />
       </div>
-      <EditAlbumForm
-        album={album}
-        users={users}
-        updateAlbum={async (data) => {
-          "use server";
-          await updateAlbum(id, {
-            name: data.name,
-            description: data.description || null,
-            userId: data.userId,
-          });
-        }}
-      />
+      <EditAlbumForm album={album} users={users} />
     </div>
   );
 }

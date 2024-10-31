@@ -30,7 +30,7 @@ export function DeleteAlbumButton({ albumId }: { albumId: string }) {
     onSuccess: () => {
       toast.success("Album deleted successfully");
       setOpen(false);
-      router.push("/admin/albums");
+      router.push("/p/albums");
     },
     onError: (error) => {
       toast.error(

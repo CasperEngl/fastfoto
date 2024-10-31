@@ -23,7 +23,7 @@ export default async function AlbumsPage() {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Albums</h1>
         <Button asChild>
-          <Link href="/admin/albums/new">Create Album</Link>
+          <Link href="/p/albums/new">Create Album</Link>
         </Button>
       </div>
       <DataTable columns={columns} data={albums} />

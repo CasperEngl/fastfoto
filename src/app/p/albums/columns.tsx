@@ -37,7 +37,7 @@ export const columns: ColumnDef<
     header: "Name",
     cell: ({ row }) => (
       <Link
-        href={`/admin/albums/${row.original.id}/edit`}
+        href={`/p/albums/${row.original.id}/edit`}
         className="hover:underline"
       >
         {row.getValue("name")}
