@@ -8,6 +8,12 @@ import { db } from "~/db/client";
 import { Albums, Users } from "~/db/schema";
 
 export default async function AdminPage() {
+  const session = await auth();
+
+  if (!session?.user?.isAdmin) {
+    return notFound();
+  }
+
   const recentUsers = await db
     .select()
     .from(Users)
