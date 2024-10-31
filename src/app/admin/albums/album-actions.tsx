@@ -56,7 +56,13 @@ export function AlbumActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
-          onClick={() => deleteAlbumMutation.mutate(album.id)}
+          onClick={() => {
+            if (!confirm("Are you sure you want to delete this album?")) {
+              return;
+            }
+
+            deleteAlbumMutation.mutate(album.id);
+          }}
           disabled={deleteAlbumMutation.isPending}
         >
           {deleteAlbumMutation.isPending ? "Deleting..." : "Delete album"}
