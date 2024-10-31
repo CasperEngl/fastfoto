@@ -1,8 +1,15 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { InferSelectModel } from "drizzle-orm";
+import invariant from "invariant";
+import { useParams } from "next/navigation";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { updateUser } from "~/app/admin/users/[id]/edit/actions";
+import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,11 +20,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
-import { InferSelectModel } from "drizzle-orm";
 import { Users } from "~/db/schema";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
 
 const userFormSchema = z.object({
   name: z.string().min(2, {
@@ -32,11 +35,12 @@ type UserFormValues = z.infer<typeof userFormSchema>;
 
 export function EditUserForm({
   user,
-  updateUser,
 }: {
   user: InferSelectModel<typeof Users>;
-  updateUser: (data: UserFormValues) => Promise<void>;
 }) {
+  const params = useParams();
+  const [isPending, startTransition] = useTransition();
+
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
     defaultValues: {
@@ -45,20 +49,24 @@ export function EditUserForm({
     },
   });
 
-  const updateUserMutation = useMutation({
-    mutationFn: updateUser,
-    onSuccess: () => {
-      toast.success("User updated successfully");
-    },
-    onError: () => {
-      toast.error("Failed to update user");
-    },
-  });
+  invariant(params.id?.toString(), "User ID is required");
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => updateUserMutation.mutate(data))}
+        onSubmit={form.handleSubmit((data) => {
+          startTransition(async () => {
+            try {
+              await updateUser({
+                ...data,
+                userId: params.id!.toString(),
+              });
+              toast.success("User updated successfully");
+            } catch (error) {
+              toast.error("Failed to update user");
+            }
+          });
+        })}
         className="space-y-8"
       >
         <FormField
@@ -71,7 +79,7 @@ export function EditUserForm({
                 <Input
                   placeholder="Enter name"
                   {...field}
-                  disabled={updateUserMutation.isPending}
+                  disabled={isPending}
                 />
               </FormControl>
               <FormDescription>
@@ -94,7 +102,7 @@ export function EditUserForm({
                   type="email"
                   placeholder="Enter email"
                   {...field}
-                  disabled={updateUserMutation.isPending}
+                  disabled={isPending}
                 />
               </FormControl>
               <FormDescription>
@@ -105,8 +113,8 @@ export function EditUserForm({
           )}
         />
 
-        <Button type="submit" disabled={updateUserMutation.isPending}>
-          {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Saving..." : "Save Changes"}
         </Button>
       </form>
     </Form>

@@ -6,11 +6,12 @@ import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Users } from "~/db/schema";
+import { isAdmin } from "~/role";
 
 export default async function UsersPage() {
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isAdmin(session?.user)) {
     return notFound();
   }
 

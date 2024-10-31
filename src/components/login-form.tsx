@@ -29,7 +29,8 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
-  const [isPending, startTransition] = useTransition();
+  const [isMagicLinkPending, startMagicLinkTransition] = useTransition();
+  const [isPasskeyPending, startPasskeyTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -50,7 +51,7 @@ export function LoginForm() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit((values) => {
-                startTransition(async () => {
+                startMagicLinkTransition(async () => {
                   await loginMagicLink(values);
                 });
               })}
@@ -69,8 +70,12 @@ export function LoginForm() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full" disabled={isPending}>
-                {isPending ? "Logging in..." : "Login"}
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={isMagicLinkPending}
+              >
+                {isMagicLinkPending ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>
@@ -88,13 +93,13 @@ export function LoginForm() {
             variant="outline"
             className="w-full"
             onClick={() => {
-              startTransition(async () => {
+              startPasskeyTransition(async () => {
                 await loginPasskey();
               });
             }}
-            disabled={isPending}
+            disabled={isPasskeyPending}
           >
-            {isPending ? "Authenticating..." : "Login with Passkey"}
+            {isPasskeyPending ? "Authenticating..." : "Login with Passkey"}
           </Button>
           <Button variant="outline" className="w-full">
             Login with Google

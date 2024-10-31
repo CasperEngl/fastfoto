@@ -1,15 +1,15 @@
 import { eq } from "drizzle-orm";
-import { revalidatePath } from "next/cache";
-import { notFound } from "next/navigation";
-import { EditUserForm } from "~/app/admin/users/[id]/edit/edit-user-form";
-import { db } from "~/db/client";
-import { Users, Albums } from "~/db/schema";
-import { Button } from "~/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
+import { EditUserForm } from "~/app/admin/users/[id]/edit/edit-user-form";
 import { auth } from "~/auth";
-import { DeleteUserButton } from "./delete-user-button";
 import { AlbumCard } from "~/components/album-card";
+import { Button } from "~/components/ui/button";
+import { db } from "~/db/client";
+import { Albums, Users } from "~/db/schema";
+import { isAdmin } from "~/role";
+import { DeleteUserButton } from "./delete-user-button";
 
 export default async function UserEditPage({
   params,
@@ -18,7 +18,7 @@ export default async function UserEditPage({
 }) {
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isAdmin(session?.user)) {
     return notFound();
   }
 
@@ -47,27 +47,16 @@ export default async function UserEditPage({
         </div>
         <DeleteUserButton userId={params.id} />
       </div>
-      <EditUserForm
-        user={user}
-        updateUser={async ({ email, name }) => {
-          "use server";
-
-          if (!session?.user?.isAdmin) {
-            throw new Error("Unauthorized");
-          }
-
-          await db
-            .update(Users)
-            .set({ email, name })
-            .where(eq(Users.id, params.id));
-
-          revalidatePath("/admin/users");
-        }}
-      />
+      <EditUserForm user={user} />
 
       {/* Albums Section */}
       <div className="mt-8">
-        <h2 className="mb-4 text-xl font-semibold">User Albums</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">User Albums</h2>
+          <Button asChild>
+            <Link href={`/p/albums/new?userId=${params.id}`}>Create Album</Link>
+          </Button>
+        </div>
         {albums.length === 0 ? (
           <p className="text-muted-foreground">
             No albums found for this user.

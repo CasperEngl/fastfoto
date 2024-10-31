@@ -1,6 +1,8 @@
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { CreateAlbumForm } from "~/app/admin/albums/new/create-album-form";
+import { useParams } from "next/navigation";
+import { z } from "zod";
+import { CreateAlbumForm } from "~/app/p/albums/new/create-album-form";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Users } from "~/db/schema";

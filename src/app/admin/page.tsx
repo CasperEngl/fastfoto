@@ -7,11 +7,12 @@ import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { db } from "~/db/client";
 import { Albums, Users } from "~/db/schema";
+import { isAdmin } from "~/role";
 
 export default async function AdminPage() {
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isAdmin(session?.user)) {
     return notFound();
   }
 

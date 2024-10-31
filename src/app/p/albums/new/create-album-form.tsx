@@ -14,7 +14,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createAlbum } from "./actions";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -41,6 +41,7 @@ export function CreateAlbumForm({
 }: {
   users: InferSelectModel<typeof Users>[];
 }) {
+  const searchParams = useSearchParams();
   const router = useRouter();
 
   const form = useForm<FormValues>({
@@ -48,7 +49,7 @@ export function CreateAlbumForm({
     defaultValues: {
       name: "",
       description: "",
-      userId: "",
+      userId: searchParams.get("userId") || "",
     },
   });
 
@@ -73,6 +74,31 @@ export function CreateAlbumForm({
       >
         <FormField
           control={form.control}
+          name="userId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>User</FormLabel>
+              <FormControl>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="name"
           render={({ field }) => (
             <FormItem>
@@ -93,31 +119,6 @@ export function CreateAlbumForm({
               <FormLabel>Description</FormLabel>
               <FormControl>
                 <Textarea placeholder="Album description" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="userId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>User</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>

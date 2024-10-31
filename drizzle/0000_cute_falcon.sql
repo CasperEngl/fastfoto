@@ -68,7 +68,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"email" text NOT NULL,
 	"emailVerified" timestamp,
 	"image" text,
-	"type" text NOT NULL,
+	"type" text DEFAULT 'client' NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
