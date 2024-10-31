@@ -15,11 +15,10 @@ export default async function AdminPage() {
     return notFound();
   }
 
-  const recentUsers = await db
-    .select()
-    .from(Users)
-    .orderBy(desc(Users.createdAt))
-    .limit(3);
+  const recentUsers = await db.query.Users.findMany({
+    limit: 4,
+    orderBy: desc(Users.createdAt),
+  });
 
   const recentAlbums = await db.query.Albums.findMany({
     limit: 4,
