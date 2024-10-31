@@ -5,9 +5,14 @@ import { InferSelectModel } from "drizzle-orm";
 import Link from "next/link";
 import { AlbumActions } from "./album-actions";
 import { Checkbox } from "~/components/ui/checkbox";
-import { Albums } from "~/db/schema";
+import { Albums, Photos, Users } from "~/db/schema";
 
-export const columns: ColumnDef<InferSelectModel<typeof Albums>>[] = [
+export const columns: ColumnDef<
+  InferSelectModel<typeof Albums> & {
+    user: InferSelectModel<typeof Users>;
+    photos: InferSelectModel<typeof Photos>[];
+  }
+>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -42,6 +47,16 @@ export const columns: ColumnDef<InferSelectModel<typeof Albums>>[] = [
   {
     accessorKey: "description",
     header: "Description",
+  },
+  {
+    accessorKey: "user",
+    header: "Owned by",
+    cell: ({ row }) => row.original.user.name,
+  },
+  {
+    id: "photoCount",
+    header: "Photos",
+    cell: ({ row }) => row.original.photos.length,
   },
   {
     id: "actions",

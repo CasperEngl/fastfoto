@@ -27,13 +27,7 @@ export async function updateAlbum(
     throw new Error("Unauthorized");
   }
 
-  await db
-    .update(Albums)
-    .set({
-      name: data.name,
-      description: data.description,
-    })
-    .where(eq(Albums.id, albumId));
+  await db.update(Albums).set(data).where(eq(Albums.id, albumId));
 
   revalidatePath("/admin/albums");
 }
