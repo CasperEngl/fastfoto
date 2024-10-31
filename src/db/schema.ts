@@ -40,7 +40,7 @@ export const Accounts = pgTable(
     compoundKey: primaryKey({
       columns: [account.provider, account.providerAccountId],
     }),
-  })
+  }),
 );
 
 export const Sessions = pgTable("session", {
@@ -62,7 +62,7 @@ export const VerificationTokens = pgTable(
     compositePk: primaryKey({
       columns: [verificationToken.identifier, verificationToken.token],
     }),
-  })
+  }),
 );
 
 export const Authenticators = pgTable(
@@ -83,7 +83,7 @@ export const Authenticators = pgTable(
     compositePK: primaryKey({
       columns: [authenticator.userId, authenticator.credentialID],
     }),
-  })
+  }),
 );
 
 export const Albums = pgTable("albums", {
