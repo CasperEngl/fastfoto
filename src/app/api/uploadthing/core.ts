@@ -37,6 +37,7 @@ export const ourFileRouter = {
           albumId: albumId,
           url: file.url,
           uploadedAt: new Date(),
+          key: file.key,
           order: 0,
         })
         .execute();

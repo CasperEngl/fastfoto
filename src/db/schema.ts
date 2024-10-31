@@ -1,3 +1,4 @@
+import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
@@ -117,6 +118,7 @@ export const Photos = pgTable("photos", {
     .notNull()
     .references(() => Albums.id, { onDelete: "cascade" }),
   url: text("url").notNull(),
+  key: text("key").notNull(),
   caption: text("caption"),
   uploadedAt: timestamp("uploaded_at", { mode: "date" })
     .notNull()
@@ -142,3 +144,14 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
     .notNull()
     .$defaultFn(() => new Date()),
 });
+
+export const AlbumsRelations = relations(Albums, ({ many }) => ({
+  photos: many(Photos),
+}));
+
+export const PhotosRelations = relations(Photos, ({ one }) => ({
+  album: one(Albums, {
+    fields: [Photos.albumId],
+    references: [Albums.id],
+  }),
+}));

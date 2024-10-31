@@ -1,0 +1,1 @@
+ALTER TABLE "photos" ADD COLUMN "key" text NOT NULL;
