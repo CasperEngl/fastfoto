@@ -55,5 +55,8 @@ export const columns: ColumnDef<InferSelectModel<typeof Users>>[] = [
 
       return <UserActions user={user} />;
     },
+    meta: {
+      align: "end",
+    },
   },
 ];

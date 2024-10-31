@@ -68,8 +68,20 @@ export function DataTable<TData, TValue>({
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
+                  const align = header.column.columnDef.meta?.align;
                   return (
-                    <TableHead key={header.id}>
+                    <TableHead
+                      key={header.id}
+                      className={
+                        align === "start"
+                          ? "text-start"
+                          : align === "center"
+                            ? "text-center"
+                            : align === "end"
+                              ? "text-end"
+                              : ""
+                      }
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
@@ -89,14 +101,28 @@ export function DataTable<TData, TValue>({
                   key={row.id}
                   data-state={row.getIsSelected() && "selected"}
                 >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext(),
-                      )}
-                    </TableCell>
-                  ))}
+                  {row.getVisibleCells().map((cell) => {
+                    const align = cell.column.columnDef.meta?.align;
+                    return (
+                      <TableCell
+                        key={cell.id}
+                        className={
+                          align === "start"
+                            ? "text-start"
+                            : align === "center"
+                              ? "text-center"
+                              : align === "end"
+                                ? "text-end"
+                                : ""
+                        }
+                      >
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext(),
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               ))
             ) : (

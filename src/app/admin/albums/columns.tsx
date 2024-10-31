@@ -49,5 +49,10 @@ export const columns: ColumnDef<InferSelectModel<typeof Albums>>[] = [
       const album = row.original;
       return <AlbumActions album={album} />;
     },
+    enableSorting: false,
+    enableHiding: false,
+    meta: {
+      align: "end",
+    },
   },
 ];
