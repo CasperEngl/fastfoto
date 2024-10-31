@@ -119,15 +119,10 @@ export function EditAlbumForm({
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {uploadedPhotos.map((photo, index) => (
               <div key={photo.url} className="relative aspect-square">
-                {/* <Image
+                <Image
                   src={photo.url}
                   alt={`Photo ${index + 1}`}
                   fill
-                  className="rounded-lg object-cover"
-                /> */}
-                <img
-                  src={photo.url}
-                  alt={`Photo ${index + 1}`}
                   className="rounded-lg object-cover"
                 />
                 <Button
