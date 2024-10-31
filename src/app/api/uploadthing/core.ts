@@ -1,4 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { UTApi } from "uploadthing/server";
 import { UploadThingError } from "uploadthing/server";
 import { auth } from "~/auth";
 import crypto from "crypto";
@@ -47,3 +48,5 @@ export const ourFileRouter = {
 } satisfies FileRouter;
 
 export type OurFileRouter = typeof ourFileRouter;
+
+export const utapi = new UTApi();

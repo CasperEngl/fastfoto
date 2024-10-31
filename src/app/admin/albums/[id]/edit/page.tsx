@@ -8,9 +8,13 @@ import { updateAlbum } from "~/app/admin/albums/actions";
 import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
-import { Albums, Photos } from "~/db/schema";
+import { Albums } from "~/db/schema";
 
-export default async function AlbumEditPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function AlbumEditPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   const session = await auth();
 
@@ -18,7 +22,11 @@ export default async function AlbumEditPage({ params }: { params: Promise<{ id: 
     return notFound();
   }
 
-  const [album] = await db.select().from(Albums).where(eq(Albums.id, id));
+  const album = await db.query.Albums.findFirst({
+    where: eq(Albums.id, id),
+    with: { photos: true },
+  });
+  const users = await db.query.Users.findMany();
 
   if (!album) {
     return notFound();
@@ -40,12 +48,13 @@ export default async function AlbumEditPage({ params }: { params: Promise<{ id: 
       </div>
       <EditAlbumForm
         album={album}
+        users={users}
         updateAlbum={async (data) => {
           "use server";
           await updateAlbum(id, {
             name: data.name,
             description: data.description || null,
-            photos: data.photos,
+            userId: data.userId,
           });
         }}
       />

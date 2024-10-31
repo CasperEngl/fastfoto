@@ -1,8 +1,17 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useMutation } from "@tanstack/react-query";
+import { InferSelectModel } from "drizzle-orm";
+import { Trash2 } from "lucide-react";
+import Image from "next/image";
+import { useRouter } from "next/navigation";
+import { useOptimistic, useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
+import { deletePhoto } from "~/app/admin/albums/[id]/edit/actions";
+import { Button } from "~/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,51 +22,60 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Button } from "~/components/ui/button";
 import { Textarea } from "~/components/ui/textarea";
-import { InferSelectModel } from "drizzle-orm";
-import { Albums } from "~/db/schema";
-import { useMutation } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { Albums, Photos, Users } from "~/db/schema";
 import { UploadDropzone } from "~/lib/uploadthing";
-import { useState } from "react";
-import Image from "next/image";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 const albumFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   description: z.string().optional(),
+  userId: z.string().min(1, "User ID is required"),
 });
 
 type AlbumFormValues = z.infer<typeof albumFormSchema>;
 
-type UploadedPhoto = {
-  url: string;
-};
-
 export function EditAlbumForm({
   album,
   updateAlbum,
+  users,
 }: {
-  album: InferSelectModel<typeof Albums>;
+  album: InferSelectModel<typeof Albums> & {
+    photos: InferSelectModel<typeof Photos>[];
+  };
   updateAlbum: (data: AlbumFormValues & { photos: string[] }) => Promise<void>;
+  users: InferSelectModel<typeof Users>[];
 }) {
-  const [uploadedPhotos, setUploadedPhotos] = useState<UploadedPhoto[]>([]);
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+
+  const [optimisticPhotos, addOptimisticPhoto] = useOptimistic(
+    album.photos,
+    (_state, newPhotos: InferSelectModel<typeof Photos>[]) => newPhotos,
+  );
 
   const form = useForm<AlbumFormValues>({
     resolver: zodResolver(albumFormSchema),
     defaultValues: {
       name: album.name ?? "",
       description: album.description ?? "",
+      userId: album.userId ?? "",
     },
   });
 
-  const mutation = useMutation({
+  const updateAlbumMutation = useMutation({
     mutationFn: (values: AlbumFormValues) =>
       updateAlbum({
         ...values,
-        photos: uploadedPhotos.map((photo) => photo.url),
+        photos: [],
       }),
     onSuccess: () => {
       toast.success("Album updated successfully");
@@ -67,16 +85,32 @@ export function EditAlbumForm({
     },
   });
 
-  const removePhoto = (indexToRemove: number) => {
-    setUploadedPhotos((photos) =>
-      photos.filter((_, index) => index !== indexToRemove),
-    );
-  };
+  const removePhotoMutation = useMutation({
+    mutationFn: async (key: string) => {
+      await deletePhoto(key);
+    },
+    onMutate: (key: string) => {
+      startTransition(() => {
+        const newPhotos = optimisticPhotos.filter((photo) => photo.key !== key);
+        addOptimisticPhoto(newPhotos);
+      });
+    },
+    onSuccess: () => {
+      toast.success("Photo deleted successfully");
+      router.refresh();
+    },
+    onError: () => {
+      toast.error("Failed to delete photo");
+      startTransition(() => {
+        addOptimisticPhoto(album.photos);
+      });
+    },
+  });
 
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+        onSubmit={form.handleSubmit((data) => updateAlbumMutation.mutate(data))}
         className="space-y-8"
       >
         <FormField
@@ -114,10 +148,40 @@ export function EditAlbumForm({
           )}
         />
 
+        <FormField
+          control={form.control}
+          name="userId"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>User</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {users.map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>The user who owns this album.</FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <Button type="submit" disabled={updateAlbumMutation.isPending}>
+          {updateAlbumMutation.isPending ? "Saving..." : "Save Changes"}
+        </Button>
+
         <div className="space-y-4">
           <FormLabel>Album Photos</FormLabel>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {uploadedPhotos.map((photo, index) => (
+            {optimisticPhotos.map((photo, index) => (
               <div key={photo.url} className="relative aspect-square">
                 <Image
                   src={photo.url}
@@ -130,15 +194,16 @@ export function EditAlbumForm({
                   variant="destructive"
                   size="sm"
                   className="absolute right-2 top-2"
-                  onClick={() => removePhoto(index)}
+                  onClick={() => removePhotoMutation.mutate(photo.key)}
                 >
-                  Remove
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete photo</span>
                 </Button>
               </div>
             ))}
           </div>
 
-          {uploadedPhotos.length < 10 && (
+          {optimisticPhotos.length < 10 && (
             <UploadDropzone
               endpoint="albumPhotos"
               input={{
@@ -146,8 +211,22 @@ export function EditAlbumForm({
               }}
               onClientUploadComplete={(res) => {
                 if (res) {
-                  const newPhotos = res.map((file) => ({ url: file.url }));
-                  setUploadedPhotos((current) => [...current, ...newPhotos]);
+                  startTransition(() => {
+                    addOptimisticPhoto([
+                      ...optimisticPhotos,
+                      ...res.map((photo) => ({
+                        url: photo.url,
+                        key: photo.key,
+                        albumId: album.id,
+                        id: Math.random().toString(),
+                        caption: "",
+                        order: 0,
+                        updatedAt: new Date(),
+                        uploadedAt: new Date(),
+                      })),
+                    ]);
+                  });
+                  router.refresh();
                   toast.success("Photos uploaded successfully!");
                 }
               }}
@@ -157,10 +236,6 @@ export function EditAlbumForm({
             />
           )}
         </div>
-
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Saving..." : "Save Changes"}
-        </Button>
       </form>
     </Form>
   );
