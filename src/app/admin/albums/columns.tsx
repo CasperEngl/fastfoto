@@ -51,7 +51,14 @@ export const columns: ColumnDef<
   {
     accessorKey: "user",
     header: "Owned by",
-    cell: ({ row }) => row.original.user.name,
+    cell: ({ row }) => (
+      <Link
+        href={`/admin/users/${row.original.user.id}/edit`}
+        className="hover:underline"
+      >
+        {row.original.user.name}
+      </Link>
+    ),
   },
   {
     id: "photoCount",

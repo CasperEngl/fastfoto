@@ -45,7 +45,7 @@ export function EditUserForm({
     },
   });
 
-  const mutation = useMutation({
+  const updateUserMutation = useMutation({
     mutationFn: updateUser,
     onSuccess: () => {
       toast.success("User updated successfully");
@@ -58,7 +58,7 @@ export function EditUserForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
+        onSubmit={form.handleSubmit((data) => updateUserMutation.mutate(data))}
         className="space-y-8"
       >
         <FormField
@@ -68,7 +68,11 @@ export function EditUserForm({
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Enter name" {...field} />
+                <Input
+                  placeholder="Enter name"
+                  {...field}
+                  disabled={updateUserMutation.isPending}
+                />
               </FormControl>
               <FormDescription>
                 This is the user's full name that will be displayed across the
@@ -86,7 +90,12 @@ export function EditUserForm({
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="Enter email" {...field} />
+                <Input
+                  type="email"
+                  placeholder="Enter email"
+                  {...field}
+                  disabled={updateUserMutation.isPending}
+                />
               </FormControl>
               <FormDescription>
                 The email address will be used for login and notifications.
@@ -96,7 +105,9 @@ export function EditUserForm({
           )}
         />
 
-        <Button type="submit">Save Changes</Button>
+        <Button type="submit" disabled={updateUserMutation.isPending}>
+          {updateUserMutation.isPending ? "Saving..." : "Save Changes"}
+        </Button>
       </form>
     </Form>
   );
