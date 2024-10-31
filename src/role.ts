@@ -1,10 +1,10 @@
 import { User } from "next-auth";
 
-export function isAdmin(user?: User) {
+export function isAdmin(user?: User): user is User & { type: "admin" } {
   return user?.type === "admin";
 }
 
-export function isClient(user?: User) {
+export function isClient(user?: User): user is User & { type: "client" } {
   if (isAdmin(user)) {
     return true;
   }

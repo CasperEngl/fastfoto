@@ -1,16 +1,16 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { auth } from "~/auth";
+import { Button } from "~/components/ui/button";
+import { db } from "~/db/client";
+import { isPhotographer } from "~/role";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { auth } from "~/auth";
-import { db } from "~/db/client";
-import { Albums } from "~/db/schema";
-import { Button } from "~/components/ui/button";
 
 export default async function AlbumsPage() {
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isPhotographer(session?.user)) {
     return notFound();
   }
 

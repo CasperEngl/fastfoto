@@ -5,11 +5,12 @@ import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Users } from "~/db/schema";
+import { isAdmin } from "~/role";
 
 export async function deleteUser(userId: string) {
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isAdmin(session?.user)) {
     throw new Error("Unauthorized");
   }
 

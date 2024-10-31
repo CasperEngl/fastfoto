@@ -1,15 +1,16 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createUserSchema, type CreateUserFormValues } from "./schema";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Users } from "~/db/schema";
+import { isAdmin } from "~/role";
+import { createUserSchema, type CreateUserFormValues } from "./schema";
 
 export async function createUser(data: CreateUserFormValues) {
   const session = await auth();
 
-  if (!session?.user?.isAdmin) {
+  if (!isAdmin(session?.user)) {
     throw new Error("Unauthorized");
   }
 
