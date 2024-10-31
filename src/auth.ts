@@ -1,23 +1,26 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { eq } from "drizzle-orm";
 import NextAuth from "next-auth";
 import Resend from "next-auth/providers/resend";
 import { db } from "~/db/client";
-import { Accounts, Users } from "~/db/schema";
+import { Accounts, Users, Authenticators } from "~/db/schema";
+import Passkey from "next-auth/providers/passkey";
+import { eq, InferSelectModel } from "drizzle-orm";
 
 declare module "next-auth" {
-  interface User {
-    isAdmin: boolean;
-  }
+  interface User extends InferSelectModel<typeof Users> {}
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: Users,
     accountsTable: Accounts,
+    authenticatorsTable: Authenticators,
   }),
   session: {
     strategy: "jwt",
+  },
+  experimental: {
+    enableWebAuthn: true,
   },
   callbacks: {
     session: async ({ session }) => {
@@ -26,15 +29,51 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         .from(Users)
         .where(eq(Users.email, session.user.email));
 
-      session.user.id = user.id;
-      session.user.isAdmin = user.isAdmin;
+      session.user = user;
 
       return session;
     },
   },
   providers: [
+    Passkey({}),
     Resend({
       from: '"Fast Foto" <noreply@casperengelmann.com>',
     }),
+    // CredentialsProvider({
+    //   name: "Credentials",
+    //   credentials: {
+    //     email: { label: "Email", type: "email" },
+    //     password: { label: "Password", type: "password" },
+    //   },
+    //   async authorize(credentials) {
+    //     if (!credentials.email || !credentials.password) {
+    //       return null;
+    //     }
+
+    //     const { email, password } = z
+    //       .object({
+    //         email: z.string().email(),
+    //         password: z.string(),
+    //       })
+    //       .parse(credentials);
+
+    //     const [user] = await db
+    //       .select()
+    //       .from(Users)
+    //       .where(eq(Users.email, email));
+
+    //     if (!user) {
+    //       return null;
+    //     }
+
+    //     return {
+    //       id: user.id,
+    //       name: user.name,
+    //       email: user.email,
+    //       image: user.image,
+    //       isAdmin: user.isAdmin,
+    //     };
+    //   },
+    // }),
   ],
 });

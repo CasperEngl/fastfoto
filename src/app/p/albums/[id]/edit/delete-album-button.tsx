@@ -5,7 +5,6 @@ import { Button } from "~/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { deleteAlbum } from "~/app/admin/albums/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -18,6 +17,7 @@ import {
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
 import { useState } from "react";
+import { deleteAlbum } from "~/app/p/albums/actions";
 
 export function DeleteAlbumButton({ albumId }: { albumId: string }) {
   const router = useRouter();

@@ -10,7 +10,6 @@ import { useOptimistic, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { deletePhoto } from "~/app/admin/albums/[id]/edit/actions";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -32,6 +31,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { deletePhoto } from "~/app/p/albums/[id]/edit/actions";
 
 const albumFormSchema = z.object({
   name: z.string().min(2, {

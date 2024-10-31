@@ -4,6 +4,9 @@ import { withUt } from "uploadthing/tw";
 const config: Config = {
   content: ["./src/**/*.{ts,tsx,mdx}"],
   theme: {
+    container: {
+      center: true,
+    },
     extend: {
       colors: {
         border: "hsl(var(--border))",

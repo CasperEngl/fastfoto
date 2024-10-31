@@ -14,10 +14,14 @@ export const Users = pgTable("users", {
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
-  email: text("email").unique(),
+  email: text("email").unique().notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
-  isAdmin: boolean("isAdmin").notNull().default(false),
+  type: text("type", {
+    enum: ["admin", "photographer", "client"],
+  })
+    .notNull()
+    .default("client"),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),

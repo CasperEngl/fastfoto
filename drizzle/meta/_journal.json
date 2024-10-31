@@ -5,43 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1730333247118,
-      "tag": "0000_colossal_puff_adder",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1730333475678,
-      "tag": "0001_long_saracen",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1730334533793,
-      "tag": "0002_sour_earthquake",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1730334638823,
-      "tag": "0003_empty_iron_patriot",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1730342722790,
-      "tag": "0004_numerous_nightmare",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1730344237355,
-      "tag": "0005_outgoing_ma_gnuci",
+      "when": 1730383865255,
+      "tag": "0000_wandering_maverick",
       "breakpoints": true
     }
   ]
