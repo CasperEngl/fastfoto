@@ -79,50 +79,6 @@ export function EditAlbumForm({
         onSubmit={form.handleSubmit((data) => mutation.mutate(data))}
         className="space-y-8"
       >
-        <div className="space-y-4">
-          <FormLabel>Album Photos</FormLabel>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {uploadedPhotos.map((photo, index) => (
-              <div key={photo.url} className="relative aspect-square">
-                <Image
-                  src={photo.url}
-                  alt={`Photo ${index + 1}`}
-                  fill
-                  className="rounded-lg object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute right-2 top-2"
-                  onClick={() => removePhoto(index)}
-                >
-                  Remove
-                </Button>
-              </div>
-            ))}
-          </div>
-
-          {uploadedPhotos.length < 10 && (
-            <UploadDropzone
-              endpoint="albumPhotos"
-              input={{
-                albumId: album.id,
-              }}
-              onClientUploadComplete={(res) => {
-                if (res) {
-                  const newPhotos = res.map((file) => ({ url: file.url }));
-                  setUploadedPhotos((current) => [...current, ...newPhotos]);
-                  toast.success("Photos uploaded successfully!");
-                }
-              }}
-              onUploadError={(error: Error) => {
-                toast.error(`Upload failed: ${error.message}`);
-              }}
-            />
-          )}
-        </div>
-
         <FormField
           control={form.control}
           name="name"
@@ -157,6 +113,55 @@ export function EditAlbumForm({
             </FormItem>
           )}
         />
+
+        <div className="space-y-4">
+          <FormLabel>Album Photos</FormLabel>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+            {uploadedPhotos.map((photo, index) => (
+              <div key={photo.url} className="relative aspect-square">
+                {/* <Image
+                  src={photo.url}
+                  alt={`Photo ${index + 1}`}
+                  fill
+                  className="rounded-lg object-cover"
+                /> */}
+                <img
+                  src={photo.url}
+                  alt={`Photo ${index + 1}`}
+                  className="rounded-lg object-cover"
+                />
+                <Button
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  className="absolute right-2 top-2"
+                  onClick={() => removePhoto(index)}
+                >
+                  Remove
+                </Button>
+              </div>
+            ))}
+          </div>
+
+          {uploadedPhotos.length < 10 && (
+            <UploadDropzone
+              endpoint="albumPhotos"
+              input={{
+                albumId: album.id,
+              }}
+              onClientUploadComplete={(res) => {
+                if (res) {
+                  const newPhotos = res.map((file) => ({ url: file.url }));
+                  setUploadedPhotos((current) => [...current, ...newPhotos]);
+                  toast.success("Photos uploaded successfully!");
+                }
+              }}
+              onUploadError={(error: Error) => {
+                toast.error(`Upload failed: ${error.message}`);
+              }}
+            />
+          )}
+        </div>
 
         <Button type="submit" disabled={mutation.isPending}>
           {mutation.isPending ? "Saving..." : "Save Changes"}
