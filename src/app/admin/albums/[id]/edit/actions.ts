@@ -6,8 +6,8 @@ import { db } from "~/db/client";
 import { Photos } from "~/db/schema";
 
 export async function deletePhoto(key: string) {
-  await Promise.all([
-    utapi.deleteFiles(key),
-    db.delete(Photos).where(eq(Photos.key, key)),
-  ]);
+  await db.transaction(async (tx) => {
+    await utapi.deleteFiles(key);
+    await tx.delete(Photos).where(eq(Photos.key, key));
+  });
 }
