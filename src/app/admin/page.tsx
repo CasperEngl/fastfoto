@@ -2,6 +2,7 @@ import { desc } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "~/auth";
+import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 import { db } from "~/db/client";
@@ -20,11 +21,11 @@ export default async function AdminPage() {
     .orderBy(desc(Users.createdAt))
     .limit(3);
 
-  const recentAlbums = await db
-    .select()
-    .from(Albums)
-    .orderBy(desc(Albums.createdAt))
-    .limit(3);
+  const recentAlbums = await db.query.Albums.findMany({
+    limit: 4,
+    orderBy: desc(Albums.createdAt),
+    with: { photos: true },
+  });
 
   return (
     <div className="container mx-auto py-10">
@@ -67,19 +68,9 @@ export default async function AdminPage() {
             </Button>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
+            <div className="grid grid-cols-2">
               {recentAlbums.map((album) => (
-                <div
-                  key={album.id}
-                  className="flex items-center justify-between"
-                >
-                  <div>
-                    <p className="font-medium">{album.name}</p>
-                    <p className="line-clamp-1 text-sm text-muted-foreground">
-                      {album.description}
-                    </p>
-                  </div>
-                </div>
+                <AlbumCard key={album.id} album={album} />
               ))}
             </div>
           </CardContent>
