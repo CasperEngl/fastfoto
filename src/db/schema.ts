@@ -54,7 +54,7 @@ export const Accounts = pgTable(
   }),
 );
 
-export const Sessions = pgTable("session", {
+export const Sessions = pgTable("sessions", {
   sessionToken: text("sessionToken").primaryKey(),
   userId: text("userId")
     .notNull()
@@ -63,7 +63,7 @@ export const Sessions = pgTable("session", {
 });
 
 export const VerificationTokens = pgTable(
-  "verificationToken",
+  "verification_tokens",
   {
     identifier: text("identifier").notNull(),
     token: text("token").notNull(),
@@ -77,7 +77,7 @@ export const VerificationTokens = pgTable(
 );
 
 export const Authenticators = pgTable(
-  "authenticator",
+  "authenticators",
   {
     credentialID: text("credentialID").notNull().unique(),
     userId: text("userId")
@@ -103,9 +103,6 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
-  userId: text("userId")
-    .notNull()
-    .references(() => Users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -149,14 +146,37 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
     .$defaultFn(() => new Date()),
 });
 
+export const UsersToAlbums = pgTable(
+  "users_to_albums",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade" }),
+    albumId: text("albumId")
+      .notNull()
+      .references(() => Albums.id, { onDelete: "cascade" }),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.userId, t.albumId] }),
+  }),
+);
+
 export const UsersRelations = relations(Users, ({ many }) => ({
-  albums: many(Albums),
+  albums: many(UsersToAlbums),
 }));
 
-export const AlbumsRelations = relations(Albums, ({ one, many }) => ({
+export const AlbumsRelations = relations(Albums, ({ many }) => ({
   photos: many(Photos),
+  users: many(UsersToAlbums),
+}));
+
+export const UsersToAlbumsRelations = relations(UsersToAlbums, ({ one }) => ({
+  album: one(Albums, {
+    fields: [UsersToAlbums.albumId],
+    references: [Albums.id],
+  }),
   user: one(Users, {
-    fields: [Albums.userId],
+    fields: [UsersToAlbums.userId],
     references: [Users.id],
   }),
 }));
