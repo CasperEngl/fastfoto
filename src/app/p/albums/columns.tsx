@@ -9,7 +9,7 @@ import { Albums, Photos, Users } from "~/db/schema";
 
 export const columns: ColumnDef<
   InferSelectModel<typeof Albums> & {
-    user: InferSelectModel<typeof Users>;
+    users: InferSelectModel<typeof Users>[];
     photos: InferSelectModel<typeof Photos>[];
   }
 >[] = [
@@ -49,15 +49,20 @@ export const columns: ColumnDef<
     header: "Description",
   },
   {
-    accessorKey: "user",
-    header: "Owned by",
+    accessorKey: "users",
+    header: "Users",
     cell: ({ row }) => (
-      <Link
-        href={`/admin/users/${row.original.user.id}/edit`}
-        className="hover:underline"
-      >
-        {row.original.user.name}
-      </Link>
+      <div className="flex gap-2">
+        {row.original.users.map((user) => (
+          <Link
+            key={user.id}
+            href={`/admin/users/${user.id}/edit`}
+            className="hover:underline"
+          >
+            {user.name}
+          </Link>
+        ))}
+      </div>
     ),
   },
   {

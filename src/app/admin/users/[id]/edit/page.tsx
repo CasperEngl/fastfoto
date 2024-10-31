@@ -7,7 +7,7 @@ import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
-import { Albums, Users } from "~/db/schema";
+import { Users, UsersToAlbums } from "~/db/schema";
 import { isAdmin } from "~/role";
 import { DeleteUserButton } from "./delete-user-button";
 
@@ -23,9 +23,11 @@ export default async function UserEditPage({
   }
 
   // Get user and their albums
-  const [user] = await db.select().from(Users).where(eq(Users.id, params.id));
+  const user = await db.query.Users.findFirst({
+    where: eq(Users.id, params.id),
+  });
   const albums = await db.query.Albums.findMany({
-    where: eq(Albums.userId, params.id),
+    where: eq(UsersToAlbums.userId, params.id),
     with: { photos: true },
   });
 
