@@ -2,7 +2,13 @@ import { DrizzleAdapter } from "@auth/drizzle-adapter";
 import NextAuth from "next-auth";
 import Resend from "next-auth/providers/resend";
 import { db } from "~/db/client";
-import { Accounts, Users, Authenticators } from "~/db/schema";
+import {
+  Accounts,
+  Users,
+  Authenticators,
+  VerificationTokens,
+  Sessions,
+} from "~/db/schema";
 import Passkey from "next-auth/providers/passkey";
 import { eq, InferSelectModel } from "drizzle-orm";
 
@@ -15,9 +21,11 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     usersTable: Users,
     accountsTable: Accounts,
     authenticatorsTable: Authenticators,
+    verificationTokensTable: VerificationTokens,
+    sessionsTable: Sessions,
   }),
   session: {
-    strategy: "jwt",
+    updateAge: 0,
   },
   experimental: {
     enableWebAuthn: true,
