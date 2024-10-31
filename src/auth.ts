@@ -26,6 +26,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         .from(Users)
         .where(eq(Users.email, session.user.email));
 
+      session.user.id = user.id;
       session.user.isAdmin = user.isAdmin;
 
       return session;
