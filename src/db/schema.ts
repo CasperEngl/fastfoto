@@ -145,8 +145,16 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
     .$defaultFn(() => new Date()),
 });
 
-export const AlbumsRelations = relations(Albums, ({ many }) => ({
+export const UsersRelations = relations(Users, ({ many }) => ({
+  albums: many(Albums),
+}));
+
+export const AlbumsRelations = relations(Albums, ({ one, many }) => ({
   photos: many(Photos),
+  user: one(Users, {
+    fields: [Albums.userId],
+    references: [Users.id],
+  }),
 }));
 
 export const PhotosRelations = relations(Photos, ({ one }) => ({

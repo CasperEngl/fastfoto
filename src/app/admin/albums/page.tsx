@@ -14,7 +14,7 @@ export default async function AlbumsPage() {
     return notFound();
   }
 
-  const albums = await db.select().from(Albums);
+  const albums = await db.query.Albums.findMany({});
 
   return (
     <div className="container mx-auto py-10">
