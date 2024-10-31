@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "~/components/ui/sonner";
+import { auth } from "~/auth";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -21,17 +22,19 @@ export const metadata: Metadata = {
     "Fast Foto - A lightning-fast photo sharing and viewing experience",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers>{children}</Providers>
+        <Providers session={session}>{children}</Providers>
 
         <Toaster />
       </body>

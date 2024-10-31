@@ -1,5 +1,6 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import { User } from "next-auth";
 import { Button } from "~/components/ui/button";
 import {
@@ -41,6 +42,7 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ user }: SettingsFormProps) {
+  const session = useSession();
   const [isPending, startTransition] = useTransition();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),

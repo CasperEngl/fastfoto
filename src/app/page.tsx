@@ -1,3 +1,29 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth, signOut } from "~/auth";
+import { Button } from "~/components/ui/button";
+
 export default async function Home() {
-  return <div>Home</div>;
+  const session = await auth();
+
+  return (
+    <div className="space-y-4">
+      <pre>{JSON.stringify(session, null, 2)}</pre>
+      {session ? (
+        <form
+          action={async () => {
+            "use server";
+            await signOut();
+            redirect("/");
+          }}
+        >
+          <Button>Sign out</Button>
+        </form>
+      ) : (
+        <Button asChild>
+          <Link href="/login">Login</Link>
+        </Button>
+      )}
+    </div>
+  );
 }

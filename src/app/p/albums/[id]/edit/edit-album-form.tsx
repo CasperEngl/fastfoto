@@ -44,6 +44,10 @@ const albumFormSchema = z.object({
 
 type AlbumFormValues = z.infer<typeof albumFormSchema>;
 
+interface OptimisticPhoto extends InferSelectModel<typeof Photos> {
+  isRemoving?: boolean;
+}
+
 export function EditAlbumForm({
   album,
   users,
@@ -58,9 +62,13 @@ export function EditAlbumForm({
   const [isUpdating, startUpdateTransition] = useTransition();
   const [isRemoving, startRemoveTransition] = useTransition();
 
-  const [optimisticPhotos, addOptimisticPhoto] = useOptimistic(
-    album.photos,
-    (_state, newPhotos: InferSelectModel<typeof Photos>[]) => newPhotos,
+  const [optimisticPhotos, setOptimisticPhotos] = useOptimistic<
+    OptimisticPhoto[]
+  >(
+    album.photos.map((photo) => ({
+      ...photo,
+      isRemoving: false,
+    })),
   );
 
   const form = useForm<AlbumFormValues>({
@@ -162,7 +170,11 @@ export function EditAlbumForm({
           <FormLabel>Album Photos</FormLabel>
           <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
             {optimisticPhotos.map((photo, index) => (
-              <div key={photo.url} className="relative aspect-square">
+              <div
+                key={photo.url}
+                className="relative aspect-square"
+                style={{ opacity: photo.isRemoving ? 0.5 : 1 }}
+              >
                 <Image
                   src={photo.url}
                   alt={`Photo ${index + 1}`}
@@ -174,20 +186,27 @@ export function EditAlbumForm({
                   variant="destructive"
                   size="sm"
                   className="absolute right-2 top-2"
-                  disabled={isRemoving}
+                  disabled={photo.isRemoving}
                   onClick={() => {
                     startRemoveTransition(async () => {
                       try {
-                        const newPhotos = optimisticPhotos.filter(
-                          (p) => p.key !== photo.key,
+                        // Mark the photo as removing
+                        const updatedPhotos = optimisticPhotos.map((p) =>
+                          p.key === photo.key ? { ...p, isRemoving: true } : p,
                         );
-                        addOptimisticPhoto(newPhotos);
+                        setOptimisticPhotos(updatedPhotos);
+
                         await deletePhoto(photo.key);
+
                         toast.success("Photo deleted successfully");
                         router.refresh();
                       } catch (error) {
+                        // Revert the removing state on error
+                        const revertedPhotos = optimisticPhotos.map((p) =>
+                          p.key === photo.key ? { ...p, isRemoving: false } : p,
+                        );
+                        setOptimisticPhotos(revertedPhotos);
                         toast.error("Failed to delete photo");
-                        addOptimisticPhoto(album.photos);
                       }
                     });
                   }}
@@ -198,39 +217,36 @@ export function EditAlbumForm({
               </div>
             ))}
           </div>
-
-          {optimisticPhotos.length < 10 && (
-            <UploadDropzone
-              endpoint="albumPhotos"
-              input={{
-                albumId: album.id,
-              }}
-              onClientUploadComplete={(res) => {
-                if (res) {
-                  startUpdateTransition(() => {
-                    addOptimisticPhoto([
-                      ...optimisticPhotos,
-                      ...res.map((photo) => ({
-                        url: photo.url,
-                        key: photo.key,
-                        albumId: album.id,
-                        id: Math.random().toString(),
-                        caption: "",
-                        order: 0,
-                        updatedAt: new Date(),
-                        uploadedAt: new Date(),
-                      })),
-                    ]);
-                  });
-                  router.refresh();
-                  toast.success("Photos uploaded successfully!");
-                }
-              }}
-              onUploadError={(error: Error) => {
-                toast.error(`Upload failed: ${error.message}`);
-              }}
-            />
-          )}
+          <UploadDropzone
+            endpoint="albumPhotos"
+            input={{
+              albumId: album.id,
+            }}
+            onClientUploadComplete={(res) => {
+              if (res) {
+                startUpdateTransition(() => {
+                  setOptimisticPhotos([
+                    ...optimisticPhotos,
+                    ...res.map((photo) => ({
+                      url: photo.url,
+                      key: photo.key,
+                      albumId: album.id,
+                      id: Math.random().toString(),
+                      caption: "",
+                      order: 0,
+                      updatedAt: new Date(),
+                      uploadedAt: new Date(),
+                    })),
+                  ]);
+                });
+                router.refresh();
+                toast.success("Photos uploaded successfully!");
+              }
+            }}
+            onUploadError={(error: Error) => {
+              toast.error(`Upload failed: ${error.message}`);
+            }}
+          />
         </div>
       </form>
     </Form>

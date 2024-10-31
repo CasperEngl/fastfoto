@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { SettingsForm } from "~/app/u/settings/settings-form";
 import { auth } from "~/auth";
 import { Separator } from "~/components/ui/separator";
+import { PasskeyForm } from "./passkey";
 
 export default async function SettingsPage() {
   const session = await auth();
@@ -20,6 +21,14 @@ export default async function SettingsPage() {
       </div>
       <Separator />
       <SettingsForm user={session.user} />
+      <Separator />
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">Passkeys</h2>
+        <p className="text-sm text-muted-foreground">
+          Manage your passkeys for secure authentication.
+        </p>
+      </div>
+      <PasskeyForm />
     </div>
   );
 }

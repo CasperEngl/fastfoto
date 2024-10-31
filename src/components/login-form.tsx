@@ -1,9 +1,13 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSession } from "next-auth/react";
+import { signIn } from "next-auth/webauthn";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import { z } from "zod";
 import { loginMagicLink, loginPasskey } from "~/app/login/actions";
 import { Button } from "~/components/ui/button";
@@ -29,6 +33,7 @@ const formSchema = z.object({
 });
 
 export function LoginForm() {
+  const router = useRouter();
   const [isMagicLinkPending, startMagicLinkTransition] = useTransition();
   const [isPasskeyPending, startPasskeyTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
@@ -90,16 +95,21 @@ export function LoginForm() {
             </div>
           </div>
           <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              startPasskeyTransition(async () => {
-                await loginPasskey();
-              });
-            }}
             disabled={isPasskeyPending}
+            onClick={() =>
+              startPasskeyTransition(async () => {
+                try {
+                  await signIn("passkey");
+
+                  router.push("/");
+                  toast("Successfully signed in with passkey");
+                } catch (error) {
+                  toast("Failed to sign in with passkey");
+                }
+              })
+            }
           >
-            {isPasskeyPending ? "Authenticating..." : "Login with Passkey"}
+            {isPasskeyPending ? "Signing in..." : "Sign in with Passkey"}
           </Button>
           <Button variant="outline" className="w-full">
             Login with Google
