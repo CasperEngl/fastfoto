@@ -95,6 +95,7 @@ export function LoginForm() {
             </div>
           </div>
           <Button
+            variant="outline"
             disabled={isPasskeyPending}
             onClick={() =>
               startPasskeyTransition(async () => {
@@ -110,9 +111,6 @@ export function LoginForm() {
             }
           >
             {isPasskeyPending ? "Signing in..." : "Sign in with Passkey"}
-          </Button>
-          <Button variant="outline" className="w-full">
-            Login with Google
           </Button>
         </div>
         <div className="mt-4 text-center text-sm">
