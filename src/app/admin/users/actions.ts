@@ -17,8 +17,6 @@ export async function deleteUser(userId: string) {
     throw new Error("Cannot delete your own account");
   }
 
-  return;
-
   await db.delete(Users).where(eq(Users.id, userId));
   revalidatePath("/admin/users");
 }
