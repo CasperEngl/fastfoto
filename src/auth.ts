@@ -24,9 +24,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     verificationTokensTable: VerificationTokens,
     sessionsTable: Sessions,
   }),
-  session: {
-    updateAge: 0,
-  },
   experimental: {
     enableWebAuthn: true,
   },
