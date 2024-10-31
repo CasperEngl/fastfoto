@@ -16,6 +16,7 @@ export const Users = pgTable("users", {
   email: text("email").unique(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
+  isAdmin: boolean("isAdmin").notNull().default(false),
 });
 
 export const Accounts = pgTable(
@@ -84,3 +85,48 @@ export const Authenticators = pgTable(
     }),
   })
 );
+
+export const Albums = pgTable("albums", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  description: text("description"),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  userId: text("userId")
+    .notNull()
+    .references(() => Users.id, { onDelete: "cascade" }),
+});
+
+export const Photos = pgTable("photos", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  albumId: text("albumId")
+    .notNull()
+    .references(() => Albums.id, { onDelete: "cascade" }),
+  url: text("url").notNull(),
+  caption: text("caption"),
+  uploadedAt: timestamp("uploaded_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  order: integer("order").notNull(),
+});
+
+export const AdminAuditLogs = pgTable("admin_audit_logs", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  adminId: text("adminId")
+    .notNull()
+    .references(() => Users.id, { onDelete: "cascade" }),
+  action: text("action").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: text("entity_id").notNull(),
+  details: text("details"),
+  performedAt: timestamp("performed_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+});

@@ -15,6 +15,20 @@
       "when": 1730333475678,
       "tag": "0001_long_saracen",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1730334533793,
+      "tag": "0002_sour_earthquake",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1730334638823,
+      "tag": "0003_empty_iron_patriot",
+      "breakpoints": true
     }
   ]
 }
