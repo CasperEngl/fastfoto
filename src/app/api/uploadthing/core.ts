@@ -1,32 +1,47 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError } from "uploadthing/server";
 import { auth } from "~/auth";
+import crypto from "crypto";
+import { z } from "zod";
+import { db } from "~/db/client";
+import { Photos } from "~/db/schema";
 
 const f = createUploadthing();
 
-// FileRouter for your app, can contain multiple FileRoutes
 export const ourFileRouter = {
-  // Define as many FileRoutes as you like, each with a unique routeSlug
-  imageUploader: f({ image: { maxFileSize: "16MB" } })
-    // Set permissions and file types for this FileRoute
-    .middleware(async ({ req }) => {
-      // This code runs on your server before upload
-      const user = await auth();
+  albumPhotos: f({ image: { maxFileSize: "16MB", maxFileCount: 10 } })
+    .input(
+      z.object({
+        albumId: z.string().uuid(),
+      }),
+    )
+    .middleware(async ({ input }) => {
+      const session = await auth();
 
-      // If you throw, the user will not be able to upload
-      if (!user) throw new UploadThingError("Unauthorized");
+      if (!session?.user?.id) {
+        throw new UploadThingError("Unauthorized");
+      }
 
-      // Whatever is returned here is accessible in onUploadComplete as `metadata`
-      return { userId: user.id };
+      return { userId: session.user.id, albumId: input.albumId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
-      // This code RUNS ON YOUR SERVER after upload
-      console.log("Upload complete for userId:", metadata.userId);
+      const albumId = metadata.albumId;
+      if (!albumId) {
+        throw new Error("Album ID is required");
+      }
 
-      console.log("file url", file.url);
+      await db
+        .insert(Photos)
+        .values({
+          id: crypto.randomUUID(),
+          albumId: albumId,
+          url: file.url,
+          uploadedAt: new Date(),
+          order: 0,
+        })
+        .execute();
 
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-      return { uploadedBy: metadata.userId };
+      return { url: file.url };
     }),
 } satisfies FileRouter;
 

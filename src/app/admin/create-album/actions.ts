@@ -1,19 +1,20 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
 import { InferInsertModel } from "drizzle-orm";
-import { Albums } from "~/db/schema";
+import { revalidatePath } from "next/cache";
 import { db } from "~/db/client";
+import { Albums } from "~/db/schema";
 
 export async function createAlbum(data: InferInsertModel<typeof Albums>) {
-  try {
-    const album = await db.insert(Albums).values(data);
+  const [album] = await db
+    .insert(Albums)
+    .values({
+      name: data.name,
+      description: data.description,
+      userId: data.userId,
+    })
+    .returning();
 
-    revalidatePath("/admin/albums");
-
-    return album;
-  } catch (error) {
-    console.error("Error creating album:", error);
-    throw new Error("Failed to create album");
-  }
+  revalidatePath("/admin/albums");
+  return album;
 }

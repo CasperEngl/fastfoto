@@ -18,6 +18,15 @@ import { useRouter } from "next/navigation";
 import { createAlbum } from "./actions";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { InferSelectModel } from "drizzle-orm";
+import { Users } from "~/db/schema";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "~/components/ui/select";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -27,7 +36,11 @@ const formSchema = z.object({
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function CreateAlbumForm() {
+export function CreateAlbumForm({
+  users,
+}: {
+  users: InferSelectModel<typeof Users>[];
+}) {
   const router = useRouter();
 
   const form = useForm<FormValues>({
@@ -41,9 +54,9 @@ export function CreateAlbumForm() {
 
   const mutation = useMutation({
     mutationFn: createAlbum,
-    onSuccess: () => {
+    onSuccess: (album) => {
       toast.success("Album created successfully");
-      router.push("/admin/albums" as any);
+      router.push(`/admin/albums/${album.id}/edit`);
       router.refresh();
     },
     onError: (error) => {
@@ -91,9 +104,20 @@ export function CreateAlbumForm() {
           name="userId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>User ID</FormLabel>
+              <FormLabel>User</FormLabel>
               <FormControl>
-                <Input placeholder="User ID" {...field} />
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </FormControl>
               <FormMessage />
             </FormItem>
