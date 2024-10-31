@@ -12,6 +12,7 @@ import {
 } from "~/components/ui/dropdown-menu";
 import { Checkbox } from "~/components/ui/checkbox";
 import { User } from "next-auth";
+import Link from "next/link";
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -36,6 +37,14 @@ export const columns: ColumnDef<User>[] = [
   {
     accessorKey: "name",
     header: "Name",
+    cell: ({ row }) => (
+      <Link
+        href={`/admin/users/${row.original.id}/edit`}
+        className="hover:underline"
+      >
+        {row.getValue("name")}
+      </Link>
+    ),
   },
   {
     accessorKey: "email",
@@ -62,12 +71,13 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(user.id)}
+              onClick={() => navigator.clipboard.writeText(user.id!)}
             >
               Copy user ID
             </DropdownMenuItem>
-            <DropdownMenuItem>View user details</DropdownMenuItem>
-            <DropdownMenuItem>Edit user</DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link href={`/admin/users/${user.id}/edit`}>Edit user</Link>
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       );
