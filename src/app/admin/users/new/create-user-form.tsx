@@ -5,7 +5,6 @@ import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
-import { createUser } from "~/app/admin/create-user/actions";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -18,6 +17,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { CreateUserFormValues, createUserSchema } from "./schema";
+import { createUser } from "~/app/admin/users/new/actions";
 
 export function CreateUserForm() {
   const router = useRouter();
@@ -38,7 +38,9 @@ export function CreateUserForm() {
       toast.success("User created successfully");
     },
     onError: (error) => {
-      toast.error("Failed to create user");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to create user",
+      );
     },
   });
 

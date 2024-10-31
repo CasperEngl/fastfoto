@@ -17,6 +17,12 @@ export const Users = pgTable("users", {
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
   isAdmin: boolean("isAdmin").notNull().default(false),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
+    () => new Date(),
+  ),
 });
 
 export const Accounts = pgTable(
@@ -92,12 +98,15 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .$defaultFn(() => new Date()),
   userId: text("userId")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
+    () => new Date(),
+  ),
 });
 
 export const Photos = pgTable("photos", {
@@ -113,6 +122,9 @@ export const Photos = pgTable("photos", {
     .notNull()
     .$defaultFn(() => new Date()),
   order: integer("order").notNull(),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
+    () => new Date(),
+  ),
 });
 
 export const AdminAuditLogs = pgTable("admin_audit_logs", {
