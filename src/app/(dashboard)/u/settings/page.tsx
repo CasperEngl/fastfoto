@@ -9,8 +9,9 @@ import { PasskeyForm } from "./passkey";
 export default async function SettingsPage({
   searchParams,
 }: {
-  searchParams: { verified?: string; error?: string };
+  searchParams: Promise<{ verified?: string; error?: string }>;
 }) {
+  const { error, verified } = await searchParams;
   const session = await auth();
 
   if (!session?.user) {
@@ -19,7 +20,7 @@ export default async function SettingsPage({
 
   return (
     <div className="container space-y-6 py-8">
-      {searchParams.verified ? (
+      {verified ? (
         <Alert variant="success">
           <CheckCircle2 className="size-4" />
           <AlertTitle>Email successfully verified!</AlertTitle>
@@ -27,7 +28,7 @@ export default async function SettingsPage({
         </Alert>
       ) : null}
 
-      {searchParams.error === "invalid-token" ? (
+      {error === "invalid-token" ? (
         <Alert variant="destructive">
           <XCircle className="size-4" />
           <AlertTitle>Invalid verification link</AlertTitle>
