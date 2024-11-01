@@ -1,5 +1,7 @@
 "use client";
 
+import { Album, Home, Settings, Users } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -10,11 +12,9 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { Users, Album, Settings, Home } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { isAdmin, isClient, isPhotographer } from "~/role";
 
 export function AppSidebar() {
