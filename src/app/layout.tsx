@@ -44,9 +44,9 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SidebarProvider defaultOpen={defaultOpen}>
-          <AppSidebar />
-
           <Providers session={session}>
+            <AppSidebar />
+
             <SidebarInset className="w-full">
               <header className="border-b">
                 <div className="container flex items-center gap-4 p-4">
