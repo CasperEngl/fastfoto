@@ -43,20 +43,20 @@ export function DeleteAlbumButton({ albumId }: { albumId: string }) {
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
             onClick={async () => {
-              try {
-                startTransition(async () => {
+              startTransition(async () => {
+                try {
                   await deleteAlbum(albumId);
                   toast.success("Album deleted successfully");
                   setOpen(false);
                   router.push("/p/albums");
-                });
-              } catch (error) {
-                toast.error(
-                  error instanceof Error
-                    ? error.message
-                    : "Failed to delete album",
-                );
-              }
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to delete album",
+                  );
+                }
+              });
             }}
             disabled={isPending}
             asChild
