@@ -28,7 +28,7 @@ export async function deleteAlbum(albumId: string) {
 
 export async function updateAlbum(
   albumId: string,
-  data: InferInsertModel<typeof Albums> & {
+  data: Omit<InferInsertModel<typeof Albums>, "ownerId"> & {
     users: string[];
   },
 ) {
