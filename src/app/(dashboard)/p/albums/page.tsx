@@ -9,6 +9,7 @@ import { Albums } from "~/db/schema";
 import { isAdmin, isPhotographer } from "~/role";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
+import { Plus } from "lucide-react";
 
 export default async function AlbumsPage() {
   const session = await auth();
@@ -44,7 +45,10 @@ export default async function AlbumsPage() {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Albums</h1>
         <Button asChild>
-          <Link href="/p/albums/new">Create Album</Link>
+          <Link href="/p/albums/new">
+            <Plus className="size-4" />
+            Create Album
+          </Link>
         </Button>
       </div>
       <DataTable columns={columns} data={transformedAlbums} />

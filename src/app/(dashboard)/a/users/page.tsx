@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { columns } from "~/app/(dashboard)/a/users/columns";
@@ -22,7 +23,10 @@ export default async function UsersPage() {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Users</h1>
         <Button asChild>
-          <Link href="/a/users/new">Create User</Link>
+          <Link href="/a/users/new">
+            <Plus className="size-4" />
+            Create User
+          </Link>
         </Button>
       </div>
       <DataTable columns={columns} data={users} />
