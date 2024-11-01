@@ -4,6 +4,13 @@ import "./globals.css";
 import { Providers } from "./providers";
 import { Toaster } from "~/components/ui/sonner";
 import { auth } from "~/auth";
+import { AppSidebar } from "~/components/app-sidebar";
+import { cookies } from "next/headers";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "~/components/ui/sidebar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -28,15 +35,29 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
+  const cookieStore = await cookies();
+  const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <Providers session={session}>{children}</Providers>
+        <SidebarProvider defaultOpen={defaultOpen}>
+          <AppSidebar />
 
-        <Toaster />
+          <Providers session={session}>
+            <SidebarInset className="w-full">
+              <header className="container flex items-center gap-4 p-4">
+                <SidebarTrigger />
+                <h1 className="text-xl font-semibold">Fast Foto</h1>
+              </header>
+              <main className="container px-4">{children}</main>
+            </SidebarInset>
+          </Providers>
+
+          <Toaster />
+        </SidebarProvider>
       </body>
     </html>
   );

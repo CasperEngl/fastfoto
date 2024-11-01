@@ -12,7 +12,7 @@ export default async function SettingsPage() {
   }
 
   return (
-    <div className="container max-w-2xl space-y-6 py-8">
+    <div className="container space-y-6 py-8">
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">
