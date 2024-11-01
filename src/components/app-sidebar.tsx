@@ -41,11 +41,8 @@ export function AppSidebar() {
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
-        </SidebarGroup>
 
-        {isAdmin(session.data?.user) ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Admin</SidebarGroupLabel>
+          {isAdmin(session.data?.user) ? (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -60,12 +57,9 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroup>
-        ) : null}
+          ) : null}
 
-        {isPhotographer(session.data?.user) ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Photographer</SidebarGroupLabel>
+          {isPhotographer(session.data?.user) ? (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -80,12 +74,9 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroup>
-        ) : null}
+          ) : null}
 
-        {isClient(session.data?.user) ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Client</SidebarGroupLabel>
+          {isClient(session.data?.user) ? (
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -100,8 +91,8 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          </SidebarGroup>
-        ) : null}
+          ) : null}
+        </SidebarGroup>
 
         {session.data?.user ? (
           <SidebarGroup>
