@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -47,15 +46,7 @@ export default async function UserEditPage({
   return (
     <div className="container mx-auto py-10">
       <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full" asChild>
-            <Link href="/a/users">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back to Users</span>
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold tracking-tight">Edit User</h1>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Edit User</h1>
         <DeleteUserButton userId={id} />
       </div>
       <EditUserForm user={user} />

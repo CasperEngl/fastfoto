@@ -1,5 +1,4 @@
 import { eq, getTableColumns } from "drizzle-orm";
-import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
@@ -51,15 +50,7 @@ export default async function AlbumEditPage({
   return (
     <div className="container mx-auto py-10">
       <div className="mb-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" className="rounded-full" asChild>
-            <Link href="/p/albums">
-              <ArrowLeft className="h-4 w-4" />
-              <span className="sr-only">Back to Albums</span>
-            </Link>
-          </Button>
-          <h1 className="text-2xl font-bold tracking-tight">Edit Album</h1>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Edit Album</h1>
         <DeleteAlbumButton albumId={id} />
       </div>
       <EditAlbumForm album={album} users={users} />
