@@ -11,6 +11,8 @@ import {
 } from "~/db/schema";
 import Passkey from "next-auth/providers/passkey";
 import { eq, InferSelectModel } from "drizzle-orm";
+import { resend } from "~/email";
+import LoginMagicLinkEmail from "emails/login-magic-link";
 
 declare module "next-auth" {
   interface User extends InferSelectModel<typeof Users> {}
@@ -43,6 +45,14 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     Passkey({}),
     Resend({
       from: '"Fast Foto" <noreply@casperengelmann.com>',
+      async sendVerificationRequest(params) {
+        await resend.emails.send({
+          from: "Fast Foto <noreply@casperengelmann.com>",
+          to: params.identifier,
+          subject: "Sign in to Fast Foto",
+          react: <LoginMagicLinkEmail loginUrl={params.url} />,
+        });
+      },
     }),
     // CredentialsProvider({
     //   name: "Credentials",

@@ -1,6 +1,7 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import VerifyEmailChangeEmail from "emails/verify-email-change";
 import ms from "ms";
 import { nanoid } from "nanoid";
 import { auth } from "~/auth";
@@ -28,6 +29,7 @@ export async function requestEmailChange(newEmail: string) {
 
   // Generate verification token
   const token = nanoid();
+  const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
 
   // Store the pending email
   await db
@@ -41,16 +43,10 @@ export async function requestEmailChange(newEmail: string) {
     expires: new Date(Date.now() + ms("1d")),
   });
 
-  // Send verification email
   await resend.emails.send({
     from: "Fast Foto <noreply@casperengelmann.com>",
     to: newEmail,
     subject: "Verify your email change",
-    html: `
-      <p>Click the link below to verify your email change:</p>
-      <a href="${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}">
-        Verify Email
-      </a>
-    `,
+    react: <VerifyEmailChangeEmail verificationLink={verificationLink} />,
   });
 }
