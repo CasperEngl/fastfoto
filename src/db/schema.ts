@@ -103,6 +103,9 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
+  ownerId: text("ownerId")
+    .notNull()
+    .references(() => Users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -163,11 +166,16 @@ export const UsersToAlbums = pgTable(
 
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
+  ownedAlbums: many(Albums, { relationName: "owner" }),
 }));
 
-export const AlbumsRelations = relations(Albums, ({ many }) => ({
+export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   photos: many(Photos),
   usersToAlbums: many(UsersToAlbums),
+  owner: one(Users, {
+    fields: [Albums.ownerId],
+    references: [Users.id],
+  }),
 }));
 
 export const UsersToAlbumsRelations = relations(UsersToAlbums, ({ one }) => ({

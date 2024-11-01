@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
-import { UsersToAlbums } from "~/db/schema";
+import { Albums } from "~/db/schema";
 import { isAdmin, isPhotographer } from "~/role";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
@@ -19,31 +19,25 @@ export default async function AlbumsPage() {
 
   invariant(session.user.id, "User ID is required");
 
-  const albums = await db.query.UsersToAlbums.findMany({
+  const albums = await db.query.Albums.findMany({
     where: isAdmin(session.user)
       ? undefined
-      : eq(UsersToAlbums.userId, session.user.id),
+      : eq(Albums.ownerId, session.user.id),
     with: {
-      album: {
+      photos: true,
+      usersToAlbums: {
         with: {
-          photos: true,
-          usersToAlbums: {
-            with: {
-              user: true,
-            },
-          },
+          user: true,
         },
       },
     },
   });
 
-  // Transform the data to match the expected format for the DataTable
-  const transformedAlbums = albums.map(({ album }) => ({
+  // We no longer need to filter albums after fetching since we're filtering in the query
+  const transformedAlbums = albums.map((album) => ({
     ...album,
     users: album.usersToAlbums.map(({ user }) => user),
   }));
-
-  console.log("transformedAlbums", transformedAlbums);
 
   return (
     <div className="container mx-auto py-10">

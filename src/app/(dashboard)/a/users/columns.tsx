@@ -44,9 +44,9 @@ export const columns: ColumnDef<InferSelectModel<typeof Users>>[] = [
     header: "Email",
   },
   {
-    accessorKey: "isAdmin",
+    accessorKey: "type",
     header: "Admin Status",
-    cell: ({ row }) => <div>{row.getValue("isAdmin") ? "Admin" : "User"}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
   },
   {
     id: "actions",

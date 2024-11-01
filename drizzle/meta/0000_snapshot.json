@@ -1,5 +1,5 @@
 {
-  "id": "81731c68-067e-4efa-8cbf-9e4f4a73abf1",
+  "id": "37365ae4-69d3-4c5b-9ad5-8336347e4e4e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -196,6 +196,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "ownerId": {
+          "name": "ownerId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp",
@@ -210,7 +216,21 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {},
+      "foreignKeys": {
+        "albums_ownerId_users_id_fk": {
+          "name": "albums_ownerId_users_id_fk",
+          "tableFrom": "albums",
+          "tableTo": "users",
+          "columnsFrom": [
+            "ownerId"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
