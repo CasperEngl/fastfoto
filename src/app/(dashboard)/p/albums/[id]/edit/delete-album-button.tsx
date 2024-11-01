@@ -1,6 +1,5 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
 import { Button } from "~/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -16,28 +15,13 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useTransition } from "react";
 import { deleteAlbum } from "~/app/(dashboard)/p/albums/actions";
 
 export function DeleteAlbumButton({ albumId }: { albumId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-
-  const deleteAlbumMutation = useMutation({
-    mutationFn: async () => {
-      await deleteAlbum(albumId);
-    },
-    onSuccess: () => {
-      toast.success("Album deleted successfully");
-      setOpen(false);
-      router.push("/p/albums");
-    },
-    onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to delete album",
-      );
-    },
-  });
+  const [isPending, startTransition] = useTransition();
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -56,16 +40,29 @@ export function DeleteAlbumButton({ albumId }: { albumId: string }) {
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={deleteAlbumMutation.isPending}>
-            Cancel
-          </AlertDialogCancel>
+          <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => deleteAlbumMutation.mutate()}
-            disabled={deleteAlbumMutation.isPending}
+            onClick={async () => {
+              try {
+                startTransition(async () => {
+                  await deleteAlbum(albumId);
+                  toast.success("Album deleted successfully");
+                  setOpen(false);
+                  router.push("/p/albums");
+                });
+              } catch (error) {
+                toast.error(
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to delete album",
+                );
+              }
+            }}
+            disabled={isPending}
             asChild
           >
             <Button variant="destructive">
-              {deleteAlbumMutation.isPending ? "Deleting..." : "Delete"}
+              {isPending ? "Deleting..." : "Delete"}
             </Button>
           </AlertDialogAction>
         </AlertDialogFooter>

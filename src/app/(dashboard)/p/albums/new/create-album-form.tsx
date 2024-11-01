@@ -1,7 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
+import { useTransition } from "react";
 import { InferSelectModel } from "drizzle-orm";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -40,6 +40,7 @@ export function CreateAlbumForm({
   const session = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -50,28 +51,25 @@ export function CreateAlbumForm({
     },
   });
 
-  const mutation = useMutation({
-    mutationFn: createAlbum,
-    onSuccess: (album) => {
-      toast.success("Album created successfully");
-      router.push(`/p/albums/${album.id}/edit`);
-      router.refresh();
-    },
-    onError: (error) => {
-      toast.error("Failed to create album");
-      console.error("Error creating album:", error);
-    },
-  });
-
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((values) => {
-          invariant(session.data?.user?.id, "User ID is required");
+          startTransition(async () => {
+            invariant(session.data?.user?.id, "User ID is required");
 
-          return mutation.mutate({
-            ...values,
-            ownerId: session.data.user.id,
+            try {
+              const album = await createAlbum({
+                ...values,
+                ownerId: session.data.user.id,
+              });
+              toast.success("Album created successfully");
+              router.push(`/p/albums/${album.id}/edit`);
+              router.refresh();
+            } catch (error) {
+              toast.error("Failed to create album");
+              console.error("Error creating album:", error);
+            }
           });
         })}
         className="space-y-8"
@@ -126,8 +124,8 @@ export function CreateAlbumForm({
           )}
         />
 
-        <Button type="submit" disabled={mutation.isPending}>
-          {mutation.isPending ? "Creating..." : "Create Album"}
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Creating..." : "Create Album"}
         </Button>
       </form>
     </Form>

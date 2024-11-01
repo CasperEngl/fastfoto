@@ -1,8 +1,8 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { Button } from "~/components/ui/button";
@@ -21,6 +21,7 @@ import { createUser } from "~/app/(dashboard)/a/users/new/actions";
 
 export function CreateUserForm() {
   const router = useRouter();
+  const [isPending, startTransition] = useTransition();
 
   const form = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
@@ -30,25 +31,24 @@ export function CreateUserForm() {
     },
   });
 
-  const createUserMutation = useMutation({
-    mutationFn: createUser,
-    onSuccess: () => {
-      form.reset();
-      router.refresh();
-      toast.success("User created successfully");
-    },
-    onError: (error) => {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to create user",
-      );
-    },
-  });
-
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit((data) => {
-          createUserMutation.mutate(data);
+          startTransition(async () => {
+            try {
+              await createUser(data);
+              form.reset();
+              router.refresh();
+              toast.success("User created successfully");
+            } catch (error) {
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : "Failed to create user",
+              );
+            }
+          });
         })}
         className="space-y-8"
       >
@@ -86,8 +86,8 @@ export function CreateUserForm() {
           )}
         />
 
-        <Button type="submit" disabled={createUserMutation.isPending}>
-          {createUserMutation.isPending ? "Creating..." : "Create User"}
+        <Button type="submit" disabled={isPending}>
+          {isPending ? "Creating..." : "Create User"}
         </Button>
       </form>
     </Form>
