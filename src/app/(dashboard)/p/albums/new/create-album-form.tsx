@@ -21,6 +21,8 @@ import { Combobox } from "~/components/ui/combobox";
 import { Textarea } from "~/components/ui/textarea";
 import { Users } from "~/db/schema";
 import { createAlbum } from "./actions";
+import { useSession } from "next-auth/react";
+import invariant from "invariant";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,6 +37,7 @@ export function CreateAlbumForm({
 }: {
   users: InferSelectModel<typeof Users>[];
 }) {
+  const session = useSession();
   const searchParams = useSearchParams();
   const router = useRouter();
 
@@ -63,7 +66,14 @@ export function CreateAlbumForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((values) => mutation.mutate(values))}
+        onSubmit={form.handleSubmit((values) => {
+          invariant(session.data?.user?.id, "User ID is required");
+
+          return mutation.mutate({
+            ...values,
+            ownerId: session.data.user.id,
+          });
+        })}
         className="space-y-8"
       >
         <FormField
