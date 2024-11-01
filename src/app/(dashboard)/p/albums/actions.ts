@@ -4,7 +4,7 @@ import { eq, InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { Albums } from "~/db/schema";
+import { Albums, UsersToAlbums } from "~/db/schema";
 import { isPhotographer } from "~/role";
 
 export async function deleteAlbum(albumId: string) {
@@ -28,7 +28,9 @@ export async function deleteAlbum(albumId: string) {
 
 export async function updateAlbum(
   albumId: string,
-  data: InferInsertModel<typeof Albums>,
+  data: InferInsertModel<typeof Albums> & {
+    users: string[];
+  },
 ) {
   const session = await auth();
 
@@ -44,7 +46,29 @@ export async function updateAlbum(
     throw new Error("Album not found");
   }
 
-  await db.update(Albums).set(data).where(eq(Albums.id, albumId));
+  await db.transaction(async (tx) => {
+    // Update album details
+    await tx
+      .update(Albums)
+      .set({
+        name: data.name,
+        description: data.description,
+      })
+      .where(eq(Albums.id, albumId));
+
+    // Delete existing user relationships
+    await tx.delete(UsersToAlbums).where(eq(UsersToAlbums.albumId, albumId));
+
+    // Insert new user relationships
+    if (data.users.length > 0) {
+      await tx.insert(UsersToAlbums).values(
+        data.users.map((userId) => ({
+          userId,
+          albumId,
+        })),
+      );
+    }
+  });
 
   revalidatePath("/p/albums");
 }

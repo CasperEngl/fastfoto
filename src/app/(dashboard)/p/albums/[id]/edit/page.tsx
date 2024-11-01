@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, getTableColumns } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -25,13 +25,28 @@ export default async function AlbumEditPage({
 
   const album = await db.query.Albums.findFirst({
     where: eq(Albums.id, id),
-    with: { photos: true },
+    with: {
+      photos: true,
+      usersToAlbums: {
+        with: {
+          user: true,
+        },
+      },
+    },
+  }).then((album) => {
+    if (!album) {
+      return null;
+    }
+    return {
+      ...album,
+      users: album?.usersToAlbums.map((userToAlbum) => userToAlbum.user),
+    };
   });
-  const users = await db.query.Users.findMany();
-
   if (!album) {
     return notFound();
   }
+  console.log("album", album.id);
+  const users = await db.query.Users.findMany();
 
   return (
     <div className="container mx-auto py-10">

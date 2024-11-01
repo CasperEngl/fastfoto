@@ -2,6 +2,8 @@ import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { z } from "zod";
+import { EditUserForm } from "~/app/(dashboard)/a/users/[id]/edit/edit-user-form";
 import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
@@ -9,13 +11,13 @@ import { db } from "~/db/client";
 import { Users, UsersToAlbums } from "~/db/schema";
 import { isAdmin } from "~/role";
 import { DeleteUserButton } from "./delete-user-button";
-import { EditUserForm } from "~/app/(dashboard)/a/users/[id]/edit/edit-user-form";
 
 export default async function UserEditPage({
   params,
 }: {
-  params: { id: string };
+  params: Promise<unknown>;
 }) {
+  const { id } = z.object({ id: z.string() }).parse(await params);
   const session = await auth();
 
   if (!isAdmin(session?.user)) {
@@ -24,16 +26,23 @@ export default async function UserEditPage({
 
   // Get user and their albums
   const user = await db.query.Users.findFirst({
-    where: eq(Users.id, params.id),
-  });
-  const albums = await db.query.Albums.findMany({
-    where: eq(UsersToAlbums.userId, params.id),
-    with: { photos: true },
+    where: eq(Users.id, id),
   });
 
   if (!user) {
     return notFound();
   }
+
+  const albums = await db.query.UsersToAlbums.findMany({
+    where: eq(UsersToAlbums.userId, id),
+    with: {
+      album: {
+        with: {
+          photos: true,
+        },
+      },
+    },
+  });
 
   return (
     <div className="container mx-auto py-10">
@@ -47,7 +56,7 @@ export default async function UserEditPage({
           </Button>
           <h1 className="text-2xl font-bold tracking-tight">Edit User</h1>
         </div>
-        <DeleteUserButton userId={params.id} />
+        <DeleteUserButton userId={id} />
       </div>
       <EditUserForm user={user} />
 
@@ -56,7 +65,7 @@ export default async function UserEditPage({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">User Albums</h2>
           <Button asChild>
-            <Link href={`/p/albums/new?userId=${params.id}`}>Create Album</Link>
+            <Link href={`/p/albums/new?userId=${id}`}>Create Album</Link>
           </Button>
         </div>
         {albums.length === 0 ? (
@@ -65,7 +74,7 @@ export default async function UserEditPage({
           </p>
         ) : (
           <div className="grid grid-cols-3 gap-4">
-            {albums.map((album) => (
+            {albums.map(({ album }) => (
               <AlbumCard key={album.id} album={album} />
             ))}
           </div>

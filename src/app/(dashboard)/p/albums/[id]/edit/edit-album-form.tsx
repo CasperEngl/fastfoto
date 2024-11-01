@@ -33,13 +33,14 @@ import { InferSelectModel } from "drizzle-orm";
 import invariant from "invariant";
 import { updateAlbum } from "~/app/(dashboard)/p/albums/actions";
 import { deletePhoto } from "~/app/(dashboard)/p/albums/[id]/edit/actions";
+import { Combobox } from "~/components/ui/combobox";
 
 const albumFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   description: z.string().optional(),
-  userId: z.string().min(1, "User ID is required"),
+  users: z.array(z.string()).default([]).catch([]),
 });
 
 type AlbumFormValues = z.infer<typeof albumFormSchema>;
@@ -54,6 +55,7 @@ export function EditAlbumForm({
 }: {
   album: InferSelectModel<typeof Albums> & {
     photos: InferSelectModel<typeof Photos>[];
+    users: InferSelectModel<typeof Users>[];
   };
   users: InferSelectModel<typeof Users>[];
 }) {
@@ -76,6 +78,7 @@ export function EditAlbumForm({
     defaultValues: {
       name: album.name ?? "",
       description: album.description ?? "",
+      users: album.users.map((user) => user.id),
     },
   });
 
@@ -90,6 +93,7 @@ export function EditAlbumForm({
               await updateAlbum(params.id.toString(), {
                 name: values.name,
                 description: values.description || null,
+                users: values.users || [],
               });
               toast.success("Album updated successfully");
             } catch (error) {
@@ -136,24 +140,21 @@ export function EditAlbumForm({
 
         <FormField
           control={form.control}
-          name="userId"
+          name="users"
           render={({ field }) => (
             <FormItem>
               <FormLabel>User</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a user" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div>
+                <Combobox
+                  options={users.map((user) => ({
+                    value: user.id,
+                    label: user.name ?? "",
+                  }))}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  multiple
+                />
+              </div>
               <FormDescription>The user who owns this album.</FormDescription>
               <FormMessage />
             </FormItem>

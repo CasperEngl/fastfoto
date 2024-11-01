@@ -52,7 +52,7 @@ export const columns: ColumnDef<
     accessorKey: "users",
     header: "Users",
     cell: ({ row }) => (
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-y-1">
         {row.original.users.map((user) => (
           <Link
             key={user.id}

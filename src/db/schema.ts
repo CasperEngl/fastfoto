@@ -162,12 +162,12 @@ export const UsersToAlbums = pgTable(
 );
 
 export const UsersRelations = relations(Users, ({ many }) => ({
-  albums: many(UsersToAlbums),
+  usersToAlbums: many(UsersToAlbums),
 }));
 
 export const AlbumsRelations = relations(Albums, ({ many }) => ({
   photos: many(Photos),
-  users: many(UsersToAlbums),
+  usersToAlbums: many(UsersToAlbums),
 }));
 
 export const UsersToAlbumsRelations = relations(UsersToAlbums, ({ one }) => ({

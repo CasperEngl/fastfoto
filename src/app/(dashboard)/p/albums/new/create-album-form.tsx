@@ -17,13 +17,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "~/components/ui/select";
+import { Combobox } from "~/components/ui/combobox";
 import { Textarea } from "~/components/ui/textarea";
 import { Users } from "~/db/schema";
 import { createAlbum } from "./actions";
@@ -31,7 +25,7 @@ import { createAlbum } from "./actions";
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  userId: z.string().min(1, "User ID is required"),
+  users: z.array(z.string()).default([]).catch([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -49,7 +43,7 @@ export function CreateAlbumForm({
     defaultValues: {
       name: "",
       description: "",
-      userId: searchParams.get("userId") || "",
+      users: searchParams.get("userId") ? [searchParams.get("userId")!] : [],
     },
   });
 
@@ -74,24 +68,21 @@ export function CreateAlbumForm({
       >
         <FormField
           control={form.control}
-          name="userId"
+          name="users"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>User</FormLabel>
-              <FormControl>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select user" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </FormControl>
+              <FormLabel>Users</FormLabel>
+              <div>
+                <Combobox
+                  options={users.map((user) => ({
+                    value: user.id,
+                    label: user.name ?? "",
+                  }))}
+                  value={field.value}
+                  onValueChange={field.onChange}
+                  multiple
+                />
+              </div>
               <FormMessage />
             </FormItem>
           )}

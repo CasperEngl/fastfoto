@@ -1,14 +1,14 @@
+import { eq } from "drizzle-orm";
+import invariant from "invariant";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
+import { UsersToAlbums } from "~/db/schema";
 import { isAdmin, isPhotographer } from "~/role";
 import { columns } from "./columns";
 import { DataTable } from "./data-table";
-import { eq } from "drizzle-orm";
-import { UsersToAlbums } from "~/db/schema";
-import invariant from "invariant";
 
 export default async function AlbumsPage() {
   const session = await auth();
@@ -27,18 +27,23 @@ export default async function AlbumsPage() {
       album: {
         with: {
           photos: true,
-          users: {
-            with: { user: true },
+          usersToAlbums: {
+            with: {
+              user: true,
+            },
           },
         },
       },
     },
-  }).then((usersToAlbums) => {
-    return usersToAlbums.map((userToAlbum) => ({
-      ...userToAlbum.album,
-      users: userToAlbum.album.users.map((user) => user.user),
-    }));
   });
+
+  // Transform the data to match the expected format for the DataTable
+  const transformedAlbums = albums.map(({ album }) => ({
+    ...album,
+    users: album.usersToAlbums.map(({ user }) => user),
+  }));
+
+  console.log("transformedAlbums", transformedAlbums);
 
   return (
     <div className="container mx-auto py-10">
@@ -48,7 +53,7 @@ export default async function AlbumsPage() {
           <Link href="/p/albums/new">Create Album</Link>
         </Button>
       </div>
-      <DataTable columns={columns} data={albums} />
+      <DataTable columns={columns} data={transformedAlbums} />
     </div>
   );
 }
