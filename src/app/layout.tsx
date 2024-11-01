@@ -48,10 +48,13 @@ export default async function RootLayout({
 
           <Providers session={session}>
             <SidebarInset className="w-full">
-              <header className="container flex items-center gap-4 p-4">
-                <SidebarTrigger />
-                <h1 className="text-xl font-semibold">Fast Foto</h1>
+              <header className="border-b">
+                <div className="container flex items-center gap-4 p-4">
+                  <SidebarTrigger />
+                  <h1 className="text-xl font-semibold">Fast Foto</h1>
+                </div>
               </header>
+
               <main className="container px-4">{children}</main>
             </SidebarInset>
           </Providers>
