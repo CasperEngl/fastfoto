@@ -16,6 +16,7 @@ export const Users = pgTable("users", {
   name: text("name"),
   email: text("email").unique().notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
+  pendingEmail: text("pendingEmail"),
   image: text("image"),
   type: text("type", {
     enum: ["admin", "photographer", "client"],

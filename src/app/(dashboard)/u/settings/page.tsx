@@ -1,18 +1,42 @@
-import { redirect } from "next/navigation";
-import { PasskeyForm } from "./passkey";
 import { Separator } from "@radix-ui/react-separator";
+import { CheckCircle2, XCircle } from "lucide-react";
+import { redirect } from "next/navigation";
 import { SettingsForm } from "~/app/(dashboard)/u/settings/settings-form";
 import { auth } from "~/auth";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { PasskeyForm } from "./passkey";
 
-export default async function SettingsPage() {
+export default async function SettingsPage({
+  searchParams,
+}: {
+  searchParams: { verified?: string; error?: string };
+}) {
   const session = await auth();
 
   if (!session?.user) {
-    redirect("/login");
+    return redirect("/login");
   }
 
   return (
     <div className="container space-y-6 py-8">
+      {searchParams.verified ? (
+        <Alert variant="success">
+          <CheckCircle2 className="size-4" />
+          <AlertTitle>Email successfully verified!</AlertTitle>
+          <AlertDescription>Your email has been updated.</AlertDescription>
+        </Alert>
+      ) : null}
+
+      {searchParams.error === "invalid-token" ? (
+        <Alert variant="destructive">
+          <XCircle className="size-4" />
+          <AlertTitle>Invalid verification link</AlertTitle>
+          <AlertDescription>
+            Please try requesting a new email verification.
+          </AlertDescription>
+        </Alert>
+      ) : null}
+
       <div>
         <h1 className="text-2xl font-bold tracking-tight">Settings</h1>
         <p className="text-sm text-muted-foreground">

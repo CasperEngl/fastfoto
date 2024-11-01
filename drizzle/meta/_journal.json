@@ -8,6 +8,13 @@
       "when": 1730428442840,
       "tag": "0000_handy_the_watchers",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1730430255367,
+      "tag": "0001_hard_bishop",
+      "breakpoints": true
     }
   ]
 }
