@@ -50,10 +50,10 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname?.startsWith("/admin/users")}
+                  isActive={pathname?.startsWith("/a/users")}
                   tooltip="Users"
                 >
-                  <Link href="/admin/users">
+                  <Link href="/a/users">
                     <Users />
                     Users
                   </Link>
