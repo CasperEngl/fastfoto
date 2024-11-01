@@ -6,6 +6,8 @@ import Link from "next/link";
 import { AlbumActions } from "./album-actions";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Albums, Photos, Users } from "~/db/schema";
+import { useSession } from "next-auth/react";
+import { isAdmin } from "~/role";
 
 export const columns: ColumnDef<
   InferSelectModel<typeof Albums> & {
@@ -51,19 +53,27 @@ export const columns: ColumnDef<
   {
     accessorKey: "users",
     header: "Users",
-    cell: ({ row }) => (
-      <div className="flex flex-col gap-y-1">
-        {row.original.users.map((user) => (
-          <Link
-            key={user.id}
-            href={`/a/users/${user.id}/edit`}
-            className="hover:underline"
-          >
-            {user.name}
-          </Link>
-        ))}
-      </div>
-    ),
+    cell: ({ row }) => {
+      const session = useSession();
+
+      return (
+        <div className="flex flex-col gap-y-1">
+          {row.original.users.map((user) =>
+            isAdmin(session.data?.user) ? (
+              <Link
+                key={user.id}
+                href={`/a/users/${user.id}/edit`}
+                className="hover:underline"
+              >
+                {user.name}
+              </Link>
+            ) : (
+              <span key={user.id}>{user.name}</span>
+            ),
+          )}
+        </div>
+      );
+    },
   },
   {
     id: "photoCount",
