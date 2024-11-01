@@ -2,7 +2,6 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "next-auth";
-import { useSession } from "next-auth/react";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -22,6 +21,7 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { propertiesChanged } from "~/lib/utils";
 
 const profileFormSchema = z.object({
   name: z
@@ -46,7 +46,6 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ user }: SettingsFormProps) {
-  const session = useSession();
   const [isPending, startTransition] = useTransition();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -61,15 +60,19 @@ export function SettingsForm({ user }: SettingsFormProps) {
       <form
         onSubmit={form.handleSubmit((values) => {
           startTransition(async () => {
-            console.log("email compare", values.email, user.email);
+            if (propertiesChanged(values, user)) {
+              await updateProfile({ name: values.name });
 
-            values.email !== user.email
-              ? await requestEmailChange(values.email).then(() =>
-                  toast.success(
-                    "Verification email sent. Please check your inbox.",
-                  ),
-                )
-              : await updateProfile({ name: values.name });
+              toast.success("Profile updated successfully");
+            }
+
+            if (values.email !== user.email) {
+              await requestEmailChange(values.email).then(() =>
+                toast.success(
+                  "Verification email sent. Please check your inbox.",
+                ),
+              );
+            }
           });
         })}
         className="space-y-8"
