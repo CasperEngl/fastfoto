@@ -8,6 +8,7 @@ import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Users, VerificationTokens } from "~/db/schema";
 import { resend } from "~/email";
+import { env } from "~/env";
 
 export async function updateProfile(data: { name: string }) {
   const session = await auth();
@@ -29,7 +30,7 @@ export async function requestEmailChange(newEmail: string) {
 
   // Generate verification token
   const token = nanoid();
-  const verificationLink = `${process.env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
+  const verificationLink = `${env.NEXT_PUBLIC_APP_URL}/api/verify-email?token=${token}`;
 
   // Store the pending email
   await db

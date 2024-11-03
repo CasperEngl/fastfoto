@@ -4,13 +4,16 @@ import { z } from "zod";
 export const env = createEnv({
   server: {
     AUTH_SECRET: z.string().min(1),
-    AUTH_DRIZZLE_URL: z.string().url(),
-    AUTH_RESEND_KEY: z.string().min(1),
+    DATABASE_URL: z.string().url(),
+    RESEND_KEY: z.string().min(1),
   },
-  client: {},
+  client: {
+    NEXT_PUBLIC_APP_URL: z.string().url(),
+  },
   runtimeEnv: {
     AUTH_SECRET: process.env.AUTH_SECRET,
-    AUTH_DRIZZLE_URL: process.env.AUTH_DRIZZLE_URL,
-    AUTH_RESEND_KEY: process.env.AUTH_RESEND_KEY,
+    DATABASE_URL: process.env.DATABASE_URL,
+    RESEND_KEY: process.env.RESEND_KEY,
+    NEXT_PUBLIC_APP_URL: process.env.NEXT_PUBLIC_APP_URL,
   },
 });

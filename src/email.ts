@@ -1,3 +1,4 @@
 import { Resend } from "resend";
+import { env } from "~/env";
 
-export const resend = new Resend(process.env.AUTH_RESEND_KEY);
+export const resend = new Resend(env.RESEND_KEY);

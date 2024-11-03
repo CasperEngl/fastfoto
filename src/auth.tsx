@@ -1,18 +1,19 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { eq, InferSelectModel } from "drizzle-orm";
+import LoginMagicLinkEmail from "emails/login-magic-link";
 import NextAuth from "next-auth";
+import Passkey from "next-auth/providers/passkey";
 import Resend from "next-auth/providers/resend";
 import { db } from "~/db/client";
 import {
   Accounts,
-  Users,
   Authenticators,
-  VerificationTokens,
   Sessions,
+  Users,
+  VerificationTokens,
 } from "~/db/schema";
-import Passkey from "next-auth/providers/passkey";
-import { eq, InferSelectModel } from "drizzle-orm";
 import { resend } from "~/email";
-import LoginMagicLinkEmail from "emails/login-magic-link";
+import { env } from "~/env";
 
 declare module "next-auth" {
   interface User extends InferSelectModel<typeof Users> {}
@@ -44,6 +45,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   providers: [
     Passkey({}),
     Resend({
+      apiKey: env.RESEND_KEY,
       from: '"Fast Foto" <noreply@casperengelmann.com>',
       async sendVerificationRequest(params) {
         await resend.emails.send({
