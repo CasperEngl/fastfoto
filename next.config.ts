@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   images: {
     remotePatterns: [
       {
@@ -9,6 +10,10 @@ const nextConfig: NextConfig = {
         pathname: "/f/**",
       },
     ],
+  },
+  compress: false,
+  experimental: {
+    typedRoutes: true,
   },
 };
 
