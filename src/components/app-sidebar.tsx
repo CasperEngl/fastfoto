@@ -80,14 +80,12 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
-                  asChild
+                  // asChild
                   isActive={pathname?.startsWith("/c/albums")}
                   tooltip="My Albums"
                 >
-                  <Link href="/c/albums">
-                    <Album />
-                    My Albums
-                  </Link>
+                  <Album />
+                  My Albums
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
