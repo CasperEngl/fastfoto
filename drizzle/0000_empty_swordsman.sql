@@ -1,8 +1,9 @@
+CREATE TYPE "public"."user_type" AS ENUM('admin', 'photographer', 'client');--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "accounts" (
-	"userId" text NOT NULL,
+	"user_id" text NOT NULL,
 	"type" text NOT NULL,
 	"provider" text NOT NULL,
-	"providerAccountId" text NOT NULL,
+	"provider_account_id" text NOT NULL,
 	"refresh_token" text,
 	"access_token" text,
 	"expires_at" integer,
@@ -10,12 +11,12 @@ CREATE TABLE IF NOT EXISTS "accounts" (
 	"scope" text,
 	"id_token" text,
 	"session_state" text,
-	CONSTRAINT "accounts_provider_providerAccountId_pk" PRIMARY KEY("provider","providerAccountId")
+	CONSTRAINT "accounts_provider_provider_account_id_pk" PRIMARY KEY("provider","provider_account_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "admin_audit_logs" (
 	"id" text PRIMARY KEY NOT NULL,
-	"adminId" text NOT NULL,
+	"admin_id" text NOT NULL,
 	"action" text NOT NULL,
 	"entity_type" text NOT NULL,
 	"entity_id" text NOT NULL,
@@ -27,27 +28,27 @@ CREATE TABLE IF NOT EXISTS "albums" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"description" text,
-	"ownerId" text NOT NULL,
+	"owner_id" text NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "authenticators" (
-	"credentialID" text NOT NULL,
-	"userId" text NOT NULL,
-	"providerAccountId" text NOT NULL,
-	"credentialPublicKey" text NOT NULL,
+	"credential_id" text NOT NULL,
+	"user_id" text NOT NULL,
+	"provider_account_id" text NOT NULL,
+	"credential_public_key" text NOT NULL,
 	"counter" integer NOT NULL,
-	"credentialDeviceType" text NOT NULL,
-	"credentialBackedUp" boolean NOT NULL,
+	"credential_device_type" text NOT NULL,
+	"credential_backed_up" boolean NOT NULL,
 	"transports" text,
-	CONSTRAINT "authenticators_userId_credentialID_pk" PRIMARY KEY("userId","credentialID"),
-	CONSTRAINT "authenticators_credentialID_unique" UNIQUE("credentialID")
+	CONSTRAINT "authenticators_user_id_credential_id_pk" PRIMARY KEY("user_id","credential_id"),
+	CONSTRAINT "authenticators_credential_id_unique" UNIQUE("credential_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "photos" (
 	"id" text PRIMARY KEY NOT NULL,
-	"albumId" text NOT NULL,
+	"album_id" text NOT NULL,
 	"url" text NOT NULL,
 	"key" text NOT NULL,
 	"caption" text,
@@ -57,8 +58,8 @@ CREATE TABLE IF NOT EXISTS "photos" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "sessions" (
-	"sessionToken" text PRIMARY KEY NOT NULL,
-	"userId" text NOT NULL,
+	"session_token" text PRIMARY KEY NOT NULL,
+	"user_id" text NOT NULL,
 	"expires" timestamp NOT NULL
 );
 --> statement-breakpoint
@@ -66,18 +67,19 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text,
 	"email" text NOT NULL,
-	"emailVerified" timestamp,
+	"email_verified" timestamp,
+	"pending_email" text,
 	"image" text,
-	"type" text DEFAULT 'client' NOT NULL,
+	"user_type" "user_type" DEFAULT 'client' NOT NULL,
 	"created_at" timestamp NOT NULL,
 	"updated_at" timestamp,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users_to_albums" (
-	"userId" text NOT NULL,
-	"albumId" text NOT NULL,
-	CONSTRAINT "users_to_albums_userId_albumId_pk" PRIMARY KEY("userId","albumId")
+	"user_id" text NOT NULL,
+	"album_id" text NOT NULL,
+	CONSTRAINT "users_to_albums_user_id_album_id_pk" PRIMARY KEY("user_id","album_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "verification_tokens" (
@@ -88,49 +90,49 @@ CREATE TABLE IF NOT EXISTS "verification_tokens" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "accounts" ADD CONSTRAINT "accounts_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "accounts" ADD CONSTRAINT "accounts_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_adminId_users_id_fk" FOREIGN KEY ("adminId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "admin_audit_logs" ADD CONSTRAINT "admin_audit_logs_admin_id_users_id_fk" FOREIGN KEY ("admin_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "albums" ADD CONSTRAINT "albums_ownerId_users_id_fk" FOREIGN KEY ("ownerId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "albums" ADD CONSTRAINT "albums_owner_id_users_id_fk" FOREIGN KEY ("owner_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "authenticators" ADD CONSTRAINT "authenticators_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "authenticators" ADD CONSTRAINT "authenticators_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "photos" ADD CONSTRAINT "photos_albumId_albums_id_fk" FOREIGN KEY ("albumId") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "photos" ADD CONSTRAINT "photos_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "sessions" ADD CONSTRAINT "sessions_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "users_to_albums" ADD CONSTRAINT "users_to_albums_userId_users_id_fk" FOREIGN KEY ("userId") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "users_to_albums" ADD CONSTRAINT "users_to_albums_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "users_to_albums" ADD CONSTRAINT "users_to_albums_albumId_albums_id_fk" FOREIGN KEY ("albumId") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE no action;
+ ALTER TABLE "users_to_albums" ADD CONSTRAINT "users_to_albums_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

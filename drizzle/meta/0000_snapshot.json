@@ -1,5 +1,5 @@
 {
-  "id": "37365ae4-69d3-4c5b-9ad5-8336347e4e4e",
+  "id": "0841dea8-c325-48f6-927d-cf5cc97916de",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -8,8 +8,8 @@
       "name": "accounts",
       "schema": "",
       "columns": {
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -26,8 +26,8 @@
           "primaryKey": false,
           "notNull": true
         },
-        "providerAccountId": {
-          "name": "providerAccountId",
+        "provider_account_id": {
+          "name": "provider_account_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -77,12 +77,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "accounts_userId_users_id_fk": {
-          "name": "accounts_userId_users_id_fk",
+        "accounts_user_id_users_id_fk": {
+          "name": "accounts_user_id_users_id_fk",
           "tableFrom": "accounts",
           "tableTo": "users",
           "columnsFrom": [
-            "userId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -92,11 +92,11 @@
         }
       },
       "compositePrimaryKeys": {
-        "accounts_provider_providerAccountId_pk": {
-          "name": "accounts_provider_providerAccountId_pk",
+        "accounts_provider_provider_account_id_pk": {
+          "name": "accounts_provider_provider_account_id_pk",
           "columns": [
             "provider",
-            "providerAccountId"
+            "provider_account_id"
           ]
         }
       },
@@ -115,8 +115,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "adminId": {
-          "name": "adminId",
+        "admin_id": {
+          "name": "admin_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -154,12 +154,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "admin_audit_logs_adminId_users_id_fk": {
-          "name": "admin_audit_logs_adminId_users_id_fk",
+        "admin_audit_logs_admin_id_users_id_fk": {
+          "name": "admin_audit_logs_admin_id_users_id_fk",
           "tableFrom": "admin_audit_logs",
           "tableTo": "users",
           "columnsFrom": [
-            "adminId"
+            "admin_id"
           ],
           "columnsTo": [
             "id"
@@ -196,8 +196,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "ownerId": {
-          "name": "ownerId",
+        "owner_id": {
+          "name": "owner_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -217,12 +217,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "albums_ownerId_users_id_fk": {
-          "name": "albums_ownerId_users_id_fk",
+        "albums_owner_id_users_id_fk": {
+          "name": "albums_owner_id_users_id_fk",
           "tableFrom": "albums",
           "tableTo": "users",
           "columnsFrom": [
-            "ownerId"
+            "owner_id"
           ],
           "columnsTo": [
             "id"
@@ -241,26 +241,26 @@
       "name": "authenticators",
       "schema": "",
       "columns": {
-        "credentialID": {
-          "name": "credentialID",
+        "credential_id": {
+          "name": "credential_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "providerAccountId": {
-          "name": "providerAccountId",
+        "provider_account_id": {
+          "name": "provider_account_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "credentialPublicKey": {
-          "name": "credentialPublicKey",
+        "credential_public_key": {
+          "name": "credential_public_key",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -271,14 +271,14 @@
           "primaryKey": false,
           "notNull": true
         },
-        "credentialDeviceType": {
-          "name": "credentialDeviceType",
+        "credential_device_type": {
+          "name": "credential_device_type",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "credentialBackedUp": {
-          "name": "credentialBackedUp",
+        "credential_backed_up": {
+          "name": "credential_backed_up",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true
@@ -292,12 +292,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "authenticators_userId_users_id_fk": {
-          "name": "authenticators_userId_users_id_fk",
+        "authenticators_user_id_users_id_fk": {
+          "name": "authenticators_user_id_users_id_fk",
           "tableFrom": "authenticators",
           "tableTo": "users",
           "columnsFrom": [
-            "userId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -307,20 +307,20 @@
         }
       },
       "compositePrimaryKeys": {
-        "authenticators_userId_credentialID_pk": {
-          "name": "authenticators_userId_credentialID_pk",
+        "authenticators_user_id_credential_id_pk": {
+          "name": "authenticators_user_id_credential_id_pk",
           "columns": [
-            "userId",
-            "credentialID"
+            "user_id",
+            "credential_id"
           ]
         }
       },
       "uniqueConstraints": {
-        "authenticators_credentialID_unique": {
-          "name": "authenticators_credentialID_unique",
+        "authenticators_credential_id_unique": {
+          "name": "authenticators_credential_id_unique",
           "nullsNotDistinct": false,
           "columns": [
-            "credentialID"
+            "credential_id"
           ]
         }
       },
@@ -338,8 +338,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "albumId": {
-          "name": "albumId",
+        "album_id": {
+          "name": "album_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -383,12 +383,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "photos_albumId_albums_id_fk": {
-          "name": "photos_albumId_albums_id_fk",
+        "photos_album_id_albums_id_fk": {
+          "name": "photos_album_id_albums_id_fk",
           "tableFrom": "photos",
           "tableTo": "albums",
           "columnsFrom": [
-            "albumId"
+            "album_id"
           ],
           "columnsTo": [
             "id"
@@ -407,14 +407,14 @@
       "name": "sessions",
       "schema": "",
       "columns": {
-        "sessionToken": {
-          "name": "sessionToken",
+        "session_token": {
+          "name": "session_token",
           "type": "text",
           "primaryKey": true,
           "notNull": true
         },
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -428,12 +428,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "sessions_userId_users_id_fk": {
-          "name": "sessions_userId_users_id_fk",
+        "sessions_user_id_users_id_fk": {
+          "name": "sessions_user_id_users_id_fk",
           "tableFrom": "sessions",
           "tableTo": "users",
           "columnsFrom": [
-            "userId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -470,9 +470,15 @@
           "primaryKey": false,
           "notNull": true
         },
-        "emailVerified": {
-          "name": "emailVerified",
+        "email_verified": {
+          "name": "email_verified",
           "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "pending_email": {
+          "name": "pending_email",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
@@ -482,9 +488,10 @@
           "primaryKey": false,
           "notNull": false
         },
-        "type": {
-          "name": "type",
-          "type": "text",
+        "user_type": {
+          "name": "user_type",
+          "type": "user_type",
+          "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
           "default": "'client'"
@@ -522,14 +529,14 @@
       "name": "users_to_albums",
       "schema": "",
       "columns": {
-        "userId": {
-          "name": "userId",
+        "user_id": {
+          "name": "user_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "albumId": {
-          "name": "albumId",
+        "album_id": {
+          "name": "album_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -537,12 +544,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "users_to_albums_userId_users_id_fk": {
-          "name": "users_to_albums_userId_users_id_fk",
+        "users_to_albums_user_id_users_id_fk": {
+          "name": "users_to_albums_user_id_users_id_fk",
           "tableFrom": "users_to_albums",
           "tableTo": "users",
           "columnsFrom": [
-            "userId"
+            "user_id"
           ],
           "columnsTo": [
             "id"
@@ -550,12 +557,12 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "users_to_albums_albumId_albums_id_fk": {
-          "name": "users_to_albums_albumId_albums_id_fk",
+        "users_to_albums_album_id_albums_id_fk": {
+          "name": "users_to_albums_album_id_albums_id_fk",
           "tableFrom": "users_to_albums",
           "tableTo": "albums",
           "columnsFrom": [
-            "albumId"
+            "album_id"
           ],
           "columnsTo": [
             "id"
@@ -565,11 +572,11 @@
         }
       },
       "compositePrimaryKeys": {
-        "users_to_albums_userId_albumId_pk": {
-          "name": "users_to_albums_userId_albumId_pk",
+        "users_to_albums_user_id_album_id_pk": {
+          "name": "users_to_albums_user_id_album_id_pk",
           "columns": [
-            "userId",
-            "albumId"
+            "user_id",
+            "album_id"
           ]
         }
       },
@@ -618,7 +625,17 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {},
+  "enums": {
+    "public.user_type": {
+      "name": "user_type",
+      "schema": "public",
+      "values": [
+        "admin",
+        "photographer",
+        "client"
+      ]
+    }
+  },
   "schemas": {},
   "sequences": {},
   "roles": {},
