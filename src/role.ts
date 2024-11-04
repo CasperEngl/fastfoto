@@ -1,23 +1,23 @@
 import { User } from "next-auth";
 
-export function isAdmin(user?: User): user is User & { type: "admin" } {
-  return user?.type === "admin";
+export function isAdmin(user?: User): user is User & { userType: "admin" } {
+  return user?.userType === "admin";
 }
 
-export function isClient(user?: User): user is User & { type: "client" } {
+export function isClient(user?: User): user is User & { userType: "client" } {
   if (isAdmin(user)) {
     return true;
   }
 
-  return user?.type === "client";
+  return user?.userType === "client";
 }
 
 export function isPhotographer(
   user?: User,
-): user is User & { type: "photographer" } {
+): user is User & { userType: "photographer" } {
   if (isAdmin(user)) {
     return true;
   }
 
-  return user?.type === "photographer";
+  return user?.userType === "photographer";
 }

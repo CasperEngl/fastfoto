@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
+  pgEnum,
   pgTable,
   primaryKey,
   text,
@@ -9,20 +10,22 @@ import {
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
+export const userType = pgEnum("user_type", [
+  "admin",
+  "photographer",
+  "client",
+]);
+
 export const Users = pgTable("users", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name"),
   email: text("email").unique().notNull(),
-  emailVerified: timestamp("emailVerified", { mode: "date" }),
-  pendingEmail: text("pendingEmail"),
+  emailVerified: timestamp("email_verified", { mode: "date" }),
+  pendingEmail: text("pending_email"),
   image: text("image"),
-  type: text("type", {
-    enum: ["admin", "photographer", "client"],
-  })
-    .notNull()
-    .default("client"),
+  userType: userType("user_type").notNull().default("client"),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -34,12 +37,12 @@ export const Users = pgTable("users", {
 export const Accounts = pgTable(
   "accounts",
   {
-    userId: text("userId")
+    userId: text("user_id")
       .notNull()
       .references(() => Users.id, { onDelete: "cascade" }),
     type: text("type").$type<AdapterAccountType>().notNull(),
     provider: text("provider").notNull(),
-    providerAccountId: text("providerAccountId").notNull(),
+    providerAccountId: text("provider_account_id").notNull(),
     refresh_token: text("refresh_token"),
     access_token: text("access_token"),
     expires_at: integer("expires_at"),
@@ -56,8 +59,8 @@ export const Accounts = pgTable(
 );
 
 export const Sessions = pgTable("sessions", {
-  sessionToken: text("sessionToken").primaryKey(),
-  userId: text("userId")
+  sessionToken: text("session_token").primaryKey(),
+  userId: text("user_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
   expires: timestamp("expires", { mode: "date" }).notNull(),
@@ -80,15 +83,15 @@ export const VerificationTokens = pgTable(
 export const Authenticators = pgTable(
   "authenticators",
   {
-    credentialID: text("credentialID").notNull().unique(),
-    userId: text("userId")
+    credentialID: text("credential_id").notNull().unique(),
+    userId: text("user_id")
       .notNull()
       .references(() => Users.id, { onDelete: "cascade" }),
-    providerAccountId: text("providerAccountId").notNull(),
-    credentialPublicKey: text("credentialPublicKey").notNull(),
+    providerAccountId: text("provider_account_id").notNull(),
+    credentialPublicKey: text("credential_public_key").notNull(),
     counter: integer("counter").notNull(),
-    credentialDeviceType: text("credentialDeviceType").notNull(),
-    credentialBackedUp: boolean("credentialBackedUp").notNull(),
+    credentialDeviceType: text("credential_device_type").notNull(),
+    credentialBackedUp: boolean("credential_backed_up").notNull(),
     transports: text("transports"),
   },
   (authenticator) => ({
@@ -104,7 +107,7 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
-  ownerId: text("ownerId")
+  ownerId: text("owner_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" })
@@ -119,7 +122,7 @@ export const Photos = pgTable("photos", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  albumId: text("albumId")
+  albumId: text("album_id")
     .notNull()
     .references(() => Albums.id, { onDelete: "cascade" }),
   url: text("url").notNull(),
@@ -138,7 +141,7 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  adminId: text("adminId")
+  adminId: text("admin_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
   action: text("action").notNull(),
@@ -153,10 +156,10 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
 export const UsersToAlbums = pgTable(
   "users_to_albums",
   {
-    userId: text("userId")
+    userId: text("user_id")
       .notNull()
       .references(() => Users.id, { onDelete: "cascade" }),
-    albumId: text("albumId")
+    albumId: text("album_id")
       .notNull()
       .references(() => Albums.id, { onDelete: "cascade" }),
   },
