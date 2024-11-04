@@ -32,7 +32,7 @@ export const env = createEnv({
     RESEND_KEY: z.string().min(1),
   },
   runtimeEnv: {
-    APP_URL: process.env.COOLIFY_URL,
+    APP_URL: process.env.APP_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL_EXTERNAL: process.env.DATABASE_URL_EXTERNAL,
     DATABASE_URL: process.env.DATABASE_URL,
