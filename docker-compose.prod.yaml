@@ -19,9 +19,9 @@ services:
   db:
     image: postgres:latest
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: ${MY_POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${MY_POSTGRES_PASSWORD:-postgres}
+      POSTGRES_DB: ${MY_POSTGRES_DB:-postgres}
     ports:
       - "5432:5432"
     volumes:
