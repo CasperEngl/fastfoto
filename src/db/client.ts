@@ -6,6 +6,8 @@ import postgres from "postgres";
 import * as schema from "~/db/schema";
 import { env } from "~/env";
 
+console.log("process.env", process.env);
+
 export const pool = postgres(env.DATABASE_URL_EXTERNAL, { max: 1 });
 
 export const db = drizzle(pool, { schema });
