@@ -8,15 +8,11 @@ import {
   Preview,
   Text,
 } from "@react-email/components";
-import * as React from "react";
+import { env } from "~/env";
 
 interface LoginMagicLinkEmailProps {
   loginUrl: string;
 }
-
-const baseUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : process.env.NEXT_PUBLIC_APP_URL;
 
 export const LoginMagicLinkEmail = ({ loginUrl }: LoginMagicLinkEmailProps) => (
   <Html>
@@ -48,7 +44,7 @@ export const LoginMagicLinkEmail = ({ loginUrl }: LoginMagicLinkEmailProps) => (
         </Text>
         <Text style={footer}>
           <Link
-            href={baseUrl}
+            href={env.APP_URL}
             target="_blank"
             style={{ ...link, color: "#898989" }}
           >
