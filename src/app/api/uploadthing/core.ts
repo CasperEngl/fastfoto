@@ -5,7 +5,8 @@ import { auth } from "~/auth";
 import crypto from "crypto";
 import { z } from "zod";
 import { db } from "~/db/client";
-import { Photos } from "~/db/schema";
+import { Photos, Users } from "~/db/schema";
+import { eq } from "drizzle-orm";
 
 const f = createUploadthing();
 
@@ -41,6 +42,28 @@ export const ourFileRouter = {
           key: file.key,
           order: 0,
         })
+        .execute();
+
+      return { url: file.url };
+    }),
+  profileImage: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+    .middleware(async () => {
+      const session = await auth();
+
+      if (!session?.user?.id) {
+        throw new UploadThingError("Unauthorized");
+      }
+
+      return { userId: session.user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      await db
+        .update(Users)
+        .set({
+          image: file.url,
+          updatedAt: new Date(),
+        })
+        .where(eq(Users.id, metadata.userId))
         .execute();
 
       return { url: file.url };

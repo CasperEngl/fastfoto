@@ -4,6 +4,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { InferSelectModel } from "drizzle-orm";
 import Link from "next/link";
 import { UserActions } from "~/app/(dashboard)/a/users/user-actions";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Users } from "~/db/schema";
 
@@ -31,12 +32,23 @@ export const columns: ColumnDef<InferSelectModel<typeof Users>>[] = [
     accessorKey: "name",
     header: "Name",
     cell: ({ row }) => (
-      <Link
-        href={`/a/users/${row.original.id}/edit`}
-        className="hover:underline"
-      >
-        {row.getValue("name")}
-      </Link>
+      <div className="flex items-center gap-x-3">
+        <Avatar className="size-8">
+          <AvatarImage
+            src={row.original.image ?? undefined}
+            alt={row.getValue("name")}
+          />
+          <AvatarFallback>
+            {row.original.name?.[0]?.toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <Link
+          href={`/a/users/${row.original.id}/edit`}
+          className="hover:underline"
+        >
+          {row.getValue("name")}
+        </Link>
+      </div>
     ),
   },
   {
@@ -44,15 +56,16 @@ export const columns: ColumnDef<InferSelectModel<typeof Users>>[] = [
     header: "Email",
   },
   {
-    accessorKey: "type",
-    header: "Admin Status",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("type")}</div>,
+    accessorKey: "userType",
+    header: "User Type",
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("userType")}</div>
+    ),
   },
   {
     id: "actions",
     cell: ({ row }) => {
       const user = row.original;
-
       return <UserActions user={user} />;
     },
     meta: {

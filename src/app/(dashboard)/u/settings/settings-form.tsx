@@ -22,6 +22,9 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { propertiesChanged } from "~/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { useRouter } from "next/navigation";
+import { UploadButton } from "~/lib/uploadthing";
 
 const profileFormSchema = z.object({
   name: z
@@ -46,6 +49,7 @@ interface SettingsFormProps {
 }
 
 export function SettingsForm({ user }: SettingsFormProps) {
+  const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
@@ -56,63 +60,86 @@ export function SettingsForm({ user }: SettingsFormProps) {
   });
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit((values) => {
-          startTransition(async () => {
-            if (propertiesChanged(values, user)) {
-              await updateProfile({ name: values.name });
+    <div className="space-y-8">
+      <div className="flex items-center gap-x-6">
+        <Avatar className="size-24">
+          <AvatarImage
+            src={user.image ?? undefined}
+            alt={user.name ?? "Avatar"}
+          />
+          <AvatarFallback>{user.name?.[0]?.toUpperCase()}</AvatarFallback>
+        </Avatar>
 
-              toast.success("Profile updated successfully");
-            }
+        <UploadButton
+          endpoint="profileImage"
+          onClientUploadComplete={() => {
+            toast.success("Profile picture updated");
 
-            if (values.email !== user.email) {
-              await requestEmailChange(values.email).then(() =>
-                toast.success(
-                  "Verification email sent. Please check your inbox.",
-                ),
-              );
-            }
-          });
-        })}
-        className="space-y-8"
-      >
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Name</FormLabel>
-              <FormControl>
-                <Input placeholder="Your name" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is your public display name.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
+            router.refresh();
+          }}
+          onUploadError={(error: Error) => {
+            toast.error(`Error uploading image: ${error.message}`);
+          }}
         />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input placeholder="Your email" type="email" {...field} />
-              </FormControl>
-              <FormDescription>
-                This is the email associated with your account.
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Updating..." : "Update profile"}
-        </Button>
-      </form>
-    </Form>
+      </div>
+
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit((values) => {
+            startTransition(async () => {
+              if (propertiesChanged(values, user)) {
+                await updateProfile({ name: values.name });
+                toast.success("Profile updated successfully");
+              }
+
+              if (values.email !== user.email) {
+                await requestEmailChange(values.email).then(() =>
+                  toast.success(
+                    "Verification email sent. Please check your inbox.",
+                  ),
+                );
+              }
+            });
+          })}
+          className="space-y-8"
+        >
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Name</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your name" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is your public display name.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="email"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Email</FormLabel>
+                <FormControl>
+                  <Input placeholder="Your email" type="email" {...field} />
+                </FormControl>
+                <FormDescription>
+                  This is the email associated with your account.
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit" disabled={isPending}>
+            {isPending ? "Updating..." : "Update profile"}
+          </Button>
+        </form>
+      </Form>
+    </div>
   );
 }
