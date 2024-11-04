@@ -3,7 +3,10 @@ import { withUt } from "uploadthing/tw";
 
 const config: Config = {
   darkMode: ["class"],
-  content: ["./src/**/*.{ts,tsx,mdx}"],
+  content: [
+    "./src/**/*.{ts,tsx,mdx}",
+    "./node_modules/@uploadthing/react/dist**",
+  ],
   theme: {
     container: {
       center: true,
