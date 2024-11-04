@@ -6,6 +6,9 @@ services:
     ports:
       - "3000:3000"
     environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - NODE_ENV=${NODE_ENV}
       - AUTH_SECRET=${AUTH_SECRET}
       - DATABASE_URL_EXTERNAL=${DATABASE_URL_EXTERNAL}
