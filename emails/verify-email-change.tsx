@@ -47,7 +47,7 @@ export const VerifyEmailChangeEmail = ({
         </Text>
         <Text style={footer}>
           <Link
-            href={env.COOLIFY_URL}
+            href={env.APP_URL}
             target="_blank"
             style={{ ...link, color: "#898989" }}
           >

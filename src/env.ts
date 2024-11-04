@@ -13,14 +13,14 @@ console.log("process.env", JSON.stringify(process.env, null, 2));
 
 export const env = createEnv({
   server: {
-    COOLIFY_URL: z.string().url().optional(),
+    APP_URL: z.string().url().optional(),
     AUTH_SECRET: z.string().min(1),
     DATABASE_URL_EXTERNAL: z.string().url(),
     DATABASE_URL: z.string().url(),
     RESEND_KEY: z.string().min(1),
   },
   runtimeEnv: {
-    COOLIFY_URL: process.env.COOLIFY_URL,
+    APP_URL: process.env.COOLIFY_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL_EXTERNAL: process.env.DATABASE_URL_EXTERNAL,
     DATABASE_URL: process.env.DATABASE_URL,
