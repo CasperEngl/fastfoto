@@ -11,7 +11,7 @@ expand(
 
 export const env = createEnv({
   server: {
-    COOLIFY_URL: z.string().url(),
+    COOLIFY_URL: z.string().url().optional(),
     AUTH_SECRET: z.string().min(1),
     DATABASE_URL_EXTERNAL: z.string().url(),
     DATABASE_URL: z.string().url(),
