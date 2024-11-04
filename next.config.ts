@@ -2,6 +2,12 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  eslint: {
+    ignoreDuringBuilds: process.env.NODE_ENV === "development",
+  },
+  typescript: {
+    ignoreBuildErrors: process.env.NODE_ENV === "development",
+  },
   images: {
     remotePatterns: [
       {
