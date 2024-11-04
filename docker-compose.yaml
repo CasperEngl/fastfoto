@@ -11,18 +11,25 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - my_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
-  # cron:
-  #   image: alpine/curl
-  #   command: >
-  #     sh -c "
-  #       echo '*/10 * * * * curl -X POST http://web:3000/db/clear' > /etc/crontabs/root && \
-  #       crond -f -l 2
-  #     "
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - my_network
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      - NODE_ENV=${NODE_ENV:-development}
+      - DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@db:5432/postgres}
+      - DATABASE_URL_EXTERNAL=${DATABASE_URL_EXTERNAL:-postgres://postgres:postgres@localhost:5432/postgres}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - my_network
 
 volumes:
   postgres_data:
