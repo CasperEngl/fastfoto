@@ -4,36 +4,24 @@ import { Album, Home, Settings, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { SheetDescription, SheetTitle } from "~/components/ui/sheet";
 import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
-  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
-import { useIsMobile } from "~/hooks/use-mobile";
 import { isAdmin, isClient, isPhotographer } from "~/role";
 
 export function AppSidebar() {
   const pathname = usePathname();
   const session = useSession();
-  const isMobile = useIsMobile();
 
   return (
     <Sidebar collapsible="icon" variant="inset">
-      {isMobile ? (
-        <SidebarHeader className="sr-only">
-          <SheetTitle>Mobile Navigation</SheetTitle>
-          <SheetDescription>
-            Use the hamburger menu to navigate to other pages.
-          </SheetDescription>
-        </SidebarHeader>
-      ) : null}
       <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
