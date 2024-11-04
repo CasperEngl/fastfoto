@@ -14,7 +14,8 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       RESEND_KEY: ${RESEND_KEY}
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     networks:
       - my_network
 
@@ -30,18 +31,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - my_network
-
-  # cron:
-  #   image: alpine/curl
-  #   command: >
-  #     sh -c "
-  #       echo '*/10 * * * * curl -X POST http://web:3000/db/clear' > /etc/crontabs/root && \
-  #       crond -f -l 2
-  #     "
-  #   depends_on:
-  #     - web
-  #   networks:
-  #     - my_network
+    healthcheck:
+      test: ["pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
 
 volumes:
   postgres_data:
