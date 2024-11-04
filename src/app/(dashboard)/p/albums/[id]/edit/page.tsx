@@ -1,11 +1,9 @@
-import { eq, getTableColumns } from "drizzle-orm";
-import Link from "next/link";
+import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { z } from "zod";
 import { DeleteAlbumButton } from "~/app/(dashboard)/p/albums/[id]/edit/delete-album-button";
 import { EditAlbumForm } from "~/app/(dashboard)/p/albums/[id]/edit/edit-album-form";
 import { auth } from "~/auth";
-import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
 import { isPhotographer } from "~/role";
@@ -44,7 +42,6 @@ export default async function AlbumEditPage({
   if (!album) {
     return notFound();
   }
-  console.log("album", album.id);
   const users = await db.query.Users.findMany();
 
   return (
