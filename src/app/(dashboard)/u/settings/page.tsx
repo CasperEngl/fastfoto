@@ -1,10 +1,10 @@
-import { Separator } from "@radix-ui/react-separator";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { redirect } from "next/navigation";
+import { PasskeyButton } from "~/app/(dashboard)/u/settings/passkey-button";
 import { SettingsForm } from "~/app/(dashboard)/u/settings/settings-form";
 import { auth } from "~/auth";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { PasskeyForm } from "./passkey";
+import { Separator } from "~/components/ui/separator";
 
 export default async function SettingsPage({
   searchParams,
@@ -44,7 +44,6 @@ export default async function SettingsPage({
           Manage your account settings and set e-mail preferences.
         </p>
       </div>
-      <Separator />
       <SettingsForm user={session.user} />
       <Separator />
       <div>
@@ -53,7 +52,7 @@ export default async function SettingsPage({
           Manage your passkeys for secure authentication.
         </p>
       </div>
-      <PasskeyForm />
+      <PasskeyButton />
     </div>
   );
 }

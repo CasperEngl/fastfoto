@@ -99,6 +99,8 @@ export function SettingsForm({ user }: SettingsFormProps) {
                   ),
                 );
               }
+
+              router.refresh();
             });
           })}
           className="space-y-8"
