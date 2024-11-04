@@ -12,4 +12,4 @@ export const db = drizzle(pool, { schema });
 
 invariant(drizzleConfig.out, "drizzleConfig.out is required");
 
-// await migrate(db, { migrationsFolder: drizzleConfig.out });
+await migrate(db, { migrationsFolder: drizzleConfig.out });
