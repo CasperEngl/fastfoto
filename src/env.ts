@@ -9,7 +9,7 @@ expand(
   }),
 );
 
-console.log("process.env", process.env);
+console.log("process.env", JSON.stringify(process.env, null, 2));
 
 export const env = createEnv({
   server: {
