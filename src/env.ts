@@ -9,7 +9,19 @@ expand(
   }),
 );
 
-console.log("process.env", JSON.stringify(process.env, null, 2));
+console.log(
+  "process.env",
+  JSON.stringify(
+    process.env,
+    (key, value) => {
+      if (key.toLowerCase().includes("postgres")) {
+        return "[redacted]";
+      }
+      return value;
+    },
+    2,
+  ),
+);
 
 export const env = createEnv({
   server: {
