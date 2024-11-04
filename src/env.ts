@@ -9,6 +9,8 @@ expand(
   }),
 );
 
+console.log("process.env", JSON.stringify(process.env, null, 2));
+
 export const env = createEnv({
   server: {
     COOLIFY_URL: z.string().url().optional(),
