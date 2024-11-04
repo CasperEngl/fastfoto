@@ -1,0 +1,13 @@
+FROM oven/bun:latest
+
+WORKDIR /app
+
+# Copy only the necessary files for migrations
+COPY package.json bun.lockb ./
+COPY drizzle.config.ts ./
+COPY src/db ./src/db
+COPY drizzle ./drizzle
+
+RUN bun install
+
+CMD ["bunx", "drizzle-kit", "migrate"] 

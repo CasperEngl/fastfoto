@@ -1,6 +1,8 @@
 services:
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     ports:
       - "3000:3000"
     environment:
@@ -9,6 +11,20 @@ services:
       - DATABASE_URL_EXTERNAL=${DATABASE_URL_EXTERNAL}
       - DATABASE_URL=${DATABASE_URL}
       - RESEND_KEY=${RESEND_KEY}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - my_network
+
+  migrate:
+    build:
+      context: .
+      dockerfile: Dockerfile.migrate
+    environment:
+      - NODE_ENV=${NODE_ENV}
+      - DATABASE_URL_EXTERNAL=${DATABASE_URL_EXTERNAL}
+      - DATABASE_URL=${DATABASE_URL}
     depends_on:
       db:
         condition: service_healthy
