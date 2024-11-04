@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "echo $NODE_ENV && echo $APP_URL && echo $AUTH_SECRET && echo $DATABASE_URL && echo $DATABASE_URL_EXTERNAL && echo $POSTGRES_DB && echo $POSTGRES_PASSWORD && echo $POSTGRES_USER && echo $RESEND_KEY && next build",
     "start": "next start",
     "lint": "next lint",
     "email:build": "email build",
