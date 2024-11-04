@@ -9,6 +9,8 @@ expand(
   }),
 );
 
+console.log("process.env", process.env);
+
 export const env = createEnv({
   server: {
     APP_URL: z.string().url(),
