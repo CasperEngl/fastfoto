@@ -30,7 +30,7 @@ export async function requestEmailChange(newEmail: string) {
 
   // Generate verification token
   const token = nanoid();
-  const verificationLink = `${env.APP_URL}/api/verify-email?token=${token}`;
+  const verificationLink = `${env.COOLIFY_URL}/api/verify-email?token=${token}`;
 
   // Store the pending email
   await db

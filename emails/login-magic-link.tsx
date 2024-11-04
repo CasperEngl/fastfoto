@@ -44,7 +44,7 @@ export const LoginMagicLinkEmail = ({ loginUrl }: LoginMagicLinkEmailProps) => (
         </Text>
         <Text style={footer}>
           <Link
-            href={env.APP_URL}
+            href={env.COOLIFY_URL}
             target="_blank"
             style={{ ...link, color: "#898989" }}
           >

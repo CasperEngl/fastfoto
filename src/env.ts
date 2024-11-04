@@ -11,14 +11,14 @@ expand(
 
 export const env = createEnv({
   server: {
-    APP_URL: z.string().url(),
+    COOLIFY_URL: z.string().url(),
     AUTH_SECRET: z.string().min(1),
     DATABASE_URL_EXTERNAL: z.string().url(),
     DATABASE_URL: z.string().url(),
     RESEND_KEY: z.string().min(1),
   },
   runtimeEnv: {
-    APP_URL: process.env.APP_URL,
+    COOLIFY_URL: process.env.COOLIFY_URL,
     AUTH_SECRET: process.env.AUTH_SECRET,
     DATABASE_URL_EXTERNAL: process.env.DATABASE_URL_EXTERNAL,
     DATABASE_URL: process.env.DATABASE_URL,
