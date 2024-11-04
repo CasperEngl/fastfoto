@@ -4,12 +4,12 @@ services:
     ports:
       - "3000:3000"
     environment:
-      NODE_ENV: ${NODE_ENV}
-      APP_URL: ${APP_URL}
-      AUTH_SECRET: ${AUTH_SECRET}
-      DATABASE_URL_EXTERNAL: ${DATABASE_URL_EXTERNAL}
-      DATABASE_URL: ${DATABASE_URL}
-      RESEND_KEY: ${RESEND_KEY}
+      NODE_ENV: "${NODE_ENV}"
+      APP_URL: "${APP_URL}"
+      AUTH_SECRET: "${AUTH_SECRET}"
+      DATABASE_URL_EXTERNAL: "${DATABASE_URL_EXTERNAL}"
+      DATABASE_URL: "${DATABASE_URL}"
+      RESEND_KEY: "${RESEND_KEY}"
     depends_on:
       db:
         condition: service_healthy
@@ -19,9 +19,9 @@ services:
   db:
     image: postgres:latest
     environment:
-      POSTGRES_USER: ${MY_POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${MY_POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${MY_POSTGRES_DB:-postgres}
+      POSTGRES_USER: "${POSTGRES_USER:-postgres}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:-postgres}"
+      POSTGRES_DB: "${POSTGRES_DB:-postgres}"
     ports:
       - "5432:5432"
     volumes:
@@ -29,7 +29,7 @@ services:
     networks:
       - my_network
     healthcheck:
-      test: CMD-SHELL pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
+      test: "CMD-SHELL pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"
       interval: 5s
       timeout: 5s
       retries: 5
