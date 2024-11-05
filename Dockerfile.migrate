@@ -1,9 +1,8 @@
 FROM node:20-alpine
 
-RUN apk add --no-cache curl unzip \
+RUN apk add --no-cache curl unzip bash \
   && curl -fsSL https://bun.sh/install | bash \
   && ln -s /root/.bun/bin/bun /usr/local/bin/bun
-
 
 ENV NODE_ENV=production
 
@@ -17,4 +16,4 @@ COPY drizzle ./drizzle
 
 RUN bun install
 
-CMD ["npx", "drizzle-kit", "migrate"] 
+CMD ["npx", "drizzle-kit", "migrate"]
