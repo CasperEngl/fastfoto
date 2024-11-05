@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:latest
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-postgres}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
     ports:
       - "5432:5432"
     volumes:
@@ -22,9 +22,9 @@ services:
       context: .
       dockerfile: Dockerfile.migrate
     environment:
-      - NODE_ENV=${NODE_ENV:-development}
-      - DATABASE_URL=${DATABASE_URL:-postgres://postgres:postgres@db:5432/postgres}
-      - DATABASE_URL_EXTERNAL=${DATABASE_URL_EXTERNAL:-postgres://postgres:postgres@localhost:5432/postgres}
+      - NODE_ENV=production
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+      - DATABASE_URL_EXTERNAL=postgres://postgres:postgres@localhost:5432/postgres
     depends_on:
       db:
         condition: service_healthy
