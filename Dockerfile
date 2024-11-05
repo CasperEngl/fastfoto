@@ -1,5 +1,8 @@
 FROM oven/bun:alpine AS base
 
+ENV NODE_ENV=production
+ENV HOSTNAME=0.0.0.0
+
 # Stage 1: Install dependencies
 FROM base AS deps
 WORKDIR /app
@@ -16,7 +19,6 @@ RUN bun run build
 # Stage 3: Production server
 FROM base AS runner
 WORKDIR /app
-ENV NODE_ENV=production
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
