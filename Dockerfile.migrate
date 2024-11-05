@@ -12,4 +12,7 @@ COPY drizzle ./drizzle
 
 RUN bun install
 
+RUN echo "Database URL:" ${DATABASE_URL}
+RUN echo "Database URL External:" ${DATABASE_URL_EXTERNAL}
+
 CMD ["bunx", "drizzle-kit", "migrate"] 
