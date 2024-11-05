@@ -2,6 +2,7 @@ FROM oven/bun:alpine AS base
 
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
+ENV AUTH_TRUST_HOST=true
 
 # Stage 1: Install dependencies
 FROM base AS deps
