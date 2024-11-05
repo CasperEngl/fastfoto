@@ -1,6 +1,5 @@
-FROM node:20-alpine
+FROM node:20
 
-RUN apk add --no-cache curl unzip bash
 RUN curl -fsSL https://bun.sh/install | bash
 
 ENV PATH="/root/.bun/bin:$PATH"
