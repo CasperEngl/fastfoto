@@ -12,4 +12,4 @@ COPY drizzle ./drizzle
 
 RUN bun install
 
-CMD ["bunx", "drizzle-kit", "migrate"] 
+CMD ["npx", "drizzle-kit", "migrate"] 
