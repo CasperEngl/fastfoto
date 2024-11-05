@@ -1,5 +1,7 @@
 FROM oven/bun:latest
 
+ENV NODE_ENV=production
+
 WORKDIR /app
 
 # Copy only the necessary files for migrations
