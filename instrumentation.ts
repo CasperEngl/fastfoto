@@ -1,7 +1,16 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === "nodejs") {
     const { default: pino } = await import("pino");
-    const logger = pino();
+    const logger = pino(
+      { level: "warn" },
+      pino.transport({
+        target: "@axiomhq/pino",
+        options: {
+          dataset: process.env.AXIOM_DATASET,
+          token: process.env.AXIOM_TOKEN,
+        },
+      }),
+    );
     const { PerformanceObserver } = await import("perf_hooks");
 
     // Create a performance observer
