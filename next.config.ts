@@ -21,6 +21,9 @@ const nextConfig: NextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  compiler: {
+    removeConsole: false,
+  },
 };
 
 export default nextConfig;
