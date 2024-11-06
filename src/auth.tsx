@@ -19,6 +19,10 @@ declare module "next-auth" {
   interface User extends InferSelectModel<typeof Users> {}
 }
 
+console.log("env.AUTH_SECRET", env.AUTH_SECRET);
+console.log("env.APP_URL", env.APP_URL);
+console.log("env.RESEND_KEY", env.RESEND_KEY);
+
 export const { handlers, auth, signIn, signOut } = NextAuth({
   adapter: DrizzleAdapter(db, {
     usersTable: Users,
