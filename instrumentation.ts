@@ -1,4 +1,4 @@
-/* export async function register() {
+export async function register() {
   console.log("process.env.NEXT_RUNTIME", process.env.NEXT_RUNTIME);
   console.log("process.env.AXIOM_DATASET", process.env.AXIOM_DATASET);
   console.log("process.env.AXIOM_TOKEN", process.env.AXIOM_TOKEN);
@@ -41,4 +41,3 @@
     });
   }
 }
- */
