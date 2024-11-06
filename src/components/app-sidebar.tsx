@@ -1,7 +1,7 @@
 "use client";
 
-import { Album, Home, Settings, Users } from "lucide-react";
-import { useSession } from "next-auth/react";
+import { Album, Home, LogIn, LogOut, Settings, Users } from "lucide-react";
+import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -89,28 +89,41 @@ export function AppSidebar() {
             </SidebarMenu>
           ) : null}
         </SidebarGroup>
-
-        {session.data?.user ? (
-          <SidebarGroup>
-            <SidebarGroupLabel>Settings</SidebarGroupLabel>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname?.startsWith("/u/settings")}
-                  tooltip="Settings"
-                >
-                  <Link href="/u/settings">
-                    <Settings />
-                    Settings
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarGroup>
-        ) : null}
       </SidebarContent>
-      <SidebarFooter />
+      <SidebarFooter>
+        <SidebarMenu>
+          {session.data?.user ? (
+            <SidebarMenuItem>
+              <SidebarMenuButton
+                asChild
+                isActive={pathname?.startsWith("/u/settings")}
+                tooltip="Settings"
+              >
+                <Link href="/u/settings">
+                  <Settings />
+                  Settings
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          ) : null}
+
+          <SidebarMenuItem>
+            {session.data?.user ? (
+              <SidebarMenuButton onClick={() => signOut()} tooltip="Sign Out">
+                <LogOut />
+                Sign Out
+              </SidebarMenuButton>
+            ) : (
+              <SidebarMenuButton asChild tooltip="Sign In">
+                <Link href="/login">
+                  <LogIn />
+                  Sign In
+                </Link>
+              </SidebarMenuButton>
+            )}
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
     </Sidebar>
   );
 }
