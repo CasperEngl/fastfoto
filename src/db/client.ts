@@ -10,4 +10,4 @@ export const pool = postgres(
   { max: 1, debug: true },
 );
 
-export const db = drizzle(pool, { schema });
+export const db = drizzle(pool, { schema, logger: true });
