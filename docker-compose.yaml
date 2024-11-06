@@ -1,3 +1,5 @@
+name: fastfoto-dev
+
 services:
   db:
     image: postgres:latest
