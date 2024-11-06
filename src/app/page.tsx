@@ -1,7 +1,6 @@
-import { revalidatePath } from "next/cache";
 import Link from "next/link";
-import { redirect } from "next/navigation";
-import { auth, signOut } from "~/auth";
+import { SignOutButton } from "~/app/sign-out-button";
+import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 
 export default async function Home() {
@@ -11,15 +10,7 @@ export default async function Home() {
     <div className="space-y-4">
       <pre>{JSON.stringify(session, null, 2)}</pre>
       {session ? (
-        <form
-          action={async () => {
-            "use server";
-            await signOut();
-            redirect("/");
-          }}
-        >
-          <Button>Sign out</Button>
-        </form>
+        <SignOutButton />
       ) : (
         <Button asChild>
           <Link href="/login">Login</Link>
