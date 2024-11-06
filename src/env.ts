@@ -25,7 +25,7 @@ expand(
 
 export const env = createEnv({
   server: {
-    APP_URL: z.string().url().optional(),
+    APP_URL: z.string().url(),
     AUTH_SECRET: z.string().min(1),
     DATABASE_URL_EXTERNAL: z.string().url(),
     DATABASE_URL: z.string().url(),
