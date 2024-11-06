@@ -23,7 +23,9 @@ RUN bun run build
 # Stage 3: Production server
 FROM base AS runner
 WORKDIR /app
-COPY --from=builder /app .
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.next/standalone ./.next/standalone
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 CMD ["node", ".next/standalone/server.js"]
