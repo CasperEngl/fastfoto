@@ -1,5 +1,8 @@
-FROM oven/bun:alpine AS base
+FROM node:20 AS base
 
+RUN curl -fsSL https://bun.sh/install | bash
+
+ENV PATH="/root/.bun/bin:$PATH"
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV AUTH_TRUST_HOST=true
