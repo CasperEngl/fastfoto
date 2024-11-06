@@ -21,6 +21,7 @@ const nextConfig: NextConfig = {
   experimental: {
     typedRoutes: true,
   },
+  reactProductionProfiling: true,
 };
 
 export default nextConfig;
