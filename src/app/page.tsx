@@ -15,7 +15,6 @@ export default async function Home() {
           action={async () => {
             "use server";
             await signOut();
-            revalidatePath("/");
             redirect("/");
           }}
         >
