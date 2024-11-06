@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "~/auth";
@@ -14,6 +15,7 @@ export default async function Home() {
           action={async () => {
             "use server";
             await signOut();
+            revalidatePath("/");
             redirect("/");
           }}
         >
