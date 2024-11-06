@@ -19,9 +19,14 @@ export async function register() {
       entries.forEach((entry) => {
         // Log slow operations (> 1s)
         if (entry.duration > 1000) {
-          logger.warn(
-            `Slow operation detected: ${entry.name} took ${entry.duration}ms`,
-          );
+          logger.warn({
+            msg: `Slow operation detected: ${entry.name}`,
+            name: entry.name,
+            duration: entry.duration,
+            startTime: entry.startTime,
+            entryType: entry.entryType,
+            detail: entry.detail,
+          });
         }
       });
     });
