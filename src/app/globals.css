@@ -73,10 +73,10 @@ body {
 
 @layer base {
   * {
-    border-color: theme('colors.border');
+    border-color: theme("colors.border");
   }
   body {
-    background-color: theme('colors.background');
-    color: theme('colors.foreground');
+    background-color: theme("colors.background");
+    color: theme("colors.foreground");
   }
 }
