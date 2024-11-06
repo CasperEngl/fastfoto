@@ -7,7 +7,7 @@ export const pool = postgres(
   process.env.NODE_ENV === "production"
     ? env.DATABASE_URL
     : env.DATABASE_URL_EXTERNAL,
-  { max: 1, debug: true },
+  { max: 10, debug: true },
 );
 
 export const db = drizzle(pool, { schema, logger: true });
