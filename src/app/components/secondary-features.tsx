@@ -5,7 +5,7 @@ import Image from "next/image";
 import { useId } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { Container } from "~/app/components/Container";
+import { Container } from "~/app/components/container";
 
 interface Feature {
   name: string | React.ReactNode;

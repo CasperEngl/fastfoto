@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import Link from "next/link";
-import { Container } from "~/app/components/Container";
+import { Container } from "~/app/components/container";
 import { Button } from "~/components/ui/button";
 
 function SwirlyDoodle(props: React.ComponentPropsWithoutRef<"svg">) {

@@ -1,7 +1,7 @@
 import Image from "next/image";
 
 import { Button } from "~/components/ui/button";
-import { Container } from "~/app/components/Container";
+import { Container } from "~/app/components/container";
 import Link from "next/link";
 
 export function CallToAction() {

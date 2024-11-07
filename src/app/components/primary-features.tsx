@@ -5,7 +5,7 @@ import Image from "next/image";
 import clsx from "clsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
-import { Container } from "~/app/components/Container";
+import { Container } from "~/app/components/container";
 
 const features = [
   {

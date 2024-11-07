@@ -1,12 +1,12 @@
-import { CallToAction } from "~/app/components/CallToAction";
-import { Faqs } from "~/app/components/Faqs";
-import { Footer } from "~/app/components/Footer";
-import { Header } from "~/app/components/Header";
-import { Hero } from "~/app/components/Hero";
-import { Pricing } from "~/app/components/Pricing";
-import { PrimaryFeatures } from "~/app/components/PrimaryFeatures";
-import { SecondaryFeatures } from "~/app/components/SecondaryFeatures";
-import { Testimonials } from "~/app/components/Testimonials";
+import { CallToAction } from "~/app/components/call-to-action";
+import { Faqs } from "~/app/components/faqs";
+import { Footer } from "~/app/components/footer";
+import { Header } from "~/app/components/header";
+import { Hero } from "~/app/components/hero";
+import { Pricing } from "~/app/components/pricing";
+import { PrimaryFeatures } from "~/app/components/primary-features";
+import { SecondaryFeatures } from "~/app/components/secondary-features";
+import { Testimonials } from "~/app/components/testimonials";
 
 export default function Home() {
   return (

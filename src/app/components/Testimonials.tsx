@@ -1,6 +1,6 @@
 import Image from "next/image";
 
-import { Container } from "~/app/components/Container";
+import { Container } from "~/app/components/container";
 
 const testimonials = [
   [

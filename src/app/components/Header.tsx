@@ -1,17 +1,17 @@
 "use client";
 
+import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { Container } from "~/app/components/container";
+import { Logo } from "~/app/components/logo";
+import { NavLink } from "~/app/components/nav-link";
+import { Button } from "~/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import clsx from "clsx";
-import { Container } from "~/app/components/Container";
-import { Logo } from "~/app/components/Logo";
-import { NavLink } from "~/app/components/NavLink";
-import { Button } from "~/components/ui/button";
-import { useSession } from "next-auth/react";
+import { cn } from "~/lib/utils";
 
 function MobileNavLink({
   href,
@@ -39,14 +39,11 @@ function MobileNavIcon({ open }: { open: boolean }) {
     >
       <path
         d="M0 1H14M0 7H14M0 13H14"
-        className={clsx(
-          "origin-center transition",
-          open && "scale-90 opacity-0",
-        )}
+        className={cn("origin-center transition", open && "scale-90 opacity-0")}
       />
       <path
         d="M2 2L12 12M12 2L2 12"
-        className={clsx(
+        className={cn(
           "origin-center transition",
           !open && "scale-90 opacity-0",
         )}
