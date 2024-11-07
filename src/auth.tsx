@@ -48,7 +48,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
   providers: [
-    Passkey({}),
+    Passkey,
     Resend({
       apiKey: env.RESEND_KEY,
       from: '"Fast Foto" <noreply@casperengelmann.com>',
