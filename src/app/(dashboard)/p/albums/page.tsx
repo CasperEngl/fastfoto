@@ -4,9 +4,8 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchParams } from "nuqs/server";
-import { AlbumColumn, columns } from "~/app/(dashboard)/p/albums/columns";
+import { AlbumsTable } from "~/app/(dashboard)/p/albums/albums-table";
 import { ITEMS_PER_PAGE } from "~/app/(dashboard)/p/albums/config";
-import { DataTable } from "~/app/(dashboard)/p/albums/data-table";
 import { albumSearchParamsCache } from "~/app/(dashboard)/p/albums/search-params";
 import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
@@ -108,12 +107,8 @@ export default async function AlbumsPage({
           </Link>
         </Button>
       </div>
-      <DataTable<AlbumColumn>
-        data={albums}
-        columns={columns}
-        currentPage={page}
-        totalPages={totalPages}
-      />
+
+      <AlbumsTable data={albums} currentPage={page} totalPages={totalPages} />
     </div>
   );
 }
