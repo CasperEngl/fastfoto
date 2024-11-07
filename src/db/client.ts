@@ -20,4 +20,7 @@ export const pool = postgres(
   { max: 1 },
 );
 
-export const db = drizzle(pool, { schema, logger: new QueryLogger() });
+export const db = drizzle(pool, {
+  schema,
+  logger: new QueryLogger(),
+});
