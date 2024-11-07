@@ -6,10 +6,12 @@ import { env } from "~/env";
 
 class QueryLogger implements Logger {
   logQuery(query: string, params: unknown[]): void {
-    console.debug("===BEGIN_QUERY===");
-    console.debug(query);
-    console.debug(params);
-    console.debug("===END_QUERY===");
+    if (env.APP_DEBUG === true) {
+      console.debug("===BEGIN_QUERY===");
+      console.debug(query);
+      console.debug(params);
+      console.debug("===END_QUERY===");
+    }
   }
 }
 

@@ -20,7 +20,7 @@ declare module "next-auth" {
 }
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  debug: true,
+  debug: env.APP_DEBUG,
   pages: {
     verifyRequest: "/auth/verify",
     error: "/auth/error",

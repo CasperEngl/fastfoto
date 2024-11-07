@@ -32,6 +32,7 @@ export const env = createEnv({
     RESEND_KEY: z.string().min(1),
     AXIOM_DATASET: z.string().min(1),
     AXIOM_TOKEN: z.string().min(1),
+    APP_DEBUG: z.coerce.boolean().default(false),
   },
   runtimeEnv: {
     APP_URL: process.env.APP_URL,
@@ -41,5 +42,6 @@ export const env = createEnv({
     RESEND_KEY: process.env.RESEND_KEY,
     AXIOM_DATASET: process.env.AXIOM_DATASET,
     AXIOM_TOKEN: process.env.AXIOM_TOKEN,
+    APP_DEBUG: process.env.APP_DEBUG === "true",
   },
 });
