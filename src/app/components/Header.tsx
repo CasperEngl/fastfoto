@@ -11,6 +11,7 @@ import { Container } from "~/app/components/Container";
 import { Logo } from "~/app/components/Logo";
 import { NavLink } from "~/app/components/NavLink";
 import { Button } from "~/components/ui/button";
+import { useSession } from "next-auth/react";
 
 function MobileNavLink({
   href,
@@ -79,6 +80,8 @@ function MobileNavigation() {
 }
 
 export function Header() {
+  const session = useSession();
+
   return (
     <header className="py-10">
       <Container>
@@ -94,13 +97,22 @@ export function Header() {
             </div>
           </div>
           <div className="flex items-center gap-x-5 md:gap-x-8">
-            <div className="hidden md:block">
-              <NavLink href="/login">Sign in</NavLink>
-            </div>
+            {!session.data ? (
+              <div className="hidden md:block">
+                <NavLink href="/login">Sign in</NavLink>
+              </div>
+            ) : null}
             <Button asChild color="blue">
-              <Link href="/login">
+              <Link href={session.data?.user ? "/dashboard" : "/login"}>
                 <span>
-                  Get started <span className="hidden lg:inline">today</span>
+                  {session.data?.user ? (
+                    "Dashboard"
+                  ) : (
+                    <>
+                      Get started{" "}
+                      <span className="hidden lg:inline">today</span>
+                    </>
+                  )}
                 </span>
               </Link>
             </Button>
