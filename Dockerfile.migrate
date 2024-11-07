@@ -8,10 +8,10 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # Copy only the necessary files for migrations
-COPY package.json bun.lockb tsconfig.json ./
-COPY drizzle.config.ts ./
-COPY src/db ./src/db
 COPY drizzle ./drizzle
+COPY drizzle.config.ts package.json bun.lockb tsconfig.json ./
+COPY src/db ./src/db
+COPY src/env.ts ./src/env.ts
 
 RUN bun install
 
