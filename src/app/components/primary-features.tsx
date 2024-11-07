@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import clsx from "clsx";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 
 import { Container } from "~/app/components/container";
+import { cn } from "~/lib/utils";
 
 const features = [
   {
@@ -105,15 +105,15 @@ export function PrimaryFeatures() {
                 {features.map((feature) => (
                   <div
                     key={feature.title}
-                    className={clsx(
+                    className={cn(
                       "group relative rounded-full px-4 py-1 lg:rounded-l-xl lg:rounded-r-none lg:p-6",
                       "hover:bg-white/10 lg:hover:bg-white/5",
                     )}
                   >
                     <TabsTrigger
                       value={feature.title}
-                      className={clsx(
-                        "font-display text-lg data-[state=active]:text-blue-600 lg:data-[state=active]:text-white",
+                      className={cn(
+                        "font-display bg-white text-lg data-[state=active]:text-blue-600 lg:data-[state=active]:text-white",
                         "text-blue-100 hover:text-white lg:text-white",
                       )}
                     >

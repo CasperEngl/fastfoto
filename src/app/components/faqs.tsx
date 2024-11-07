@@ -1,5 +1,4 @@
 import Image from "next/image";
-
 import { Container } from "~/app/components/container";
 
 const faqs = [

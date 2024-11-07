@@ -1,7 +1,7 @@
-import clsx from "clsx";
 import Link from "next/link";
 import { Container } from "~/app/components/container";
 import { Button } from "~/components/ui/button";
+import { cn } from "~/lib/utils";
 
 function SwirlyDoodle(props: React.ComponentPropsWithoutRef<"svg">) {
   return (
@@ -27,10 +27,7 @@ function CheckIcon({
   return (
     <svg
       aria-hidden="true"
-      className={clsx(
-        "h-6 w-6 flex-none fill-current stroke-current",
-        className,
-      )}
+      className={cn("h-6 w-6 flex-none fill-current stroke-current", className)}
       {...props}
     >
       <path
@@ -67,14 +64,14 @@ function Plan({
 }) {
   return (
     <section
-      className={clsx(
+      className={cn(
         "flex flex-col rounded-3xl px-6 sm:px-8",
         featured ? "order-first bg-blue-600 py-8 lg:order-none" : "lg:py-8",
       )}
     >
       <h3 className="font-display mt-5 text-lg text-white">{name}</h3>
       <p
-        className={clsx(
+        className={cn(
           "mt-2 text-base",
           featured ? "text-white" : "text-slate-400",
         )}
@@ -86,7 +83,7 @@ function Plan({
       </p>
       <ul
         role="list"
-        className={clsx(
+        className={cn(
           "order-last mt-10 flex flex-col gap-y-3 text-sm",
           featured ? "text-white" : "text-slate-200",
         )}

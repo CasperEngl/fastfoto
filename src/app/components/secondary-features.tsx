@@ -1,11 +1,10 @@
 "use client";
 
-import clsx from "clsx";
 import Image from "next/image";
 import { useId } from "react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
-
 import { Container } from "~/app/components/container";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
+import { cn } from "~/lib/utils";
 
 interface Feature {
   name: string | React.ReactNode;
@@ -130,11 +129,11 @@ function Feature({
 }) {
   return (
     <div
-      className={clsx(className, !isActive && "opacity-75 hover:opacity-100")}
+      className={cn(className, !isActive && "opacity-75 hover:opacity-100")}
       {...props}
     >
       <div
-        className={clsx(
+        className={cn(
           "w-9 rounded-lg",
           isActive ? "bg-blue-600" : "bg-slate-500",
         )}
@@ -144,7 +143,7 @@ function Feature({
         </svg>
       </div>
       <h3
-        className={clsx(
+        className={cn(
           "mt-6 text-sm font-medium",
           isActive ? "text-blue-600" : "text-slate-600",
         )}
@@ -223,7 +222,7 @@ function FeaturesDesktop() {
             <TabsContent
               key={feature.summary}
               value={feature.summary}
-              className={clsx(
+              className={cn(
                 "px-5 transition duration-500 ease-in-out focus-visible:outline-none",
               )}
             >
