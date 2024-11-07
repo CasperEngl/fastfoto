@@ -48,7 +48,7 @@ export function AppSidebar() {
                   isActive={pathname?.startsWith("/a/users")}
                   tooltip="Users"
                 >
-                  <Link href="/a/users">
+                  <Link href="/dashboard/a/users">
                     <Users />
                     Users
                   </Link>
@@ -65,7 +65,7 @@ export function AppSidebar() {
                   isActive={pathname?.startsWith("/p/albums")}
                   tooltip="Albums"
                 >
-                  <Link href="/p/albums">
+                  <Link href="/dashboard/p/albums">
                     <Album />
                     Albums
                   </Link>
@@ -99,7 +99,7 @@ export function AppSidebar() {
                 isActive={pathname?.startsWith("/u/settings")}
                 tooltip="Settings"
               >
-                <Link href="/u/settings">
+                <Link href="/dashboard/u/settings">
                   <Settings />
                   Settings
                 </Link>
@@ -110,7 +110,7 @@ export function AppSidebar() {
           <SidebarMenuItem>
             {session.data?.user ? (
               <SidebarMenuButton
-                onClick={() => signOut({ callbackUrl: "/" })}
+                onClick={() => signOut({ callbackUrl: "/login" })}
                 tooltip="Sign Out"
               >
                 <LogOut />
