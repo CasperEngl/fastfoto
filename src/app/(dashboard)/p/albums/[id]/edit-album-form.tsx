@@ -10,7 +10,7 @@ import { useOptimistic, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { deletePhoto } from "~/app/(dashboard)/p/albums/[id]/edit/actions";
+import { deletePhoto } from "~/app/(dashboard)/p/albums/[id]/actions";
 import { updateAlbum } from "~/app/(dashboard)/p/albums/actions";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";

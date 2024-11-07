@@ -1,14 +1,14 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { DeleteAlbumButton } from "~/app/(dashboard)/p/albums/[id]/edit/delete-album-button";
-import { EditAlbumForm } from "~/app/(dashboard)/p/albums/[id]/edit/edit-album-form";
+import { DeleteAlbumButton } from "~/app/(dashboard)/p/albums/[id]/delete-album-button";
+import { EditAlbumForm } from "~/app/(dashboard)/p/albums/[id]/edit-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
 import { isPhotographer } from "~/role";
 
-export default async function AlbumEditPage({
+export default async function AlbumPage({
   params,
 }: {
   params: Promise<unknown>;
