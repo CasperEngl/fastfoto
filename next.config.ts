@@ -15,6 +15,15 @@ const nextConfig: NextConfig = {
         hostname: "utfs.io",
         pathname: "/f/**",
       },
+      ...(process.env.NODE_ENV !== "production"
+        ? [
+            {
+              protocol: "https",
+              hostname: "picsum.photos",
+              pathname: "/**",
+            } as const,
+          ]
+        : []),
     ],
   },
   compress: false,
