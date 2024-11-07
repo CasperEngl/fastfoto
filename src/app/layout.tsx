@@ -29,7 +29,7 @@ export default async function RootLayout({
     <html lang="en">
       <body
         className={cn(
-          "flex h-full flex-col scroll-smooth bg-white antialiased",
+          "flex min-h-screen flex-col scroll-smooth bg-white antialiased",
           geistSans.variable,
         )}
       >
