@@ -12,7 +12,7 @@
     "email:dev": "email dev",
     "email:export": "email export",
     "type-check": "tsc --noEmit --pretty",
-    "db:seed": "tsx src/migrate.ts"
+    "db:seed": "tsx src/db/migrate.ts"
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.2",
