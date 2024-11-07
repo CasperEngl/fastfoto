@@ -1,26 +1,14 @@
-import NextTopLoader from "nextjs-toploader";
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import NextTopLoader from "nextjs-toploader";
+import { auth } from "~/auth";
+import { cn } from "~/lib/utils";
 import "./globals.css";
 import { Providers } from "./providers";
-import { Toaster } from "~/components/ui/sonner";
-import { auth } from "~/auth";
-import { AppSidebar } from "~/components/app-sidebar";
-import { cookies } from "next/headers";
-import {
-  SidebarInset,
-  SidebarProvider,
-  SidebarTrigger,
-} from "~/components/ui/sidebar";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
   variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
   weight: "100 900",
 });
 
@@ -36,34 +24,18 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await auth();
-  const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
 
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={cn(
+          "flex h-full flex-col scroll-smooth bg-white antialiased",
+          geistSans.variable,
+        )}
       >
         <NextTopLoader color="#047857" />
 
-        <SidebarProvider defaultOpen={defaultOpen}>
-          <Providers session={session}>
-            <AppSidebar />
-
-            <SidebarInset className="w-full">
-              <header className="border-b">
-                <div className="container flex items-center gap-4 p-4">
-                  <SidebarTrigger />
-                  <h1 className="text-xl font-semibold">Fast Foto</h1>
-                </div>
-              </header>
-
-              <main className="container px-4">{children}</main>
-            </SidebarInset>
-          </Providers>
-
-          <Toaster />
-        </SidebarProvider>
+        <Providers session={session}>{children}</Providers>
       </body>
     </html>
   );
