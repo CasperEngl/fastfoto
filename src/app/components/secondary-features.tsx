@@ -1,9 +1,9 @@
 "use client";
 
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import Image from "next/image";
 import { useId } from "react";
 import { Container } from "~/app/components/container";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "~/components/ui/tabs";
 import { cn } from "~/lib/utils";
 
 interface Feature {
@@ -170,9 +170,9 @@ function FeaturesMobile() {
               <Image
                 className="w-full"
                 src={feature.image.src}
-                alt=""
                 width={feature.image.width}
                 height={feature.image.height}
+                alt=""
                 sizes="52.75rem"
               />
             </div>
@@ -185,63 +185,56 @@ function FeaturesMobile() {
 
 function FeaturesDesktop() {
   return (
-    <Tabs
-      defaultValue={features[0].summary}
-      className="hidden lg:mt-20 lg:block"
-    >
-      <TabsList className="grid grid-cols-3 gap-x-8">
-        {features.map((feature) => (
-          <Feature
-            key={
-              typeof feature.name === "string" ? feature.name : feature.summary
-            }
-            feature={{
-              ...feature,
-              name: (
-                <TabsTrigger
-                  value={
-                    typeof feature.name === "string"
-                      ? feature.name
-                      : feature.summary
-                  }
-                  className="focus-visible:outline-none"
+    <TabGroup className="hidden lg:mt-20 lg:block">
+      {({ selectedIndex }) => (
+        <>
+          <TabList className="grid grid-cols-3 gap-x-8">
+            {features.map((feature, featureIndex) => (
+              <Feature
+                key={feature.summary}
+                feature={{
+                  ...feature,
+                  name: (
+                    <Tab className="ui-not-focus-visible:outline-none">
+                      <span className="absolute inset-0" />
+                      {feature.name}
+                    </Tab>
+                  ),
+                }}
+                isActive={featureIndex === selectedIndex}
+                className="relative"
+              />
+            ))}
+          </TabList>
+          <TabPanels className="rounded-4xl relative mt-20 overflow-hidden bg-slate-200 px-14 py-16 xl:px-16">
+            <div className="-mx-5 flex">
+              {features.map((feature, featureIndex) => (
+                <TabPanel
+                  static
+                  key={feature.summary}
+                  className={cn(
+                    "ui-not-focus-visible:outline-none px-5 transition duration-500 ease-in-out",
+                    featureIndex !== selectedIndex && "opacity-60",
+                  )}
+                  style={{ transform: `translateX(-${selectedIndex * 100}%)` }}
+                  aria-hidden={featureIndex !== selectedIndex}
                 >
-                  <span className="absolute inset-0" />
-                  {feature.name}
-                </TabsTrigger>
-              ),
-            }}
-            isActive={false}
-            className="relative"
-          />
-        ))}
-      </TabsList>
-      <div className="rounded-4xl relative mt-20 overflow-hidden bg-slate-200 px-14 py-16 xl:px-16">
-        <div className="-mx-5 flex">
-          {features.map((feature) => (
-            <TabsContent
-              key={feature.summary}
-              value={feature.summary}
-              className={cn(
-                "px-5 transition duration-500 ease-in-out focus-visible:outline-none",
-              )}
-            >
-              <div className="w-[52.75rem] overflow-hidden rounded-xl bg-white shadow-lg shadow-slate-900/5 ring-1 ring-slate-500/10">
-                <Image
-                  className="w-full"
-                  src={feature.image.src}
-                  alt=""
-                  width={feature.image.width}
-                  height={feature.image.height}
-                  sizes="52.75rem"
-                />
-              </div>
-            </TabsContent>
-          ))}
-        </div>
-        <div className="rounded-4xl pointer-events-none absolute inset-0 ring-1 ring-inset ring-slate-900/10" />
-      </div>
-    </Tabs>
+                  <div className="w-[52.75rem] overflow-hidden rounded-xl bg-white shadow-lg shadow-slate-900/5 ring-1 ring-slate-500/10">
+                    <Image
+                      className="w-full"
+                      src={feature.image}
+                      alt=""
+                      sizes="52.75rem"
+                    />
+                  </div>
+                </TabPanel>
+              ))}
+            </div>
+            <div className="rounded-4xl pointer-events-none absolute inset-0 ring-1 ring-inset ring-slate-900/10" />
+          </TabPanels>
+        </>
+      )}
+    </TabGroup>
   );
 }
 
@@ -258,7 +251,7 @@ export function SecondaryFeatures() {
             Simplify everyday business tasks.
           </h2>
           <p className="mt-4 text-lg tracking-tight text-slate-700">
-            Because you'd probably be a little confused if we suggested you
+            Because you’d probably be a little confused if we suggested you
             complicate your everyday business tasks instead.
           </p>
         </div>
