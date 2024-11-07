@@ -3,7 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InferSelectModel } from "drizzle-orm";
 import invariant from "invariant";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -20,7 +20,14 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Users } from "~/db/schema";
+import { Users, userType } from "~/db/schema";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "~/components/ui/select";
 
 const userFormSchema = z.object({
   name: z.string().min(2, {
@@ -29,6 +36,7 @@ const userFormSchema = z.object({
   email: z.string().email({
     message: "Please enter a valid email address.",
   }),
+  userType: z.enum(userType.enumValues),
 });
 
 type UserFormValues = z.infer<typeof userFormSchema>;
@@ -38,6 +46,7 @@ export function EditUserForm({
 }: {
   user: InferSelectModel<typeof Users>;
 }) {
+  const router = useRouter();
   const params = useParams();
   const [isPending, startTransition] = useTransition();
 
@@ -46,6 +55,7 @@ export function EditUserForm({
     defaultValues: {
       name: user.name ?? "",
       email: user.email ?? "",
+      userType: user.userType,
     },
   });
 
@@ -59,11 +69,16 @@ export function EditUserForm({
             try {
               await updateUser({
                 ...data,
-                userId: params.id!.toString(),
+                id: params.id!.toString(),
               });
+              router.refresh();
               toast.success("User updated successfully");
             } catch (error) {
-              toast.error("Failed to update user");
+              toast.error(
+                error instanceof Error
+                  ? error.message
+                  : "Failed to update user",
+              );
             }
           });
         })}
@@ -107,6 +122,38 @@ export function EditUserForm({
               </FormControl>
               <FormDescription>
                 The email address will be used for login and notifications.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="userType"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>User Type</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+                disabled={isPending}
+              >
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a user type" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {userType.enumValues.map((type) => (
+                    <SelectItem key={type} value={type}>
+                      {type.charAt(0).toUpperCase() + type.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormDescription>
+                Determines the user's role and permissions in the system.
               </FormDescription>
               <FormMessage />
             </FormItem>
