@@ -1,22 +1,24 @@
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
+import dayjs from "dayjs";
 import { InferSelectModel } from "drizzle-orm";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { AlbumActions } from "./album-actions";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Albums, Photos, Users } from "~/db/schema";
-import { useSession } from "next-auth/react";
 import { isAdmin } from "~/role";
+import { AlbumActions } from "./album-actions";
 
-export const columns: ColumnDef<
-  InferSelectModel<typeof Albums> & {
-    users: InferSelectModel<typeof Users>[];
-    photos: InferSelectModel<typeof Photos>[];
-  }
->[] = [
+export type AlbumColumn = InferSelectModel<typeof Albums> & {
+  users: InferSelectModel<typeof Users>[];
+  photos: InferSelectModel<typeof Photos>[];
+};
+
+export const columns = [
   {
-    id: "select",
+    accessorKey: "id",
+    enableSorting: false,
     header: ({ table }) => (
       <Checkbox
         checked={table.getIsAllPageRowsSelected()}
@@ -31,8 +33,6 @@ export const columns: ColumnDef<
         aria-label="Select row"
       />
     ),
-    enableSorting: false,
-    enableHiding: false,
   },
   {
     accessorKey: "name",
@@ -49,10 +49,15 @@ export const columns: ColumnDef<
   {
     accessorKey: "description",
     header: "Description",
+    enableSorting: false,
+    cell: ({ row }) => (
+      <span className="line-clamp-3">{row.getValue("description")}</span>
+    ),
   },
   {
     accessorKey: "users",
     header: "Users",
+    enableSorting: false,
     cell: ({ row }) => {
       const session = useSession();
 
@@ -63,12 +68,14 @@ export const columns: ColumnDef<
               <Link
                 key={user.id}
                 href={`/a/users/${user.id}/edit`}
-                className="hover:underline"
+                className="block hover:underline"
               >
                 {user.name}
               </Link>
             ) : (
-              <span key={user.id}>{user.name}</span>
+              <span key={user.id} className="block">
+                {user.name}
+              </span>
             ),
           )}
         </div>
@@ -76,9 +83,22 @@ export const columns: ColumnDef<
     },
   },
   {
-    id: "photoCount",
+    accessorKey: "photos",
     header: "Photos",
+    enableSorting: false,
     cell: ({ row }) => row.original.photos.length,
+  },
+  {
+    accessorKey: "updatedAt",
+    header: "Updated At",
+    cell: ({ row }) => (
+      <span className="whitespace-nowrap">
+        {dayjs(row.original.updatedAt).format("MMM D, YYYY h:mm A")}
+      </span>
+    ),
+    meta: {
+      align: "end",
+    },
   },
   {
     id: "actions",
@@ -87,9 +107,8 @@ export const columns: ColumnDef<
       return <AlbumActions album={album} />;
     },
     enableSorting: false,
-    enableHiding: false,
     meta: {
       align: "end",
     },
   },
-];
+] satisfies ColumnDef<AlbumColumn>[];
