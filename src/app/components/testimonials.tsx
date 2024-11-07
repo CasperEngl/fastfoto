@@ -6,19 +6,19 @@ const testimonials = [
   [
     {
       content:
-        "TaxPal is so easy to use I can't help but wonder if it's really doing the things the government expects me to do.",
+        "Fast Foto has transformed how I deliver photos to my wedding clients. The galleries are beautiful and the client experience is seamless. My clients love being able to easily select their favorites.",
       author: {
-        name: "Sheryl Berge",
-        role: "CEO at Lynch LLC",
+        name: "Sarah Chen",
+        role: "Wedding Photographer",
         image: "/images/avatars/avatar-1.png",
       },
     },
     {
       content:
-        "I'm trying to get a hold of someone in support, I'm in a lot of trouble right now and they are saying it has something to do with my books. Please get back to me right away.",
+        "The organization features are incredible. AI-powered tagging saves me hours of work, and I can find any photo instantly. It's completely changed my workflow for the better.",
       author: {
-        name: "Amy Hahn",
-        role: "Director at Velocity Industries",
+        name: "Marcus Rodriguez",
+        role: "Commercial Photographer",
         image: "/images/avatars/avatar-4.png",
       },
     },
@@ -26,19 +26,19 @@ const testimonials = [
   [
     {
       content:
-        "The best part about TaxPal is every time I pay my employees, my bank balance doesn't go down like it used to. Looking forward to spending this extra cash when I figure out why my card is being declined.",
+        "I switched from another platform and couldn't be happier. The interface is intuitive, galleries load instantly, and my clients get their photos faster than ever. Worth every penny.",
       author: {
-        name: "Leland Kiehn",
-        role: "Founder of Kiehn and Sons",
+        name: "Emily Thompson",
+        role: "Portrait Photographer",
         image: "/images/avatars/avatar-5.png",
       },
     },
     {
       content:
-        "There are so many things I had to do with my old software that I just don't do at all with TaxPal. Suspicious but I can't say I don't love it.",
+        "The client gallery experience is top-notch. My clients can easily view, select, and download their photos. It's made my delivery process so much more professional.",
       author: {
-        name: "Erin Powlowski",
-        role: "COO at Armstrong Inc",
+        name: "David Kim",
+        role: "Event Photographer",
         image: "/images/avatars/avatar-2.png",
       },
     },
@@ -46,19 +46,19 @@ const testimonials = [
   [
     {
       content:
-        "I used to have to remit tax to the EU and with TaxPal I somehow don't have to do that anymore. Nervous to travel there now though.",
+        "Fast Foto's gallery management tools are exactly what I needed. Creating custom collections for clients is simple, and the presentation is beautiful. My clients are always impressed.",
       author: {
-        name: "Peter Renolds",
-        role: "Founder of West Inc",
+        name: "Rachel Foster",
+        role: "Fashion Photographer",
         image: "/images/avatars/avatar-3.png",
       },
     },
     {
       content:
-        "This is the fourth email I've sent to your support team. I am literally being held in jail for tax fraud. Please answer your damn emails, this is important.",
+        "The speed of the platform is incredible. No more waiting for galleries to load or images to process. It's made my client delivery workflow so much more efficient.",
       author: {
-        name: "Amy Hahn",
-        role: "Director at Velocity Industries",
+        name: "James Wilson",
+        role: "Sports Photographer",
         image: "/images/avatars/avatar-4.png",
       },
     },
@@ -77,18 +77,17 @@ export function Testimonials() {
   return (
     <section
       id="testimonials"
-      aria-label="What our customers are saying"
+      aria-label="What photographers are saying"
       className="bg-slate-50 py-20 sm:py-32"
     >
       <Container>
         <div className="mx-auto max-w-2xl md:text-center">
           <h2 className="font-display text-3xl tracking-tight text-slate-900 sm:text-4xl">
-            Loved by businesses worldwide.
+            Trusted by photographers worldwide.
           </h2>
           <p className="mt-4 text-lg tracking-tight text-slate-700">
-            Our software is so simple that people can't help but fall in love
-            with it. Simplicity is easy when you just skip tons of
-            mission-critical features.
+            See why professional photographers choose Fast Foto to manage their
+            client galleries and streamline their workflow.
           </p>
         </div>
         <ul

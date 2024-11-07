@@ -8,41 +8,41 @@ import { cn } from "~/lib/utils";
 
 const features = [
   {
-    title: "Payroll",
+    title: "Gallery Management",
     description:
-      "Keep track of everyone's salaries and whether or not they've been paid. Direct deposit not supported.",
+      "Create stunning galleries with customizable layouts, easy drag-and-drop organization, and beautiful presentation options.",
     image: {
-      src: "/images/screenshots/payroll.png",
+      src: "/images/screenshots/gallery.png",
       width: 1084,
       height: 620,
     },
   },
   {
-    title: "Claim expenses",
+    title: "Client Access",
     description:
-      "All of your receipts organized into one place, as long as you don't mind typing in the data by hand.",
+      "Share private galleries with clients, enable easy photo selection, and collect feedback all in one streamlined platform.",
     image: {
-      src: "/images/screenshots/expenses.png",
+      src: "/images/screenshots/client-access.png",
       width: 1084,
       height: 620,
     },
   },
   {
-    title: "VAT handling",
+    title: "Photo Organization",
     description:
-      "We only sell our software to companies who don't deal with VAT at all, so technically we do all the VAT stuff they need.",
+      "Keep your photos organized with smart albums, AI-powered tagging, and advanced search capabilities to find any photo instantly.",
     image: {
-      src: "/images/screenshots/vat-returns.png",
+      src: "/images/screenshots/organization.png",
       width: 1084,
       height: 620,
     },
   },
   {
-    title: "Reporting",
+    title: "Download & Delivery",
     description:
-      "Easily export your data into an Excel spreadsheet where you can do whatever the hell you want with it.",
+      "Provide professional delivery options with customizable download packages, watermarking, and automated client delivery.",
     image: {
-      src: "/images/screenshots/reporting.png",
+      src: "/images/screenshots/delivery.png",
       width: 1084,
       height: 620,
     },
@@ -72,7 +72,7 @@ export function PrimaryFeatures() {
   return (
     <section
       id="features"
-      aria-label="Features for running your books"
+      aria-label="Features for managing your photography"
       className="relative overflow-hidden bg-blue-600 pb-28 pt-20 sm:py-32"
     >
       <Image
@@ -86,11 +86,11 @@ export function PrimaryFeatures() {
       <Container className="relative">
         <div className="max-w-2xl md:mx-auto md:text-center xl:max-w-none">
           <h2 className="font-display text-3xl tracking-tight text-white sm:text-4xl md:text-5xl">
-            Everything you need to run your books.
+            Everything you need to manage your photography.
           </h2>
           <p className="mt-6 text-lg tracking-tight text-blue-100">
-            Well everything you need if you aren’t that picky about minor
-            details like tax compliance.
+            Powerful tools to showcase your work, collaborate with clients, and
+            grow your photography business.
           </p>
         </div>
         <TabGroup

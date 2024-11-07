@@ -4,53 +4,53 @@ import { Container } from "~/app/components/container";
 const faqs = [
   [
     {
-      question: "Does TaxPal handle VAT?",
+      question: "How do I share galleries with my clients?",
       answer:
-        "Well no, but if you move your company offshore you can probably ignore it.",
+        "Simply create an album, upload your photos, and invite clients via email. They'll receive secure access to view, favorite, and download their photos based on your settings.",
     },
     {
-      question: "Can I pay for my subscription via purchase order?",
-      answer: "Absolutely, we are happy to take your money in all forms.",
+      question: "What file formats are supported?",
+      answer:
+        "We support all major image formats including JPG, PNG, HEIF, and RAW files. Photos are automatically optimized for web viewing while maintaining original quality for downloads.",
     },
     {
-      question: "How do I apply for a job at TaxPal?",
+      question: "Is there a limit on storage?",
       answer:
-        "We only hire our customers, so subscribe for a minimum of 6 months and then let’s talk.",
+        "Our Professional plan includes unlimited photo storage. The Starter plan includes 100GB, which typically handles 10-15 full wedding galleries or 30-40 portrait sessions.",
     },
   ],
   [
     {
-      question: "What was that testimonial about tax fraud all about?",
+      question: "How do clients select their favorite photos?",
       answer:
-        "TaxPal is just a software application, ultimately your books are your responsibility.",
+        "Clients can easily heart their favorites, create collections, and leave comments. You'll be notified when they've made their selections, streamlining the delivery process.",
     },
     {
-      question:
-        "TaxPal sounds horrible but why do I still feel compelled to purchase?",
+      question: "Can I customize the gallery appearance?",
       answer:
-        "This is the power of excellent visual design. You just can’t resist it, no matter how poorly it actually functions.",
+        "Yes! Customize colors, layouts, and branding to match your photography style. Add your logo, custom domain, and welcome message to create a cohesive client experience.",
     },
     {
-      question:
-        "I found other companies called TaxPal, are you sure you can use this name?",
+      question: "What about download permissions and print rights?",
       answer:
-        "Honestly not sure at all. We haven’t actually incorporated or anything, we just thought it sounded cool and made this website.",
+        "You have full control over download settings. Set expiration dates, limit downloads, add watermarks, and include print release documents automatically with downloads.",
     },
   ],
   [
     {
-      question: "How do you generate reports?",
+      question: "How secure are my photos?",
       answer:
-        "You just tell us what data you need a report for, and we get our kids to create beautiful charts for you using only the finest crayons.",
+        "We use bank-level encryption for storage and transfer. Private galleries are protected with unique access links, and you can enable additional security like download pins and watermarking.",
     },
     {
-      question: "Can we expect more inventory features?",
-      answer: "In life it’s really better to never expect anything at all.",
+      question: "Can I integrate with my existing workflow?",
+      answer:
+        "Yes! We integrate with popular editing software like Lightroom and Capture One. Auto-upload plugins and our API make it easy to fit Fast Foto into your existing workflow.",
     },
     {
-      question: "I lost my password, how do I get into my account?",
+      question: "What if I need help getting started?",
       answer:
-        "Send us an email and we will send you a copy of our latest password spreadsheet so you can find your information.",
+        "Our support team is here to help! We offer live chat support, detailed tutorials, and free onboarding calls for professional accounts to ensure you're set up for success.",
     },
   ],
 ];
