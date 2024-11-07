@@ -31,7 +31,9 @@ const nextConfig: NextConfig = {
     typedRoutes: true,
   },
   compiler: {
-    removeConsole: false,
+    removeConsole: {
+      exclude: ["error", "warn", "info", "debug", "trace"],
+    },
   },
 };
 
