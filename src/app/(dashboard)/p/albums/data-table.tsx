@@ -2,17 +2,15 @@
 
 import {
   ColumnDef,
-  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
-  SortingState,
   useReactTable,
 } from "@tanstack/react-table";
+import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
 import Link from "next/link";
-import { parseAsInteger, parseAsJson, useQueryState } from "nuqs";
+import { useQueryStates } from "nuqs";
+import { ITEMS_PER_PAGE } from "~/app/(dashboard)/p/albums/config";
+import { albumsSearchParamsParsers } from "~/app/(dashboard)/p/albums/search-params";
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";
 import {
@@ -23,80 +21,82 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { cn } from "~/lib/utils";
 
-interface DataTableProps<TData, TValue> {
+interface DataTableProps<TData, TValue = unknown> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
-  pagination?: {
-    currentPage: number;
-    totalPages: number;
-  };
+  totalPages?: number;
+  currentPage?: number;
 }
 
-export function DataTable<TData, TValue>({
+export function DataTable<TData>({
   columns,
   data,
-  pagination,
-}: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useQueryState(
-    "sort",
-    parseAsJson<SortingState>((value) => {
-      if (!Array.isArray(value)) return [];
-      return value;
-    }).withDefault([]),
-  );
-
-  const [columnFilters, setColumnFilters] = useQueryState(
-    "filters",
-    parseAsJson<ColumnFiltersState>((value) => {
-      if (!Array.isArray(value)) return [];
-      return value;
-    }).withDefault([]),
-  );
-
-  const [pageIndex, setPageIndex] = useQueryState(
-    "page",
-    parseAsInteger.withDefault(1),
+  currentPage = 1,
+  totalPages = 1,
+}: DataTableProps<TData>) {
+  const [searchParams, setSearchParams] = useQueryStates(
+    albumsSearchParamsParsers,
+    {
+      shallow: false,
+    },
   );
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
+    manualPagination: true,
+    manualSorting: true,
+    manualFiltering: true,
+    pageCount: totalPages ?? -1,
+    state: {
+      sorting: searchParams.sort,
+      columnFilters: searchParams.filters,
+      pagination: {
+        pageIndex: currentPage - 1,
+        pageSize: ITEMS_PER_PAGE,
+      },
+    },
     onSortingChange: (updater) => {
-      const newValue =
-        typeof updater === "function" ? updater(sorting || []) : updater;
-      setSorting(newValue || []);
+      if (typeof updater === "function") {
+        const newValue = updater(searchParams.sort);
+        setSearchParams({
+          sort: newValue,
+        });
+      } else {
+        setSearchParams({
+          sort: updater,
+        });
+      }
     },
     onColumnFiltersChange: (updater) => {
-      const newValue =
-        typeof updater === "function" ? updater(columnFilters || []) : updater;
-      setColumnFilters(newValue || []);
-    },
-    state: {
-      sorting: sorting || [],
-      columnFilters: columnFilters || [],
-      pagination: {
-        pageIndex: pageIndex || 0,
-        pageSize: 10,
-      },
+      if (typeof updater === "function") {
+        setSearchParams({
+          filters: updater(searchParams.filters),
+        });
+      } else {
+        setSearchParams({
+          filters: updater,
+        });
+      }
     },
     onPaginationChange: (updater) => {
       if (typeof updater === "function") {
-        const newState = updater({
-          pageIndex: pageIndex || 0,
-          pageSize: 10,
+        setSearchParams({
+          page:
+            updater({
+              pageIndex: searchParams.page - 1,
+              pageSize: ITEMS_PER_PAGE,
+            }).pageIndex + 1,
         });
-
-        console.log(newState);
-
-        setPageIndex(newState.pageIndex);
+      } else {
+        setSearchParams({
+          page: updater.pageIndex + 1,
+        });
       }
     },
-    manualPagination: true,
   });
 
   return (
@@ -118,25 +118,43 @@ export function DataTable<TData, TValue>({
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
                   const align = header.column.columnDef.meta?.align;
+                  const isSortable = header.column.getCanSort();
+
                   return (
                     <TableHead
                       key={header.id}
-                      className={
+                      className={cn(
+                        "whitespace-nowrap",
                         align === "start"
                           ? "text-start"
                           : align === "center"
                             ? "text-center"
                             : align === "end"
                               ? "text-end"
-                              : ""
-                      }
+                              : "",
+                        isSortable && "cursor-pointer select-none",
+                      )}
+                      onClick={header.column.getToggleSortingHandler()}
                     >
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext(),
-                          )}
+                      <div className="flex items-center justify-between gap-2">
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext(),
+                            )}
+                        {isSortable ? (
+                          <div className="w-4">
+                            {header.column.getIsSorted() === "asc" ? (
+                              <ArrowUp className="size-4" />
+                            ) : header.column.getIsSorted() === "desc" ? (
+                              <ArrowDown className="size-4" />
+                            ) : (
+                              <ArrowUpDown className="size-4" />
+                            )}
+                          </div>
+                        ) : null}
+                      </div>
                     </TableHead>
                   );
                 })}
@@ -148,22 +166,22 @@ export function DataTable<TData, TValue>({
               table.getRowModel().rows.map((row) => (
                 <TableRow
                   key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
+                  data-state={row.getIsSelected() ? "selected" : undefined}
                 >
                   {row.getVisibleCells().map((cell) => {
                     const align = cell.column.columnDef.meta?.align;
                     return (
                       <TableCell
                         key={cell.id}
-                        className={
+                        className={cn(
                           align === "start"
                             ? "text-start"
                             : align === "center"
                               ? "text-center"
                               : align === "end"
                                 ? "text-end"
-                                : ""
-                        }
+                                : "",
+                        )}
                       >
                         {flexRender(
                           cell.column.columnDef.cell,
@@ -188,35 +206,29 @@ export function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      {pagination && (
-        <div className="flex items-center justify-end space-x-2 py-4">
-          {pagination.currentPage > 1 ? (
-            <Button variant="outline" size="sm" asChild>
-              <Link href={`?page=${pagination.currentPage - 1}`}>Previous</Link>
-            </Button>
-          ) : (
-            <Button variant="outline" size="sm" disabled>
-              Previous
-            </Button>
-          )}
-          <div className="text-sm">
-            Page {pagination.currentPage} of {pagination.totalPages}
-          </div>
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={pagination.currentPage >= pagination.totalPages}
-            asChild
-          >
-            <Link
-              href={`?page=${pagination.currentPage + 1}`}
-              className="disabled:pointer-events-none"
-            >
-              Next
-            </Link>
+      <div className="flex items-center justify-end space-x-2 py-4">
+        {currentPage > 1 ? (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`?page=${currentPage - 1}`}>Previous</Link>
           </Button>
+        ) : (
+          <Button variant="outline" size="sm" disabled>
+            Previous
+          </Button>
+        )}
+        <div className="text-sm">
+          Page {currentPage} of {totalPages}
         </div>
-      )}
+        {currentPage >= totalPages ? (
+          <Button variant="outline" size="sm" disabled>
+            Next
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm" asChild>
+            <Link href={`?page=${currentPage + 1}`}>Next</Link>
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
