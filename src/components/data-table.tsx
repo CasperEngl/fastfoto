@@ -1,7 +1,7 @@
 import { flexRender } from "@tanstack/react-table";
 import { Table as ReactTable } from "@tanstack/table-core";
 import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
-import { columns } from "~/app/(dashboard)/a/users/columns";
+import { columns } from "~/app/dashboard/a/users/columns";
 import {
   Table,
   TableBody,
