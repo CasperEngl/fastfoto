@@ -8,7 +8,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { updateUser } from "~/app/(dashboard)/a/users/[id]/edit/actions";
+import { updateUser } from "~/app/(dashboard)/a/users/[id]/actions";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -20,7 +20,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Users, userType } from "~/db/schema";
 import {
   Select,
   SelectContent,
@@ -28,6 +27,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "~/components/ui/select";
+import { Users, userType } from "~/db/schema";
 
 const userFormSchema = z.object({
   name: z.string().min(2, {

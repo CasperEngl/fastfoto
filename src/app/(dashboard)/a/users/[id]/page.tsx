@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { EditUserForm } from "~/app/(dashboard)/a/users/[id]/edit/edit-user-form";
+import { EditUserForm } from "~/app/(dashboard)/a/users/[id]/edit-user-form";
 import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
