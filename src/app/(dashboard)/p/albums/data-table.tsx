@@ -2,15 +2,19 @@
 
 import {
   ColumnDef,
+  ColumnFiltersState,
   flexRender,
   getCoreRowModel,
-  useReactTable,
-  getPaginationRowModel,
-  SortingState,
-  getSortedRowModel,
-  ColumnFiltersState,
   getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  SortingState,
+  useReactTable,
 } from "@tanstack/react-table";
+import Link from "next/link";
+import { parseAsInteger, parseAsJson, useQueryState } from "nuqs";
+import { Button } from "~/components/ui/button";
+import { Input } from "~/components/ui/input";
 import {
   Table,
   TableBody,
@@ -19,35 +23,80 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
-import { Button } from "~/components/ui/button";
-import { Input } from "~/components/ui/input";
-import { useState } from "react";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
+  pagination?: {
+    currentPage: number;
+    totalPages: number;
+  };
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
+  pagination,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [sorting, setSorting] = useQueryState(
+    "sort",
+    parseAsJson<SortingState>((value) => {
+      if (!Array.isArray(value)) return [];
+      return value;
+    }).withDefault([]),
+  );
+
+  const [columnFilters, setColumnFilters] = useQueryState(
+    "filters",
+    parseAsJson<ColumnFiltersState>((value) => {
+      if (!Array.isArray(value)) return [];
+      return value;
+    }).withDefault([]),
+  );
+
+  const [pageIndex, setPageIndex] = useQueryState(
+    "page",
+    parseAsInteger.withDefault(1),
+  );
 
   const table = useReactTable({
     data,
     columns,
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    onSortingChange: setSorting,
     getSortedRowModel: getSortedRowModel(),
-    onColumnFiltersChange: setColumnFilters,
     getFilteredRowModel: getFilteredRowModel(),
-    state: {
-      sorting,
-      columnFilters,
+    onSortingChange: (updater) => {
+      const newValue =
+        typeof updater === "function" ? updater(sorting || []) : updater;
+      setSorting(newValue || []);
     },
+    onColumnFiltersChange: (updater) => {
+      const newValue =
+        typeof updater === "function" ? updater(columnFilters || []) : updater;
+      setColumnFilters(newValue || []);
+    },
+    state: {
+      sorting: sorting || [],
+      columnFilters: columnFilters || [],
+      pagination: {
+        pageIndex: pageIndex || 0,
+        pageSize: 10,
+      },
+    },
+    onPaginationChange: (updater) => {
+      if (typeof updater === "function") {
+        const newState = updater({
+          pageIndex: pageIndex || 0,
+          pageSize: 10,
+        });
+
+        console.log(newState);
+
+        setPageIndex(newState.pageIndex);
+      }
+    },
+    manualPagination: true,
   });
 
   return (
@@ -138,24 +187,36 @@ export function DataTable<TData, TValue>({
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-end space-x-2 py-4">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
-        >
-          Previous
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
-        >
-          Next
-        </Button>
-      </div>
+
+      {pagination && (
+        <div className="flex items-center justify-end space-x-2 py-4">
+          {pagination.currentPage > 1 ? (
+            <Button variant="outline" size="sm" asChild>
+              <Link href={`?page=${pagination.currentPage - 1}`}>Previous</Link>
+            </Button>
+          ) : (
+            <Button variant="outline" size="sm" disabled>
+              Previous
+            </Button>
+          )}
+          <div className="text-sm">
+            Page {pagination.currentPage} of {pagination.totalPages}
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={pagination.currentPage >= pagination.totalPages}
+            asChild
+          >
+            <Link
+              href={`?page=${pagination.currentPage + 1}`}
+              className="disabled:pointer-events-none"
+            >
+              Next
+            </Link>
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
