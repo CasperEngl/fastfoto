@@ -7,7 +7,7 @@ export function SignOutButton() {
   return (
     <form
       action={async () => {
-        await signOut();
+        await signOut({ redirectTo: "/login" });
       }}
     >
       <Button>Sign out</Button>
