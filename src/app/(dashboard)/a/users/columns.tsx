@@ -42,10 +42,7 @@ export const columns: ColumnDef<InferSelectModel<typeof Users>>[] = [
             {row.original.name?.[0]?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <Link
-          href={`/a/users/${row.original.id}/edit`}
-          className="hover:underline"
-        >
+        <Link href={`/a/users/${row.original.id}`} className="hover:underline">
           {row.getValue("name")}
         </Link>
       </div>

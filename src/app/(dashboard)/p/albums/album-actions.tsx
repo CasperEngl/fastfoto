@@ -43,7 +43,7 @@ export function AlbumActions({
           Copy album ID
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/p/albums/${album.id}/edit`}>Edit album</Link>
+          <Link href={`/p/albums/${album.id}`}>Edit album</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

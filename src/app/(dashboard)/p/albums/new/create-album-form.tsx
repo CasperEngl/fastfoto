@@ -64,7 +64,7 @@ export function CreateAlbumForm({
                 ownerId: session.data.user.id,
               });
               toast.success("Album created successfully");
-              router.push(`/p/albums/${album.id}/edit`);
+              router.push(`/p/albums/${album.id}`);
               router.refresh();
             } catch (error) {
               toast.error("Failed to create album");

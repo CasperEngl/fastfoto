@@ -38,10 +38,7 @@ export const columns = [
     accessorKey: "name",
     header: "Name",
     cell: ({ row }) => (
-      <Link
-        href={`/p/albums/${row.original.id}/edit`}
-        className="hover:underline"
-      >
+      <Link href={`/p/albums/${row.original.id}`} className="hover:underline">
         {row.getValue("name")}
       </Link>
     ),
@@ -67,7 +64,7 @@ export const columns = [
             isAdmin(session.data?.user) ? (
               <Link
                 key={user.id}
-                href={`/a/users/${user.id}/edit`}
+                href={`/a/users/${user.id}`}
                 className="block hover:underline"
               >
                 {user.name}

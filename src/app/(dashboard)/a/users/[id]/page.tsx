@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
+import { DeleteUserButton } from "~/app/(dashboard)/a/users/[id]/delete-user-button";
 import { EditUserForm } from "~/app/(dashboard)/a/users/[id]/edit-user-form";
 import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
@@ -9,7 +10,6 @@ import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Users, UsersToAlbums } from "~/db/schema";
 import { isAdmin } from "~/role";
-import { DeleteUserButton } from "./delete-user-button";
 
 export default async function UserEditPage({
   params,

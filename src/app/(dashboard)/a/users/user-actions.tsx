@@ -43,7 +43,7 @@ export function UserActions({
           Copy user ID
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/a/users/${user.id}/edit`}>Edit user</Link>
+          <Link href={`/a/users/${user.id}`}>Edit user</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
