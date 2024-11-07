@@ -1,8 +1,8 @@
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { columns } from "~/app/(dashboard)/a/users/columns";
-import { DataTable } from "~/app/(dashboard)/a/users/data-table";
+import { columns } from "~/app/dashboard/a/users/columns";
+import { DataTable } from "~/app/dashboard/a/users/data-table";
 import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
@@ -23,7 +23,7 @@ export default async function UsersPage() {
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Users</h1>
         <Button asChild>
-          <Link href="/a/users/new">
+          <Link href="/dashboard/a/users/new">
             <Plus className="size-4" />
             Create User
           </Link>

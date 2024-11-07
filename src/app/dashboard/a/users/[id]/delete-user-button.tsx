@@ -1,9 +1,11 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { Button } from "~/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { deleteUser } from "~/app/dashboard/a/users/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,10 +17,8 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
-import { useState, useTransition } from "react";
-import { deleteAlbum } from "~/app/(dashboard)/p/albums/actions";
 
-export function DeleteAlbumButton({ albumId }: { albumId: string }) {
+export function DeleteUserButton({ userId }: { userId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -28,32 +28,32 @@ export function DeleteAlbumButton({ albumId }: { albumId: string }) {
       <AlertDialogTrigger asChild>
         <Button variant="destructive">
           <Trash2 className="h-4 w-4" />
-          <span>Delete Album</span>
+          <span>Delete User</span>
         </Button>
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
-            This action cannot be undone. This will permanently delete the album
-            and all its photos.
+            This action cannot be undone. This will permanently delete the user
+            and all their data.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={async () => {
+            onClick={() => {
               startTransition(async () => {
                 try {
-                  await deleteAlbum(albumId);
-                  toast.success("Album deleted successfully");
+                  await deleteUser(userId);
+                  toast.success("User deleted successfully");
                   setOpen(false);
-                  router.push("/p/albums");
+                  router.push("/dashboard/a/users");
                 } catch (error) {
                   toast.error(
                     error instanceof Error
                       ? error.message
-                      : "Failed to delete album",
+                      : "Failed to delete user",
                   );
                 }
               });

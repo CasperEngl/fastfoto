@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { CreateAlbumForm } from "~/app/(dashboard)/p/albums/new/create-album-form";
+import { CreateAlbumForm } from "~/app/dashboard/p/albums/new/create-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { isPhotographer } from "~/role";

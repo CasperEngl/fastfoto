@@ -4,9 +4,9 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchParams } from "nuqs/server";
-import { AlbumsTable } from "~/app/(dashboard)/p/albums/albums-table";
-import { ITEMS_PER_PAGE } from "~/app/(dashboard)/p/albums/config";
-import { albumSearchParamsCache } from "~/app/(dashboard)/p/albums/search-params";
+import { AlbumsTable } from "~/app/dashboard/p/albums/albums-table";
+import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
+import { albumSearchParamsCache } from "~/app/dashboard/p/albums/search-params";
 import { auth } from "~/auth";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
@@ -101,7 +101,7 @@ export default async function AlbumsPage({
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Albums</h1>
         <Button asChild>
-          <Link href="/p/albums/new">
+          <Link href="/dashboard/p/albums/new">
             <Plus className="size-4" />
             Create Album
           </Link>

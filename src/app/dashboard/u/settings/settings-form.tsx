@@ -9,7 +9,7 @@ import * as z from "zod";
 import {
   requestEmailChange,
   updateProfile,
-} from "~/app/(dashboard)/u/settings/actions";
+} from "~/app/dashboard/u/settings/actions";
 import { Button } from "~/components/ui/button";
 import {
   Form,

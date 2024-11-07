@@ -1,7 +1,7 @@
 import { CheckCircle2, XCircle } from "lucide-react";
 import { redirect } from "next/navigation";
-import { PasskeyButton } from "~/app/(dashboard)/u/settings/passkey-button";
-import { SettingsForm } from "~/app/(dashboard)/u/settings/settings-form";
+import { PasskeyButton } from "~/app/dashboard/u/settings/passkey-button";
+import { SettingsForm } from "~/app/dashboard/u/settings/settings-form";
 import { auth } from "~/auth";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Separator } from "~/components/ui/separator";

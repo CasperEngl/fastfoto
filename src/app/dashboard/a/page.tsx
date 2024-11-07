@@ -38,7 +38,7 @@ export default async function AdminPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Users</CardTitle>
             <Button variant="ghost" asChild>
-              <Link href="/a/users">View all</Link>
+              <Link href="/dashboard/a/users">View all</Link>
             </Button>
           </CardHeader>
           <CardContent>
@@ -64,7 +64,7 @@ export default async function AdminPage() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Recent Albums</CardTitle>
             <Button variant="ghost" asChild>
-              <Link href="/p/albums">View all</Link>
+              <Link href="/dashboard/p/albums">View all</Link>
             </Button>
           </CardHeader>
           <CardContent>

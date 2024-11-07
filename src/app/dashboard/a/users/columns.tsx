@@ -3,7 +3,7 @@
 import { ColumnDef } from "@tanstack/react-table";
 import { InferSelectModel } from "drizzle-orm";
 import Link from "next/link";
-import { UserActions } from "~/app/(dashboard)/a/users/user-actions";
+import { UserActions } from "~/app/dashboard/a/users/user-actions";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Users } from "~/db/schema";
@@ -42,7 +42,10 @@ export const columns: ColumnDef<InferSelectModel<typeof Users>>[] = [
             {row.original.name?.[0]?.toUpperCase()}
           </AvatarFallback>
         </Avatar>
-        <Link href={`/a/users/${row.original.id}`} className="hover:underline">
+        <Link
+          href={`/dashboard/a/users/${row.original.id}`}
+          className="hover:underline"
+        >
           {row.getValue("name")}
         </Link>
       </div>

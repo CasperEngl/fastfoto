@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import Link from "next/link";
-import { deleteUser } from "~/app/(dashboard)/a/users/actions";
+import { deleteUser } from "~/app/dashboard/a/users/actions";
 import { useTransition } from "react";
 
 export function UserActions({
@@ -43,7 +43,7 @@ export function UserActions({
           Copy user ID
         </DropdownMenuItem>
         <DropdownMenuItem asChild>
-          <Link href={`/a/users/${user.id}`}>Edit user</Link>
+          <Link href={`/dashboard/a/users/${user.id}`}>Edit user</Link>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem

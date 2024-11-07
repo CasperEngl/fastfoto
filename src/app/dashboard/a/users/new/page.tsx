@@ -1,4 +1,4 @@
-import { CreateUserForm } from "~/app/(dashboard)/a/users/new/create-user-form";
+import { CreateUserForm } from "~/app/dashboard/a/users/new/create-user-form";
 
 export default function CreateUserPage() {
   return (

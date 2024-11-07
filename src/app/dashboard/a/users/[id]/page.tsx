@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { DeleteUserButton } from "~/app/(dashboard)/a/users/[id]/delete-user-button";
-import { EditUserForm } from "~/app/(dashboard)/a/users/[id]/edit-user-form";
+import { DeleteUserButton } from "~/app/dashboard/a/users/[id]/delete-user-button";
+import { EditUserForm } from "~/app/dashboard/a/users/[id]/edit-user-form";
 import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
@@ -56,7 +56,9 @@ export default async function UserEditPage({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">User Albums</h2>
           <Button asChild>
-            <Link href={`/p/albums/new?userId=${id}`}>Create Album</Link>
+            <Link href={`/dashboard/p/albums/new?userId=${id}`}>
+              Create Album
+            </Link>
           </Button>
         </div>
         {albums.length === 0 ? (

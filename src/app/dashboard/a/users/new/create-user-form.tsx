@@ -17,7 +17,7 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { CreateUserFormValues, createUserSchema } from "./schema";
-import { createUser } from "~/app/(dashboard)/a/users/new/actions";
+import { createUser } from "~/app/dashboard/a/users/new/actions";
 
 export function CreateUserForm() {
   const router = useRouter();
