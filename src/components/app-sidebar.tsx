@@ -109,7 +109,10 @@ export function AppSidebar() {
 
           <SidebarMenuItem>
             {session.data?.user ? (
-              <SidebarMenuButton onClick={() => signOut()} tooltip="Sign Out">
+              <SidebarMenuButton
+                onClick={() => signOut({ callbackUrl: "/" })}
+                tooltip="Sign Out"
+              >
                 <LogOut />
                 Sign Out
               </SidebarMenuButton>
