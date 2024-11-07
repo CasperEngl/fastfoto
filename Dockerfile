@@ -6,6 +6,7 @@ ENV PATH="/root/.bun/bin:$PATH"
 ENV NODE_ENV=production
 ENV HOSTNAME=0.0.0.0
 ENV AUTH_TRUST_HOST=true
+ENV NEXT_RUNTIME=nodejs
 
 # Stage 1: Install dependencies
 FROM base AS deps
