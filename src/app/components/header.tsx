@@ -21,10 +21,9 @@ function MobileNavLink({
   children: React.ReactNode;
 }) {
   return (
-    // @ts-expect-error href is not typesafe
-    <Link href={href} className="block w-full p-2">
+    <a href={href} className="block w-full p-2">
       {children}
-    </Link>
+    </a>
   );
 }
 
