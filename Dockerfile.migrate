@@ -15,4 +15,4 @@ COPY drizzle ./drizzle
 
 RUN bun install
 
-CMD ["npx", "drizzle-kit", "migrate"]
+CMD ["npx", "tsx", "src/db/migrate.ts"]
