@@ -2,9 +2,11 @@
 
 import { InferSelectModel } from "drizzle-orm";
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { Users } from "~/db/schema";
+import Link from "next/link";
+import { useActionState } from "react";
 import { toast } from "sonner";
+import { deleteUser } from "~/app/dashboard/a/users/actions";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,16 +15,28 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import Link from "next/link";
-import { deleteUser } from "~/app/dashboard/a/users/actions";
-import { useTransition } from "react";
+import { Users } from "~/db/schema";
 
 export function UserActions({
   user,
 }: {
   user: InferSelectModel<typeof Users>;
 }) {
-  const [isPending, startTransition] = useTransition();
+  const [, deleteAction, isPending] = useActionState(
+    async (prev: null, userId: string) => {
+      if (!confirm("Are you sure you want to delete this user?")) return null;
+
+      try {
+        await deleteUser(userId);
+        toast.success("User deleted successfully");
+        return null;
+      } catch (error) {
+        toast.error("Failed to delete user");
+        return null;
+      }
+    },
+    null,
+  );
 
   return (
     <DropdownMenu>
@@ -48,18 +62,7 @@ export function UserActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
-          onClick={() =>
-            startTransition(async () => {
-              try {
-                if (!confirm("Are you sure you want to delete this user?"))
-                  return;
-                await deleteUser(user.id);
-                toast.success("User deleted successfully");
-              } catch (error) {
-                toast.error("Failed to delete user");
-              }
-            })
-          }
+          onClick={() => deleteAction(user.id)}
           disabled={isPending}
         >
           {isPending ? "Deleting..." : "Delete user"}

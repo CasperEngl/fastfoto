@@ -1,9 +1,8 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { Button } from "~/components/ui/button";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useActionState, useState } from "react";
 import { toast } from "sonner";
 import { deleteUser } from "~/app/dashboard/a/users/actions";
 import {
@@ -17,11 +16,25 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "~/components/ui/alert-dialog";
+import { Button } from "~/components/ui/button";
 
 export function DeleteUserButton({ userId }: { userId: string }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [, deleteAction, isPending] = useActionState(async (prev: null) => {
+    try {
+      await deleteUser(userId);
+      toast.success("User deleted successfully");
+      setOpen(false);
+      router.push("/dashboard/a/users");
+      return null;
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete user",
+      );
+      return null;
+    }
+  }, null);
 
   return (
     <AlertDialog open={open} onOpenChange={setOpen}>
@@ -42,22 +55,7 @@ export function DeleteUserButton({ userId }: { userId: string }) {
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            onClick={() => {
-              startTransition(async () => {
-                try {
-                  await deleteUser(userId);
-                  toast.success("User deleted successfully");
-                  setOpen(false);
-                  router.push("/dashboard/a/users");
-                } catch (error) {
-                  toast.error(
-                    error instanceof Error
-                      ? error.message
-                      : "Failed to delete user",
-                  );
-                }
-              });
-            }}
+            onClick={deleteAction}
             disabled={isPending}
             asChild
           >

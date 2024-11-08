@@ -4,7 +4,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { InferSelectModel } from "drizzle-orm";
 import invariant from "invariant";
 import { useParams, useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
@@ -48,7 +47,6 @@ export function EditUserForm({
 }) {
   const router = useRouter();
   const params = useParams();
-  const [isPending, startTransition] = useTransition();
 
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userFormSchema),
@@ -64,23 +62,19 @@ export function EditUserForm({
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => {
-          startTransition(async () => {
-            try {
-              await updateUser({
-                ...data,
-                id: params.id!.toString(),
-              });
-              router.refresh();
-              toast.success("User updated successfully");
-            } catch (error) {
-              toast.error(
-                error instanceof Error
-                  ? error.message
-                  : "Failed to update user",
-              );
-            }
-          });
+        onSubmit={form.handleSubmit(async (data) => {
+          try {
+            await updateUser({
+              ...data,
+              id: params.id!.toString(),
+            });
+            router.refresh();
+            toast.success("User updated successfully");
+          } catch (error) {
+            toast.error(
+              error instanceof Error ? error.message : "Failed to update user",
+            );
+          }
         })}
         className="space-y-8"
       >
@@ -94,7 +88,7 @@ export function EditUserForm({
                 <Input
                   placeholder="Enter name"
                   {...field}
-                  disabled={isPending}
+                  disabled={form.formState.isSubmitting}
                 />
               </FormControl>
               <FormDescription>
@@ -117,7 +111,7 @@ export function EditUserForm({
                   type="email"
                   placeholder="Enter email"
                   {...field}
-                  disabled={isPending}
+                  disabled={form.formState.isSubmitting}
                 />
               </FormControl>
               <FormDescription>
@@ -137,7 +131,7 @@ export function EditUserForm({
               <Select
                 onValueChange={field.onChange}
                 defaultValue={field.value}
-                disabled={isPending}
+                disabled={form.formState.isSubmitting}
               >
                 <FormControl>
                   <SelectTrigger>
@@ -160,8 +154,8 @@ export function EditUserForm({
           )}
         />
 
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Saving..." : "Save Changes"}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Saving..." : "Save Changes"}
         </Button>
       </form>
     </Form>

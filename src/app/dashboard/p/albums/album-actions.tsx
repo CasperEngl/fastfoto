@@ -2,9 +2,10 @@
 
 import { InferSelectModel } from "drizzle-orm";
 import { MoreHorizontal } from "lucide-react";
-import { Button } from "~/components/ui/button";
-import { Albums } from "~/db/schema";
+import Link from "next/link";
+import { useActionState } from "react";
 import { toast } from "sonner";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -13,16 +14,29 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
+import { Albums } from "~/db/schema";
 import { deleteAlbum } from "./actions";
-import Link from "next/link";
-import { useTransition } from "react";
 
 export function AlbumActions({
   album,
 }: {
   album: InferSelectModel<typeof Albums>;
 }) {
-  const [isPending, startTransition] = useTransition();
+  const [, deleteAction, isPending] = useActionState(
+    async (prev: null, albumId: string) => {
+      if (!confirm("Are you sure you want to delete this album?")) return null;
+
+      try {
+        await deleteAlbum(albumId);
+        toast.success("Album deleted successfully");
+        return null;
+      } catch (error) {
+        toast.error("Failed to delete album");
+        return null;
+      }
+    },
+    null,
+  );
 
   return (
     <DropdownMenu>
@@ -48,20 +62,7 @@ export function AlbumActions({
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
-          onClick={() => {
-            if (!confirm("Are you sure you want to delete this album?")) {
-              return;
-            }
-
-            startTransition(async () => {
-              try {
-                await deleteAlbum(album.id);
-                toast.success("Album deleted successfully");
-              } catch (error) {
-                toast.error("Failed to delete album");
-              }
-            });
-          }}
+          onClick={() => deleteAction(album.id)}
           disabled={isPending}
         >
           {isPending ? "Deleting..." : "Delete album"}

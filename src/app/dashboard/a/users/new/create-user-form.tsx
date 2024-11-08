@@ -2,9 +2,9 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { createUser } from "~/app/dashboard/a/users/new/actions";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -17,11 +17,9 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { CreateUserFormValues, createUserSchema } from "./schema";
-import { createUser } from "~/app/dashboard/a/users/new/actions";
 
 export function CreateUserForm() {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
 
   const form = useForm<CreateUserFormValues>({
     resolver: zodResolver(createUserSchema),
@@ -34,21 +32,17 @@ export function CreateUserForm() {
   return (
     <Form {...form}>
       <form
-        onSubmit={form.handleSubmit((data) => {
-          startTransition(async () => {
-            try {
-              await createUser(data);
-              form.reset();
-              router.refresh();
-              toast.success("User created successfully");
-            } catch (error) {
-              toast.error(
-                error instanceof Error
-                  ? error.message
-                  : "Failed to create user",
-              );
-            }
-          });
+        onSubmit={form.handleSubmit(async (data) => {
+          try {
+            await createUser(data);
+            form.reset();
+            router.refresh();
+            toast.success("User created successfully");
+          } catch (error) {
+            toast.error(
+              error instanceof Error ? error.message : "Failed to create user",
+            );
+          }
         })}
         className="space-y-8"
       >
@@ -86,8 +80,8 @@ export function CreateUserForm() {
           )}
         />
 
-        <Button type="submit" disabled={isPending}>
-          {isPending ? "Creating..." : "Create User"}
+        <Button type="submit" disabled={form.formState.isSubmitting}>
+          {form.formState.isSubmitting ? "Creating..." : "Create User"}
         </Button>
       </form>
     </Form>

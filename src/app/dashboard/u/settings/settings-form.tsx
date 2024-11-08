@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { User } from "next-auth";
-import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
@@ -10,6 +10,7 @@ import {
   requestEmailChange,
   updateProfile,
 } from "~/app/dashboard/u/settings/actions";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -21,10 +22,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { propertiesChanged } from "~/lib/utils";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import { useRouter } from "next/navigation";
 import { UploadButton } from "~/lib/uploadthing";
+import { propertiesChanged } from "~/lib/utils";
 
 const profileFormSchema = z.object({
   name: z
@@ -50,7 +49,6 @@ interface SettingsFormProps {
 
 export function SettingsForm({ user }: SettingsFormProps) {
   const router = useRouter();
-  const [isPending, startTransition] = useTransition();
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
@@ -85,23 +83,21 @@ export function SettingsForm({ user }: SettingsFormProps) {
 
       <Form {...form}>
         <form
-          onSubmit={form.handleSubmit((values) => {
-            startTransition(async () => {
-              if (propertiesChanged(values, user)) {
-                await updateProfile({ name: values.name });
-                toast.success("Profile updated successfully");
-              }
+          onSubmit={form.handleSubmit(async (values) => {
+            if (propertiesChanged(values, user)) {
+              await updateProfile({ name: values.name });
+              toast.success("Profile updated successfully");
+            }
 
-              if (values.email !== user.email) {
-                await requestEmailChange(values.email).then(() =>
-                  toast.success(
-                    "Verification email sent. Please check your inbox.",
-                  ),
-                );
-              }
+            if (values.email !== user.email) {
+              await requestEmailChange(values.email).then(() =>
+                toast.success(
+                  "Verification email sent. Please check your inbox.",
+                ),
+              );
+            }
 
-              router.refresh();
-            });
+            router.refresh();
           })}
           className="space-y-8"
         >
@@ -137,8 +133,8 @@ export function SettingsForm({ user }: SettingsFormProps) {
               </FormItem>
             )}
           />
-          <Button type="submit" disabled={isPending}>
-            {isPending ? "Updating..." : "Update profile"}
+          <Button type="submit" disabled={form.formState.isSubmitting}>
+            {form.formState.isSubmitting ? "Updating..." : "Update profile"}
           </Button>
         </form>
       </Form>

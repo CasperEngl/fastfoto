@@ -1,15 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useSession } from "next-auth/react";
 import { signIn } from "next-auth/webauthn";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { loginMagicLink, loginPasskey } from "~/app/login/actions";
+import { loginMagicLink } from "~/app/login/actions";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -34,14 +33,23 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
-  const [isMagicLinkPending, startMagicLinkTransition] = useTransition();
-  const [isPasskeyPending, startPasskeyTransition] = useTransition();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
     },
   });
+
+  const [, passkeyAction, isPasskeyPending] = useActionState(async () => {
+    try {
+      await signIn("passkey");
+      router.push("/");
+      toast("Successfully signed in with passkey");
+    } catch (error) {
+      toast("Failed to sign in with passkey");
+    }
+    return null;
+  }, null);
 
   return (
     <Card className="mx-auto max-w-sm">
@@ -55,10 +63,8 @@ export function LoginForm() {
         <div className="grid gap-4">
           <Form {...form}>
             <form
-              onSubmit={form.handleSubmit((values) => {
-                startMagicLinkTransition(async () => {
-                  await loginMagicLink(values);
-                });
+              onSubmit={form.handleSubmit(async (values) => {
+                await loginMagicLink(values);
               })}
               className="space-y-4"
             >
@@ -78,9 +84,9 @@ export function LoginForm() {
               <Button
                 type="submit"
                 className="w-full"
-                disabled={isMagicLinkPending}
+                disabled={form.formState.isSubmitting}
               >
-                {isMagicLinkPending ? "Logging in..." : "Login"}
+                {form.formState.isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>
@@ -97,18 +103,7 @@ export function LoginForm() {
           <Button
             variant="outline"
             disabled={isPasskeyPending}
-            onClick={() =>
-              startPasskeyTransition(async () => {
-                try {
-                  await signIn("passkey");
-
-                  router.push("/");
-                  toast("Successfully signed in with passkey");
-                } catch (error) {
-                  toast("Failed to sign in with passkey");
-                }
-              })
-            }
+            onClick={() => passkeyAction()}
           >
             {isPasskeyPending ? "Signing in..." : "Sign in with Passkey"}
           </Button>
