@@ -8,6 +8,13 @@
       "when": 1730676362459,
       "tag": "0000_empty_swordsman",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1731108513093,
+      "tag": "0001_large_lester",
+      "breakpoints": true
     }
   ]
 }

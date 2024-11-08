@@ -107,7 +107,7 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
-  ownerId: text("owner_id")
+  photographerId: text("photographer_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" })
@@ -168,16 +168,54 @@ export const UsersToAlbums = pgTable(
   }),
 );
 
+export const PhotographerClients = pgTable("photographer_clients", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  photographerId: text("photographer_id")
+    .notNull()
+    .references(() => Users.id, { onDelete: "cascade" }),
+  clientId: text("client_id")
+    .notNull()
+    .references(() => Users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { mode: "date" })
+    .notNull()
+    .$defaultFn(() => new Date()),
+  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
+    () => new Date(),
+  ),
+});
+
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
-  ownedAlbums: many(Albums, { relationName: "owner" }),
+  photographerAlbums: many(Albums, { relationName: "photographer" }),
+  photographerClients: many(PhotographerClients, {
+    relationName: "photographer",
+  }),
+  clientPhotographers: many(PhotographerClients, { relationName: "client" }),
 }));
+
+export const PhotographerClientsRelations = relations(
+  PhotographerClients,
+  ({ one }) => ({
+    photographer: one(Users, {
+      fields: [PhotographerClients.photographerId],
+      references: [Users.id],
+      relationName: "photographer",
+    }),
+    client: one(Users, {
+      fields: [PhotographerClients.clientId],
+      references: [Users.id],
+      relationName: "client",
+    }),
+  }),
+);
 
 export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   photos: many(Photos),
   usersToAlbums: many(UsersToAlbums),
-  owner: one(Users, {
-    fields: [Albums.ownerId],
+  photographer: one(Users, {
+    fields: [Albums.photographerId],
     references: [Users.id],
   }),
 }));
