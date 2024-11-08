@@ -40,7 +40,7 @@ function SelectedUser({
   name: string | null;
 }) {
   return (
-    <div className="flex items-center gap-x-2">
+    <div className="inline-flex items-center gap-x-2">
       <Avatar className="size-8">
         <AvatarImage src={image ?? undefined} alt={name ?? ""} />
         <AvatarFallback>
