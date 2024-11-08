@@ -23,14 +23,14 @@ export type AlbumColumn = InferSelectModel<typeof schema.Albums> & {
 
 interface DataTableProps {
   data: AlbumColumn[];
-  totalPages?: number;
-  currentPage?: number;
+  totalPages: number;
+  currentPage: number;
 }
 
-export function AlbumsTable({
+export function AlbumsDataTable({
   data,
-  currentPage = 1,
-  totalPages = 1,
+  currentPage,
+  totalPages,
 }: DataTableProps) {
   const [searchParams, setSearchParams] = useQueryStates(
     albumsSearchParamsParsers,

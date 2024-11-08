@@ -4,10 +4,10 @@ import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchParams } from "nuqs/server";
-import { AlbumsTable } from "~/app/dashboard/p/albums/albums-table";
+import { AlbumsDataTable } from "~/app/dashboard/p/albums/albums-data-table";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
-import { albumSearchParamsCache } from "~/app/dashboard/p/albums/search-params";
 import { auth } from "~/auth";
+import { searchParamsCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
@@ -18,9 +18,7 @@ export default async function AlbumsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { page, filters, sort } = albumSearchParamsCache.parse(
-    await searchParams,
-  );
+  const { page, filters, sort } = searchParamsCache.parse(await searchParams);
   const session = await auth();
 
   if (!isPhotographer(session?.user)) {
@@ -108,7 +106,11 @@ export default async function AlbumsPage({
         </Button>
       </div>
 
-      <AlbumsTable data={albums} currentPage={page} totalPages={totalPages} />
+      <AlbumsDataTable
+        data={albums}
+        currentPage={page}
+        totalPages={totalPages}
+      />
     </div>
   );
 }
