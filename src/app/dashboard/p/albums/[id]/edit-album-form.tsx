@@ -3,14 +3,17 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InferSelectModel } from "drizzle-orm";
 import invariant from "invariant";
-import { Trash2 } from "lucide-react";
+import { Trash2, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useOptimistic, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { deletePhoto } from "~/app/dashboard/p/albums/[id]/actions";
+import { SelectedUser } from "~/app/dashboard/p/albums/[id]/selected-user";
 import { updateAlbum } from "~/app/dashboard/p/albums/actions";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
@@ -24,33 +27,12 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import { ScrollArea } from "~/components/ui/scroll-area";
 import { Textarea } from "~/components/ui/textarea";
 import { Albums, Photos, Users } from "~/db/schema";
 import { UploadDropzone } from "~/lib/uploadthing";
-import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
-import Link from "next/link";
+import { cn } from "~/lib/utils";
 import { isAdmin } from "~/role";
-import { useSession } from "next-auth/react";
-
-function SelectedUser({
-  image,
-  name,
-}: {
-  image: string | null;
-  name: string | null;
-}) {
-  return (
-    <div className="inline-flex items-center gap-x-2">
-      <Avatar className="size-8">
-        <AvatarImage src={image ?? undefined} alt={name ?? ""} />
-        <AvatarFallback>
-          {name?.slice(0, 2).toUpperCase() ?? "??"}
-        </AvatarFallback>
-      </Avatar>
-      <span className="text-sm group-hover:underline">{name}</span>
-    </div>
-  );
-}
 
 const albumFormSchema = z.object({
   name: z.string().min(2, {
@@ -114,6 +96,7 @@ export function EditAlbumForm({
                 users: values.users || [],
               });
               toast.success("Album updated successfully");
+              form.reset(form.getValues());
             } catch (error) {
               toast.error("Failed to update album");
             }
@@ -146,7 +129,7 @@ export function EditAlbumForm({
             <FormItem>
               <FormLabel>Description</FormLabel>
               <FormControl>
-                <Textarea placeholder="Enter description" {...field} />
+                <Textarea placeholder="Enter description" rows={5} {...field} />
               </FormControl>
               <FormDescription>
                 A brief description of the album's contents.
@@ -159,26 +142,28 @@ export function EditAlbumForm({
         <FormField
           control={form.control}
           name="users"
-          render={({ field }) => (
+          render={({ field, fieldState }) => (
             <FormItem>
-              <FormLabel>User</FormLabel>
+              <FormLabel>Clients</FormLabel>
               <div className="space-y-4">
                 <Combobox
                   options={users.map((user) => ({
                     value: user.id,
                     label: user.name ?? "",
                   }))}
-                  placeholder="Select users..."
+                  placeholder="Select clients..."
                   value={field.value}
                   onValueChange={field.onChange}
                   multiple
                 />
               </div>
-              <FormDescription>The user who owns this album.</FormDescription>
+              <FormDescription>
+                The clients this album is shared with.
+              </FormDescription>
               <FormMessage />
 
               {field.value.length > 0 ? (
-                <div className="flex flex-col items-start gap-2">
+                <div className="flex flex-wrap gap-2">
                   {field.value
                     .toSorted((a, b) => {
                       const userA = users.find((u) => u.id === a)?.name ?? "";
@@ -189,19 +174,48 @@ export function EditAlbumForm({
                     .map((userId) => {
                       const user = users.find((u) => u.id === userId);
 
-                      return user ? (
-                        isAdmin(session.data?.user) ? (
-                          <Link
-                            key={user.id}
-                            href={`/dashboard/a/users/${user.id}`}
-                            className="inline-block group"
+                      return (
+                        <div
+                          key={userId}
+                          className="flex gap-1 border bg-muted has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10 rounded-full p-1 items-center"
+                        >
+                          {user ? (
+                            isAdmin(session.data?.user) ? (
+                              <Link
+                                key={user.id}
+                                href={`/dashboard/a/users/${user.id}`}
+                                className="group h-8"
+                              >
+                                <SelectedUser
+                                  image={user.image}
+                                  name={user.name}
+                                />
+                              </Link>
+                            ) : (
+                              <SelectedUser
+                                image={user.image}
+                                name={user.name}
+                              />
+                            )
+                          ) : null}
+
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="size-8 rounded-full hover:bg-destructive hover:text-destructive-foreground"
+                            onClick={() => {
+                              form.setValue(
+                                "users",
+                                field.value.filter((id) => id !== userId),
+                                { shouldDirty: true },
+                              );
+                            }}
                           >
-                            <SelectedUser image={user.image} name={user.name} />
-                          </Link>
-                        ) : (
-                          <SelectedUser image={user.image} name={user.name} />
-                        )
-                      ) : null;
+                            <span className="sr-only">Remove user</span>
+                            <X className="size-4" />
+                          </Button>
+                        </div>
+                      );
                     })}
                 </div>
               ) : null}
@@ -209,91 +223,118 @@ export function EditAlbumForm({
           )}
         />
 
-        <Button type="submit" disabled={isUpdating}>
-          {isUpdating ? "Saving..." : "Save Changes"}
-        </Button>
+        <div>
+          <Button type="submit" disabled={isUpdating}>
+            {isUpdating ? "Saving..." : "Save Changes"}
+          </Button>
 
-        <div className="space-y-4">
-          <FormLabel>Album Photos</FormLabel>
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {optimisticPhotos.map((photo, index) => (
-              <div
-                key={photo.url}
-                className="relative aspect-square"
-                style={{ opacity: photo.isRemoving ? 0.5 : 1 }}
-              >
-                <Image
-                  src={photo.url}
-                  alt={`Photo ${index + 1}`}
-                  fill
-                  className="rounded-lg object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="destructive"
-                  size="sm"
-                  className="absolute right-2 top-2"
-                  disabled={photo.isRemoving}
-                  onClick={() => {
-                    startRemoveTransition(async () => {
-                      try {
-                        // Mark the photo as removing
-                        const updatedPhotos = optimisticPhotos.map((p) =>
-                          p.key === photo.key ? { ...p, isRemoving: true } : p,
-                        );
-                        setOptimisticPhotos(updatedPhotos);
+          <p
+            className={cn(
+              "mt-2 text-sm",
+              form.formState.isDirty ? "text-destructive" : "text-green-500",
+            )}
+          >
+            {form.formState.isDirty ? (
+              <span>
+                ⚠️ You have unsaved changes. Click "Save Changes" to update the
+                album users.
+              </span>
+            ) : (
+              <span>✓ All changes saved</span>
+            )}
+          </p>
+        </div>
 
-                        await deletePhoto(photo.key);
+        <div>
+          <FormLabel>Photos</FormLabel>
 
-                        toast.success("Photo deleted successfully");
-                        router.refresh();
-                      } catch (error) {
-                        // Revert the removing state on error
-                        const revertedPhotos = optimisticPhotos.map((p) =>
-                          p.key === photo.key ? { ...p, isRemoving: false } : p,
-                        );
-                        setOptimisticPhotos(revertedPhotos);
-                        toast.error("Failed to delete photo");
-                      }
-                    });
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete photo</span>
-                </Button>
+          <div className="grid grid-cols-2">
+            <UploadDropzone
+              endpoint="albumPhotos"
+              input={{
+                albumId: album.id,
+              }}
+              onClientUploadComplete={(res) => {
+                if (res) {
+                  startUpdateTransition(() => {
+                    setOptimisticPhotos([
+                      ...optimisticPhotos,
+                      ...res.map((photo) => ({
+                        url: photo.url,
+                        key: photo.key,
+                        albumId: album.id,
+                        id: Math.random().toString(),
+                        caption: "",
+                        order: 0,
+                        updatedAt: new Date(),
+                        uploadedAt: new Date(),
+                      })),
+                    ]);
+                  });
+                  router.refresh();
+                  toast.success("Photos uploaded successfully!");
+                }
+              }}
+              onUploadError={(error: Error) => {
+                toast.error(`Upload failed: ${error.message}`);
+              }}
+            />
+            <ScrollArea className="mt-2 h-[400px]">
+              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+                {optimisticPhotos.map((photo, index) => (
+                  <div
+                    key={photo.url}
+                    className="relative aspect-square"
+                    style={{ opacity: photo.isRemoving ? 0.5 : 1 }}
+                  >
+                    <Image
+                      src={photo.url}
+                      alt={`Photo ${index + 1}`}
+                      fill
+                      className="rounded-lg object-cover"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="sm"
+                      className="absolute right-2 top-2"
+                      disabled={photo.isRemoving}
+                      onClick={() => {
+                        startRemoveTransition(async () => {
+                          try {
+                            // Mark the photo as removing
+                            const updatedPhotos = optimisticPhotos.map((p) =>
+                              p.key === photo.key
+                                ? { ...p, isRemoving: true }
+                                : p,
+                            );
+                            setOptimisticPhotos(updatedPhotos);
+
+                            await deletePhoto(photo.key);
+
+                            toast.success("Photo deleted successfully");
+                            router.refresh();
+                          } catch (error) {
+                            // Revert the removing state on error
+                            const revertedPhotos = optimisticPhotos.map((p) =>
+                              p.key === photo.key
+                                ? { ...p, isRemoving: false }
+                                : p,
+                            );
+                            setOptimisticPhotos(revertedPhotos);
+                            toast.error("Failed to delete photo");
+                          }
+                        });
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                      <span className="sr-only">Delete photo</span>
+                    </Button>
+                  </div>
+                ))}
               </div>
-            ))}
+            </ScrollArea>
           </div>
-          <UploadDropzone
-            endpoint="albumPhotos"
-            input={{
-              albumId: album.id,
-            }}
-            onClientUploadComplete={(res) => {
-              if (res) {
-                startUpdateTransition(() => {
-                  setOptimisticPhotos([
-                    ...optimisticPhotos,
-                    ...res.map((photo) => ({
-                      url: photo.url,
-                      key: photo.key,
-                      albumId: album.id,
-                      id: Math.random().toString(),
-                      caption: "",
-                      order: 0,
-                      updatedAt: new Date(),
-                      uploadedAt: new Date(),
-                    })),
-                  ]);
-                });
-                router.refresh();
-                toast.success("Photos uploaded successfully!");
-              }
-            }}
-            onUploadError={(error: Error) => {
-              toast.error(`Upload failed: ${error.message}`);
-            }}
-          />
         </div>
       </form>
     </Form>
