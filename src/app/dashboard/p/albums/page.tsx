@@ -1,4 +1,4 @@
-import { and, asc, count, desc, eq, sql, SQL } from "drizzle-orm";
+import { and, asc, count, desc, eq, ilike, or, sql, SQL } from "drizzle-orm";
 import invariant from "invariant";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -30,26 +30,19 @@ export default async function AlbumsPage({
   // Parse page number from query params
   const offset = (page - 1) * ITEMS_PER_PAGE;
 
-  const [{ count: totalCount }] = await db
-    .select({ count: count() })
-    .from(Albums)
-    .where(
-      isAdmin(session.user) ? undefined : eq(Albums.ownerId, session.user.id),
-    );
-
   let whereClause = isAdmin(session.user)
     ? undefined
     : eq(Albums.ownerId, session.user.id);
 
-  if (filters.length > 0) {
-    for (const filter of filters) {
-      if (filter.id === "name") {
-        whereClause = and(
-          whereClause,
-          sql`SIMILARITY(${Albums.name}, ${filter.value}) > 0.1`,
-        );
-      }
-    }
+  const nameFilter = filters.find((filter) => filter.id === "name");
+
+  if (nameFilter) {
+    whereClause = and(whereClause, ilike(Albums.name, `%${nameFilter.value}%`));
+
+    whereClause = or(
+      whereClause,
+      sql`SIMILARITY(${Albums.name}, ${nameFilter.value}) > 0.1`,
+    );
   }
 
   let orderByClause: SQL<unknown>[] = [];
@@ -91,6 +84,11 @@ export default async function AlbumsPage({
       users: album.usersToAlbums.map(({ user }) => user),
     }));
   });
+
+  const [{ count: totalCount }] = await db
+    .select({ count: count() })
+    .from(Albums)
+    .where(whereClause);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 

@@ -1,4 +1,4 @@
-import { and, asc, count, desc, ilike, SQL } from "drizzle-orm";
+import { and, asc, count, desc, ilike, or, sql, SQL } from "drizzle-orm";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -27,22 +27,21 @@ export default async function UsersPage({
 
   const offset = (page - 1) * ITEMS_PER_PAGE;
 
-  const [{ count: totalCount }] = await db
-    .select({ count: count() })
-    .from(schema.Users);
-
   let whereClause: SQL<unknown> | undefined;
   let orderByClause: SQL<unknown>[] = [];
 
-  if (filters.length > 0) {
-    const nameFilter = filters.find((filter) => filter.id === "name");
+  const nameFilter = filters.find((filter) => filter.id === "name");
 
-    if (nameFilter) {
-      whereClause = and(
-        whereClause,
-        ilike(schema.Users.name, `%${nameFilter.value}%`),
-      );
-    }
+  if (nameFilter) {
+    whereClause = and(
+      whereClause,
+      ilike(schema.Users.name, `%${nameFilter.value}%`),
+    );
+
+    whereClause = or(
+      whereClause,
+      sql`SIMILARITY(${schema.Users.name}, ${nameFilter.value}) > 0.3`,
+    );
   }
 
   // Add any user-specified sort criteria after the match priority
@@ -69,6 +68,11 @@ export default async function UsersPage({
     limit: ITEMS_PER_PAGE,
     offset,
   });
+
+  const [{ count: totalCount }] = await db
+    .select({ count: count() })
+    .from(schema.Users)
+    .where(whereClause);
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
