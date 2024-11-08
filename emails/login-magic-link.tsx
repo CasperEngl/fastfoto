@@ -1,110 +1,78 @@
 import {
   Body,
+  Button,
   Container,
   Head,
   Heading,
   Html,
   Link,
   Preview,
+  Tailwind,
   Text,
 } from "@react-email/components";
+import dayjs from "dayjs";
+import { buttonVariants } from "~/components/ui/button";
 import { env } from "~/env";
 
 interface LoginMagicLinkEmailProps {
   loginUrl: string;
+  expiresAt: number;
 }
 
-export const LoginMagicLinkEmail = ({ loginUrl }: LoginMagicLinkEmailProps) => (
-  <Html>
-    <Head />
-    <Preview>Sign in to Fast Foto</Preview>
-    <Body style={main}>
-      <Container style={container}>
-        <Heading style={h1}>Sign in to Fast Foto</Heading>
-        <Link
-          href={loginUrl}
-          target="_blank"
-          style={{
-            ...link,
-            display: "block",
-            marginBottom: "16px",
-          }}
-        >
-          Click here to sign in to your account
-        </Link>
-        <Text
-          style={{
-            ...text,
-            color: "#ababab",
-            marginTop: "14px",
-            marginBottom: "16px",
-          }}
-        >
-          If you didn't request this sign in, you can safely ignore this email.
-        </Text>
-        <Text style={footer}>
-          <Link
-            href={env.APP_URL}
-            target="_blank"
-            style={{ ...link, color: "#898989" }}
-          >
-            Fast Foto
-          </Link>
-          {" - "}Your photography platform
-        </Text>
-      </Container>
-    </Body>
-  </Html>
-);
+export function LoginMagicLinkEmail({
+  loginUrl,
+  expiresAt,
+}: LoginMagicLinkEmailProps) {
+  return (
+    <Html>
+      <Head />
+      <Preview>Magic link to sign in to Fast Foto</Preview>
+      <Tailwind>
+        <Body className="bg-white font-sans">
+          <Container className="mx-auto px-3">
+            <Heading className="my-10 font-sans text-2xl font-bold text-gray-800">
+              Sign in to Fast Foto
+            </Heading>
+            <Button
+              href={loginUrl}
+              target="_blank"
+              className={buttonVariants({
+                className: "w-full bg-[hsl(240_5.9%_10%)] text-[hsl(0_0%_98%)]",
+              })}
+            >
+              Click here to sign in to your account
+            </Button>
+
+            <Text className="mb-4 mt-3.5 font-sans text-sm text-gray-400">
+              If you didn't request this sign in, you can safely ignore this
+              email.
+            </Text>
+
+            <Text className="mt-3.5 font-sans text-sm text-gray-400">
+              This link will expire on{" "}
+              {dayjs(expiresAt).format("MMMM D, YYYY h:mm A")}
+            </Text>
+
+            <Text className="mb-6 mt-3 font-sans text-xs leading-6 text-gray-500">
+              <Link
+                href={env.APP_URL}
+                target="_blank"
+                className="font-sans text-xs text-gray-500 underline"
+              >
+                Fast Foto
+              </Link>
+              {" - "}Your photography platform
+            </Text>
+          </Container>
+        </Body>
+      </Tailwind>
+    </Html>
+  );
+}
 
 LoginMagicLinkEmail.PreviewProps = {
-  loginUrl: "https://login.example.com/verify?code=1234-5678-9012",
+  loginUrl: new URL("/login", env.APP_URL).toString(),
+  expiresAt: Date.now(),
 } as LoginMagicLinkEmailProps;
 
 export default LoginMagicLinkEmail;
-
-const main = {
-  backgroundColor: "#ffffff",
-};
-
-const container = {
-  paddingLeft: "12px",
-  paddingRight: "12px",
-  margin: "0 auto",
-};
-
-const h1 = {
-  color: "#333",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-  fontSize: "24px",
-  fontWeight: "bold",
-  margin: "40px 0",
-  padding: "0",
-};
-
-const link = {
-  color: "#2754C5",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-  fontSize: "14px",
-  textDecoration: "underline",
-};
-
-const text = {
-  color: "#333",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-  fontSize: "14px",
-  margin: "24px 0",
-};
-
-const footer = {
-  color: "#898989",
-  fontFamily:
-    "-apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif",
-  fontSize: "12px",
-  lineHeight: "22px",
-  marginTop: "12px",
-  marginBottom: "24px",
-};
