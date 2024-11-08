@@ -45,9 +45,10 @@ export default async function AlbumsPage({
     );
   }
 
-  let orderByClause: SQL<unknown>[] = [];
+  let orderByClause: SQL<unknown>[] = [desc(Albums.updatedAt)];
 
   if (sort.length > 0) {
+    orderByClause = [];
     for (const column of sort) {
       // @ts-expect-error column.id should be a valid Albums column
       const albumsColumn = Albums[column.id];
