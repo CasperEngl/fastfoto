@@ -1,4 +1,4 @@
-import { and, asc, count, desc, sql, SQL } from "drizzle-orm";
+import { and, asc, count, desc, ilike, SQL } from "drizzle-orm";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -18,6 +18,7 @@ export default async function UsersPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { page, filters, sort } = searchParamsCache.parse(await searchParams);
+  console.log("page", page);
   const session = await auth();
 
   if (!isAdmin(session?.user)) {
@@ -31,24 +32,24 @@ export default async function UsersPage({
     .from(schema.Users);
 
   let whereClause: SQL<unknown> | undefined;
+  let orderByClause: SQL<unknown>[] = [];
 
   if (filters.length > 0) {
-    for (const filter of filters) {
-      if (filter.id === "name") {
-        whereClause = and(
-          whereClause,
-          sql`SIMILARITY(${schema.Users.name}, ${filter.value}) > 0.1`,
-        );
-      }
+    const nameFilter = filters.find((filter) => filter.id === "name");
+
+    if (nameFilter) {
+      whereClause = and(
+        whereClause,
+        ilike(schema.Users.name, `%${nameFilter.value}%`),
+      );
     }
   }
 
-  let orderByClause: SQL<unknown>[] = [];
-
+  // Add any user-specified sort criteria after the match priority
   if (sort.length > 0) {
     for (const column of sort) {
       // @ts-expect-error column.id should be a valid Users column
-      const usersColumn = Users[column.id];
+      const usersColumn = schema.Users[column.id];
 
       if (!usersColumn) {
         console.warn(`Invalid column: ${column.id}`);
