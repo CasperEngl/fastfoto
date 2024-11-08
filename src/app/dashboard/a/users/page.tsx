@@ -1,22 +1,75 @@
+import { and, asc, count, desc, sql, SQL } from "drizzle-orm";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { columns } from "~/app/dashboard/a/users/columns";
-import { DataTable } from "~/app/dashboard/a/users/data-table";
+import { SearchParams } from "nuqs/server";
+import { ITEMS_PER_PAGE } from "~/app/dashboard/a/users/config";
+import { UsersDataTable } from "~/app/dashboard/a/users/users-data-table";
 import { auth } from "~/auth";
+import { searchParamsCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
-import { Users } from "~/db/schema";
+import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
-export default async function UsersPage() {
+export default async function UsersPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const { page, filters, sort } = searchParamsCache.parse(await searchParams);
   const session = await auth();
 
   if (!isAdmin(session?.user)) {
     return notFound();
   }
 
-  const users = await db.select().from(Users);
+  const offset = (page - 1) * ITEMS_PER_PAGE;
+
+  const [{ count: totalCount }] = await db
+    .select({ count: count() })
+    .from(schema.Users);
+
+  let whereClause: SQL<unknown> | undefined;
+
+  if (filters.length > 0) {
+    for (const filter of filters) {
+      if (filter.id === "name") {
+        whereClause = and(
+          whereClause,
+          sql`SIMILARITY(${schema.Users.name}, ${filter.value}) > 0.1`,
+        );
+      }
+    }
+  }
+
+  let orderByClause: SQL<unknown>[] = [];
+
+  if (sort.length > 0) {
+    for (const column of sort) {
+      // @ts-expect-error column.id should be a valid Users column
+      const usersColumn = Users[column.id];
+
+      if (!usersColumn) {
+        console.warn(`Invalid column: ${column.id}`);
+        continue;
+      }
+
+      orderByClause = [
+        ...orderByClause,
+        column.desc ? desc(usersColumn) : asc(usersColumn),
+      ];
+    }
+  }
+
+  const users = await db.query.Users.findMany({
+    where: whereClause,
+    orderBy: orderByClause,
+    limit: ITEMS_PER_PAGE,
+    offset,
+  });
+
+  const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
   return (
     <div className="container mx-auto py-10">
@@ -29,7 +82,8 @@ export default async function UsersPage() {
           </Link>
         </Button>
       </div>
-      <DataTable columns={columns} data={users} />
+
+      <UsersDataTable data={users} currentPage={page} totalPages={totalPages} />
     </div>
   );
 }
