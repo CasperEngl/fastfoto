@@ -27,6 +27,30 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import { Albums, Photos, Users } from "~/db/schema";
 import { UploadDropzone } from "~/lib/uploadthing";
+import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import Link from "next/link";
+import { isAdmin } from "~/role";
+import { useSession } from "next-auth/react";
+
+function SelectedUser({
+  image,
+  name,
+}: {
+  image: string | null;
+  name: string | null;
+}) {
+  return (
+    <div className="flex items-center gap-x-2">
+      <Avatar className="size-8">
+        <AvatarImage src={image ?? undefined} alt={name ?? ""} />
+        <AvatarFallback>
+          {name?.slice(0, 2).toUpperCase() ?? "??"}
+        </AvatarFallback>
+      </Avatar>
+      <span className="text-sm group-hover:underline">{name}</span>
+    </div>
+  );
+}
 
 const albumFormSchema = z.object({
   name: z.string().min(2, {
@@ -52,6 +76,7 @@ export function EditAlbumForm({
   };
   users: InferSelectModel<typeof Users>[];
 }) {
+  const session = useSession();
   const router = useRouter();
   const params = useParams();
   const [isUpdating, startUpdateTransition] = useTransition();
@@ -137,12 +162,13 @@ export function EditAlbumForm({
           render={({ field }) => (
             <FormItem>
               <FormLabel>User</FormLabel>
-              <div>
+              <div className="space-y-4">
                 <Combobox
                   options={users.map((user) => ({
                     value: user.id,
                     label: user.name ?? "",
                   }))}
+                  placeholder="Select users..."
                   value={field.value}
                   onValueChange={field.onChange}
                   multiple
@@ -150,6 +176,35 @@ export function EditAlbumForm({
               </div>
               <FormDescription>The user who owns this album.</FormDescription>
               <FormMessage />
+
+              {field.value.length > 0 ? (
+                <div className="flex flex-col gap-2">
+                  {field.value
+                    .toSorted((a, b) => {
+                      const userA = users.find((u) => u.id === a)?.name ?? "";
+                      const userB = users.find((u) => u.id === b)?.name ?? "";
+
+                      return userA.localeCompare(userB);
+                    })
+                    .map((userId) => {
+                      const user = users.find((u) => u.id === userId);
+
+                      return user ? (
+                        isAdmin(session.data?.user) ? (
+                          <Link
+                            key={user.id}
+                            href={`/dashboard/a/users/${user.id}`}
+                            className="block group"
+                          >
+                            <SelectedUser image={user.image} name={user.name} />
+                          </Link>
+                        ) : (
+                          <SelectedUser image={user.image} name={user.name} />
+                        )
+                      ) : null;
+                    })}
+                </div>
+              ) : null}
             </FormItem>
           )}
         />

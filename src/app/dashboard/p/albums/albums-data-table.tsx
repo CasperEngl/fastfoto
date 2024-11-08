@@ -6,12 +6,18 @@ import { InferSelectModel } from "drizzle-orm";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useQueryStates } from "nuqs";
+import { useState } from "react";
 import { AlbumActions } from "~/app/dashboard/p/albums/album-actions";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
 import { DataTable, searchParamsParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "~/components/ui/popover";
 import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
@@ -75,7 +81,9 @@ export function AlbumsDataTable({
         header: "Description",
         enableSorting: false,
         cell: ({ row }) => (
-          <span className="line-clamp-3">{row.getValue("description")}</span>
+          <span className="line-clamp-3 max-w-[18rem]">
+            {row.getValue("description")}
+          </span>
         ),
       },
       {
@@ -83,11 +91,13 @@ export function AlbumsDataTable({
         header: "Users",
         enableSorting: false,
         cell: ({ row }) => {
+          const [open, setOpen] = useState(false);
           const session = useSession();
+          const previewCount = 2;
 
           return (
-            <div className="flex flex-col gap-y-1">
-              {row.original.users.map((user) =>
+            <div className="flex flex-col items-start gap-y-1">
+              {row.original.users.slice(0, previewCount).map((user) =>
                 isAdmin(session.data?.user) ? (
                   <Link
                     key={user.id}
@@ -101,6 +111,42 @@ export function AlbumsDataTable({
                     {user.name}
                   </span>
                 ),
+              )}
+              {row.original.users.length > previewCount && (
+                <Popover open={open} onOpenChange={setOpen}>
+                  <PopoverTrigger asChild>
+                    <button
+                      className="text-sm text-muted-foreground hover:underline"
+                      onMouseEnter={() => setOpen(true)}
+                      onMouseLeave={() => setOpen(false)}
+                    >
+                      +{row.original.users.length - previewCount} more
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="py-2 px-4 max-w-min"
+                    onMouseEnter={() => setOpen(true)}
+                    onMouseLeave={() => setOpen(false)}
+                  >
+                    <div className="flex flex-col gap-y-1">
+                      {row.original.users.slice(previewCount).map((user) =>
+                        isAdmin(session.data?.user) ? (
+                          <Link
+                            key={user.id}
+                            href={`/dashboard/a/users/${user.id}`}
+                            className="block hover:underline"
+                          >
+                            {user.name}
+                          </Link>
+                        ) : (
+                          <span key={user.id} className="block">
+                            {user.name}
+                          </span>
+                        ),
+                      )}
+                    </div>
+                  </PopoverContent>
+                </Popover>
               )}
             </div>
           );

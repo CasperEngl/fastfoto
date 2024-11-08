@@ -105,32 +105,7 @@ export function Combobox({
         >
           <div>
             <div className="flex flex-wrap gap-1">
-              {multiple ? (
-                (value as string[]).length > 0 ? (
-                  (value as string[]).map((val) => (
-                    <Badge key={val} variant="default" className="mr-1">
-                      {options.find((option) => option.value === val)?.label}
-                      <button
-                        className="ml-1 rounded-full outline-none ring-offset-background focus:ring-2 focus:ring-ring focus:ring-offset-2"
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") {
-                            removeValue(val);
-                          }
-                        }}
-                        onMouseDown={(e) => {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }}
-                        onClick={() => removeValue(val)}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))
-                ) : (
-                  <span className="text-muted-foreground">{placeholder}</span>
-                )
-              ) : value ? (
+              {!multiple && value ? (
                 options.find((option) => option.value === value)?.label
               ) : (
                 <span className="text-muted-foreground">{placeholder}</span>
