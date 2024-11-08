@@ -1,20 +1,20 @@
 "use client";
 
-import { Checkbox } from "@radix-ui/react-checkbox";
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
 import dayjs from "dayjs";
-import { Link } from "lucide-react";
+import { InferSelectModel } from "drizzle-orm";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { AlbumActions } from "~/app/dashboard/p/albums/album-actions";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
 import { albumsSearchParamsParsers } from "~/app/dashboard/p/albums/search-params";
 import { DataTable } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
+import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
-import { isAdmin } from "~/role";
 import * as schema from "~/db/schema";
-import { InferSelectModel } from "drizzle-orm";
+import { isAdmin } from "~/role";
 
 export type AlbumColumn = InferSelectModel<typeof schema.Albums> & {
   users: InferSelectModel<typeof schema.Users>[];
@@ -67,7 +67,7 @@ export function AlbumsTable({
         header: "Name",
         cell: ({ row }) => (
           <Link
-            href={`/p/albums/${row.original.id}`}
+            href={`/dashboard/p/albums/${row.original.id}`}
             className="hover:underline"
           >
             {row.getValue("name")}
@@ -95,7 +95,7 @@ export function AlbumsTable({
                 isAdmin(session.data?.user) ? (
                   <Link
                     key={user.id}
-                    href={`/a/users/${user.id}`}
+                    href={`/dashboard/a/users/${user.id}`}
                     className="block hover:underline"
                   >
                     {user.name}
