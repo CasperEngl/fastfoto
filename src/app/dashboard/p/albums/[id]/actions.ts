@@ -1,11 +1,11 @@
 "use server";
 
 import { eq } from "drizzle-orm";
-import { utapi } from "~/app/api/uploadthing/core";
-import { db } from "~/db/client";
-import { Photos, Albums } from "~/db/schema";
 import { notFound } from "next/navigation";
+import { utapi } from "~/app/api/uploadthing/core";
 import { auth } from "~/auth";
+import { db } from "~/db/client";
+import { Photos } from "~/db/schema";
 import { isPhotographer } from "~/role";
 
 export async function deletePhoto(key: string) {

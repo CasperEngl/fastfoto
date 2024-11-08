@@ -1,12 +1,11 @@
-import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { UTApi } from "uploadthing/server";
-import { UploadThingError } from "uploadthing/server";
-import { auth } from "~/auth";
 import crypto from "crypto";
+import { eq } from "drizzle-orm";
+import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { UploadThingError, UTApi } from "uploadthing/server";
 import { z } from "zod";
+import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Photos, Users } from "~/db/schema";
-import { eq } from "drizzle-orm";
 
 const f = createUploadthing();
 

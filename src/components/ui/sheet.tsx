@@ -5,8 +5,8 @@ import { cva, type VariantProps } from "class-variance-authority";
 import * as React from "react";
 
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
-import { cn } from "~/lib/utils";
 import { X } from "lucide-react";
+import { cn } from "~/lib/utils";
 
 const Sheet = SheetPrimitive.Root;
 

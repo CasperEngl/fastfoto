@@ -1,8 +1,8 @@
 import Image from "next/image";
 
+import Link from "next/link";
 import { Container } from "~/app/components/container";
 import { Button } from "~/components/ui/button";
-import Link from "next/link";
 
 export function Hero() {
   return (

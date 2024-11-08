@@ -1,4 +1,4 @@
-import { SortingState, ColumnFiltersState } from "@tanstack/react-table";
+import { ColumnFiltersState, SortingState } from "@tanstack/react-table";
 import {
   createSearchParamsCache,
   parseAsInteger,

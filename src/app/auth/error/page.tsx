@@ -1,9 +1,9 @@
 import { AlertCircle } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
-import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
-import { Button } from "~/components/ui/button";
 import Link from "next/link";
 import { z } from "zod";
+import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
+import { Button } from "~/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "~/components/ui/card";
 
 const searchParamsSchema = z.object({
   error: z.string().optional().default("Default"),

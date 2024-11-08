@@ -1,9 +1,10 @@
 "use client";
 
-import * as React from "react";
 import { Check, ChevronsUpDown, X } from "lucide-react";
+import * as React from "react";
 
-import { cn } from "~/lib/utils";
+import invariant from "invariant";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Command,
@@ -18,8 +19,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
-import { Badge } from "~/components/ui/badge";
-import invariant from "invariant";
+import { cn } from "~/lib/utils";
 
 export interface ComboboxOption {
   value: string;

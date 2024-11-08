@@ -1,11 +1,10 @@
 "use client";
 
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
+import { Camera, Image as ImageIcon, Users } from "lucide-react";
 import Image from "next/image";
-import { useId } from "react";
 import { Container } from "~/app/components/container";
 import { cn } from "~/lib/utils";
-import { Camera, Image as ImageIcon, Users } from "lucide-react";
 
 interface Feature {
   name: string | React.ReactNode;

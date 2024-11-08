@@ -2,8 +2,8 @@ import { cookies } from "next/headers";
 import { Toaster } from "sonner";
 import { AppSidebar } from "~/components/app-sidebar";
 import {
-  SidebarProvider,
   SidebarInset,
+  SidebarProvider,
   SidebarTrigger,
 } from "~/components/ui/sidebar";
 
