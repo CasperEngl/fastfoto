@@ -1,6 +1,7 @@
 import { CallToAction } from "~/app/components/call-to-action";
 import { Faqs } from "~/app/components/faqs";
 import { Footer } from "~/app/components/footer";
+import { GalleryFeatures } from "~/app/components/gallery-features";
 import { Header } from "~/app/components/header";
 import { Hero } from "~/app/components/hero";
 import { Pricing } from "~/app/components/pricing";
@@ -16,6 +17,7 @@ export default function Home() {
         <Hero />
         <PrimaryFeatures />
         <SecondaryFeatures />
+        <GalleryFeatures />
         <CallToAction />
         <Testimonials />
         <Pricing />
