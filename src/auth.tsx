@@ -57,7 +57,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           from: "Fast Foto <noreply@casperengelmann.com>",
           to: params.identifier,
           subject: "Sign in to Fast Foto",
-          react: <LoginMagicLinkEmail loginUrl={params.url} />,
+          react: (
+            <LoginMagicLinkEmail
+              loginUrl={params.url}
+              expiresAt={params.expires.getTime()}
+            />
+          ),
         });
       },
     }),
