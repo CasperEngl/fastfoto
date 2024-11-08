@@ -230,14 +230,14 @@ export function EditAlbumForm({
 
           <p
             className={cn(
-              "mt-2 text-sm",
+              "mt-2 text-sm max-w-prose text-pretty",
               form.formState.isDirty ? "text-destructive" : "text-green-500",
             )}
           >
             {form.formState.isDirty ? (
               <span>
-                ⚠️ You have unsaved changes. Click "Save Changes" to update the
-                album users.
+                ⚠️ Unsaved changes detected. Please save your changes by
+                clicking "Save Changes".
               </span>
             ) : (
               <span>✓ All changes saved</span>
