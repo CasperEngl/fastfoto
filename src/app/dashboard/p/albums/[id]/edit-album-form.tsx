@@ -177,7 +177,7 @@ export function EditAlbumForm({
                       return (
                         <div
                           key={userId}
-                          className="flex gap-1 border bg-muted has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10 rounded-full p-1 items-center"
+                          className="flex gap-x-2 border bg-muted has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10 rounded-full px-2 py-1.5 items-center"
                         >
                           {user ? (
                             isAdmin(session.data?.user) ? (
