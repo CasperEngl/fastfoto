@@ -1,0 +1,13 @@
+diff --git a/bin.cjs b/bin.cjs
+index 0c0d41a0f77990b1f7c030bda7e07c0b2687a377..14cf39503555ebd1aa469f9741d5811874b7ef40 100755
+--- a/bin.cjs
++++ b/bin.cjs
+@@ -29882,7 +29882,7 @@ var init_snapshotsDiffer = __esm({
+           if (policiesInPreviousState.length > 0 && policiesInCurrentState.length === 0 && !table4.isRLSEnabled) {
+             jsonDisableRLSStatements.push({ type: "disable_rls", tableName: table4.name, schema: table4.schema });
+           }
+-          if (table4.isRLSEnabled !== tableInPreviousState.isRLSEnabled) {
++          if (table4.isRLSEnabled !== tableInPreviousState?.isRLSEnabled) {
+             if (table4.isRLSEnabled) {
+               jsonEnableRLSStatements.push({ type: "enable_rls", tableName: table4.name, schema: table4.schema });
+             } else if (!table4.isRLSEnabled && policiesInCurrentState.length === 0) {
