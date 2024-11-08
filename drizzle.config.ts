@@ -1,10 +1,11 @@
 import { defineConfig } from "drizzle-kit";
 import invariant from "invariant";
+import { env } from "~/env";
 
 const dbUrl =
   process.env.NODE_ENV === "production"
-    ? process.env.DATABASE_URL
-    : process.env.DATABASE_URL_EXTERNAL;
+    ? env.DATABASE_URL
+    : env.DATABASE_URL_EXTERNAL;
 
 invariant(dbUrl, "dbUrl is required");
 
