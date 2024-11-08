@@ -78,7 +78,7 @@ for (const photographer of photographers) {
           }),
         ),
         description: faker.lorem.paragraph(),
-        ownerId: photographer[0].id,
+        photographerId: photographer[0].id,
       })
       .returning()
       .execute();

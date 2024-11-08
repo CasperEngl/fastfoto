@@ -32,7 +32,7 @@ export default async function AlbumsPage({
 
   let whereClause = isAdmin(session.user)
     ? undefined
-    : eq(Albums.ownerId, session.user.id);
+    : eq(Albums.photographerId, session.user.id);
 
   const nameFilter = filters.find((filter) => filter.id === "name");
 

@@ -61,7 +61,7 @@ export function CreateAlbumForm({
             try {
               const album = await createAlbum({
                 ...values,
-                ownerId: session.data.user.id,
+                photographerId: session.data.user.id,
               });
               toast.success("Album created successfully");
               router.push(`/dashboard/p/albums/${album.id}`);
