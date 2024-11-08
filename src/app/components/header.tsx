@@ -98,7 +98,7 @@ export function Header() {
                 <NavLink href="/login">Sign in</NavLink>
               </div>
             ) : null}
-            <Button asChild color="blue">
+            <Button asChild>
               <Link href={session.data?.user ? "/dashboard" : "/login"}>
                 <span>
                   {session.data?.user ? (
