@@ -176,6 +176,10 @@ export function UsersDataTable({
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
           onChange={(event) => {
             table.getColumn("name")?.setFilterValue(event.target.value);
+
+            setSearchParams({
+              page: 1,
+            });
           }}
           className="max-w-sm"
         />
@@ -183,7 +187,16 @@ export function UsersDataTable({
 
       <DataTable table={table} />
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onNextPage={() => {
+          setSearchParams({ page: currentPage + 1 });
+        }}
+        onPreviousPage={() => {
+          setSearchParams({ page: currentPage - 1 });
+        }}
+      />
     </div>
   );
 }

@@ -8,8 +8,7 @@ import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { AlbumActions } from "~/app/dashboard/p/albums/album-actions";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
-import { albumsSearchParamsParsers } from "~/app/dashboard/p/albums/search-params";
-import { DataTable } from "~/components/data-table";
+import { DataTable, searchParamsParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
@@ -32,12 +31,9 @@ export function AlbumsDataTable({
   currentPage,
   totalPages,
 }: DataTableProps) {
-  const [searchParams, setSearchParams] = useQueryStates(
-    albumsSearchParamsParsers,
-    {
-      shallow: false,
-    },
-  );
+  const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
+    shallow: false,
+  });
 
   const table = useReactTable({
     data,
@@ -199,16 +195,29 @@ export function AlbumsDataTable({
         <Input
           placeholder="Filter by name..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => {
+            table.getColumn("name")?.setFilterValue(event.target.value);
+
+            setSearchParams({
+              page: 1,
+            });
+          }}
           className="max-w-sm"
         />
       </div>
 
       <DataTable table={table} />
 
-      <Pagination currentPage={currentPage} totalPages={totalPages} />
+      <Pagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        onNextPage={() => {
+          setSearchParams({ page: currentPage + 1 });
+        }}
+        onPreviousPage={() => {
+          setSearchParams({ page: currentPage - 1 });
+        }}
+      />
     </div>
   );
 }
