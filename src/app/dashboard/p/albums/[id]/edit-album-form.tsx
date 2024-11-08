@@ -178,7 +178,7 @@ export function EditAlbumForm({
               <FormMessage />
 
               {field.value.length > 0 ? (
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col items-start gap-2">
                   {field.value
                     .toSorted((a, b) => {
                       const userA = users.find((u) => u.id === a)?.name ?? "";
@@ -194,7 +194,7 @@ export function EditAlbumForm({
                           <Link
                             key={user.id}
                             href={`/dashboard/a/users/${user.id}`}
-                            className="block group"
+                            className="inline-block group"
                           >
                             <SelectedUser image={user.image} name={user.name} />
                           </Link>
