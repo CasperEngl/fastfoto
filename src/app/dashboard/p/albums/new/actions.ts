@@ -27,7 +27,7 @@ export async function createAlbum(
       .values({
         name: data.name,
         description: data.description,
-        photographerId: session.user.id,
+        teamId: session.user.teamId,
       })
       .returning();
 
