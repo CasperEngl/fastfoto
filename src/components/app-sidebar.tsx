@@ -1,12 +1,14 @@
 "use client";
 
 import { InferSelectModel } from "drizzle-orm";
-import { Album, Home, Users } from "lucide-react";
+import invariant from "invariant";
+import { Album, ArrowLeft, Home, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavUser } from "~/components/nav-user";
 import { TeamSwitcher } from "~/components/team-switcher";
+import { Button } from "~/components/ui/button";
 import {
   Sidebar,
   SidebarContent,
@@ -29,11 +31,23 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
   const pathname = usePathname();
   const session = useSession();
 
+  invariant(session.data?.user, "User is required");
+
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarContent>
         {teams.length > 0 ? (
-          <SidebarGroup>
+          <SidebarGroup className="items-start">
+            <Button
+              asChild
+              variant="link"
+              className="items-center p-0 px-2 text-xs [&_svg]:size-3"
+            >
+              <Link href="/">
+                <ArrowLeft className="-translate-y-px" />
+                Frontpage
+              </Link>
+            </Button>
             <SidebarGroupLabel>Team</SidebarGroupLabel>
             <TeamSwitcher teams={teams} activeTeam={activeTeam} />
           </SidebarGroup>
@@ -48,9 +62,9 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                 isActive={pathname === "/"}
                 tooltip="Home"
               >
-                <Link href="/">
+                <Link href="/dashboard">
                   <Home />
-                  Home
+                  Dashboard
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
@@ -107,7 +121,7 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={session.data?.user} />
+        <NavUser user={session.data.user} />
       </SidebarFooter>
     </Sidebar>
   );
