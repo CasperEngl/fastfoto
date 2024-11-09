@@ -1,5 +1,4 @@
 import { faker } from "@faker-js/faker";
-import { and, eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { capitalize } from "lodash-es";
 import { db, pool } from "~/db/client";
@@ -93,11 +92,14 @@ for (const photographer of photographers) {
   );
 
   for (const member of randomTeamMembers) {
-    await db.insert(schema.TeamMembers).values({
-      userId: member[0].id,
-      teamId: team[0].id,
-      role: "member",
-    });
+    await db
+      .insert(schema.TeamMembers)
+      .values({
+        userId: member[0].id,
+        teamId: team[0].id,
+        role: "member",
+      })
+      .onConflictDoNothing();
   }
 
   const numAlbums = faker.number.int({ min: 2, max: 5 });
@@ -125,10 +127,13 @@ for (const photographer of photographers) {
 
     for (const client of randomClients) {
       // Create team-client relationship
-      await db.insert(schema.TeamClients).values({
-        teamId: team[0].id,
-        userId: client[0].id,
-      });
+      await db
+        .insert(schema.TeamClients)
+        .values({
+          teamId: team[0].id,
+          userId: client[0].id,
+        })
+        .onConflictDoNothing();
 
       // Add client to album
       await db.insert(schema.UsersToAlbums).values({
