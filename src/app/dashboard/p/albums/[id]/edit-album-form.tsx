@@ -13,8 +13,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 import { deletePhoto } from "~/app/dashboard/p/albums/[id]/actions";
-import { SelectedUser } from "~/app/dashboard/p/albums/[id]/selected-user";
 import { updateAlbum } from "~/app/dashboard/p/albums/actions";
+import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
 import {
@@ -142,7 +142,7 @@ export function EditAlbumForm({
         <FormField
           control={form.control}
           name="users"
-          render={({ field, fieldState }) => (
+          render={({ field }) => (
             <FormItem>
               <FormLabel>Clients</FormLabel>
               <div className="space-y-4">
@@ -177,7 +177,7 @@ export function EditAlbumForm({
                       return (
                         <div
                           key={userId}
-                          className="flex gap-x-2 border bg-muted has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10 rounded-full px-2 py-1.5 items-center"
+                          className="flex items-center gap-x-2 rounded-full border bg-muted px-2 py-1.5 has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10"
                         >
                           {user ? (
                             isAdmin(session.data?.user) ? (
@@ -230,7 +230,7 @@ export function EditAlbumForm({
 
           <p
             className={cn(
-              "mt-2 text-sm max-w-prose text-pretty",
+              "mt-2 max-w-prose text-pretty text-sm",
               form.formState.isDirty ? "text-destructive" : "text-green-500",
             )}
           >
