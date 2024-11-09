@@ -143,9 +143,6 @@ export const Albums = pgTable("albums", {
   teamId: text("team_id")
     .notNull()
     .references(() => Teams.id, { onDelete: "cascade" }),
-  photographerId: text("photographer_id").references(() => Users.id, {
-    onDelete: "set null",
-  }),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
     () => new Date(),
@@ -222,7 +219,6 @@ export const PhotographerClients = pgTable("photographer_clients", {
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
   teams: many(TeamMembers),
-  photographerAlbums: many(Albums, { relationName: "photographer" }),
   clientPhotographers: many(PhotographerClients, { relationName: "client" }),
 }));
 
@@ -264,10 +260,6 @@ export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   team: one(Teams, {
     fields: [Albums.teamId],
     references: [Teams.id],
-  }),
-  photographer: one(Users, {
-    fields: [Albums.photographerId],
-    references: [Users.id],
   }),
 }));
 

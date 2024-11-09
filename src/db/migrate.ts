@@ -88,8 +88,7 @@ for (const photographer of photographers) {
           }),
         ),
         description: faker.lorem.paragraph(),
-        photographerId: photographer[0].id,
-        teamId: team[0].id, // Add the team ID here
+        teamId: team[0].id,
       })
       .returning()
       .execute();
