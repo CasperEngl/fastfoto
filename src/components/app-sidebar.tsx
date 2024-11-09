@@ -1,9 +1,11 @@
 "use client";
 
+import { InferSelectModel } from "drizzle-orm";
 import { Album, Home, LogIn, LogOut, Settings, Users } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { TeamSwitcher } from "~/components/team-switcher";
 import {
   Sidebar,
   SidebarContent,
@@ -14,15 +16,28 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
+import type * as schema from "~/db/schema";
 import { isAdmin, isClient, isPhotographer } from "~/role";
 
-export function AppSidebar() {
+interface AppSidebarProps {
+  teams: InferSelectModel<typeof schema.Teams>[];
+  activeTeam: InferSelectModel<typeof schema.Teams>;
+}
+
+export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
   const pathname = usePathname();
   const session = useSession();
 
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarContent>
+        {teams.length > 0 ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Team</SidebarGroupLabel>
+            <TeamSwitcher teams={teams} activeTeam={activeTeam} />
+          </SidebarGroup>
+        ) : null}
+
         <SidebarGroup>
           <SidebarGroupLabel>Navigation</SidebarGroupLabel>
           <SidebarMenu>
