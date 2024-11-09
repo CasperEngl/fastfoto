@@ -15,14 +15,20 @@ import type * as schema from "~/db/schema";
 
 const pluralize = new Intl.PluralRules("en-US");
 
-export function TeamsManager({
-  teams,
-}: {
-  teams: Array<
-    InferSelectModel<typeof schema.Teams> & {
-      members: Array<InferSelectModel<typeof schema.Users>>;
+export type ManagedTeam = InferSelectModel<typeof schema.Teams> & {
+  members: Array<
+    InferSelectModel<typeof schema.Users> & {
+      role: InferSelectModel<typeof schema.TeamMembers>["role"];
     }
   >;
+};
+
+export function TeamsManager({
+  teams,
+  userManagableTeams,
+}: {
+  teams: Array<ManagedTeam>;
+  userManagableTeams: Array<string>;
 }) {
   const [teamId, setTeamId] = useQueryState(
     "teamId",
@@ -72,7 +78,11 @@ export function TeamsManager({
       </Sidebar>
 
       <div className="flex-1 p-8">
-        <TeamSettingsForm key={selectedTeam.id} team={selectedTeam} />
+        <TeamSettingsForm
+          key={selectedTeam.id}
+          team={selectedTeam}
+          userManagableTeams={userManagableTeams}
+        />
       </div>
     </div>
   );

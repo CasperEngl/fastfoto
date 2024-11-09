@@ -1,12 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InferSelectModel } from "drizzle-orm";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
 import { updateTeam } from "~/app/dashboard/u/settings/actions";
+import { ManagedTeam } from "~/app/dashboard/u/settings/teams-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Button } from "~/components/ui/button";
 import {
@@ -19,8 +19,8 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import type * as schema from "~/db/schema";
 import { UploadButton } from "~/lib/uploadthing";
+import { cn } from "~/lib/utils";
 
 const teamFormSchema = z.object({
   name: z.string().min(2, {
@@ -31,10 +31,10 @@ const teamFormSchema = z.object({
 
 export function TeamSettingsForm({
   team,
+  userManagableTeams,
 }: {
-  team: InferSelectModel<typeof schema.Teams> & {
-    members: Array<InferSelectModel<typeof schema.Users>>;
-  };
+  team: ManagedTeam;
+  userManagableTeams: Array<string>;
 }) {
   const router = useRouter();
   const form = useForm<z.infer<typeof teamFormSchema>>({
@@ -44,9 +44,10 @@ export function TeamSettingsForm({
       members: team.members.map((member) => member.id),
     },
   });
+  const canManageTeam = userManagableTeams.includes(team.id);
 
   return (
-    <div className="space-y-8">
+    <fieldset className="space-y-8" disabled={!canManageTeam}>
       <div className="flex items-center gap-x-6">
         <Avatar className="size-24">
           <AvatarImage
@@ -57,6 +58,11 @@ export function TeamSettingsForm({
         </Avatar>
 
         <UploadButton
+          className={cn(
+            !canManageTeam
+              ? "[&_[data-ut-element=button]]:cursor-default [&_[data-ut-element=button]]:opacity-50"
+              : null,
+          )}
           endpoint="teamLogo"
           input={{
             teamId: team.id,
@@ -113,6 +119,6 @@ export function TeamSettingsForm({
           </Button>
         </form>
       </Form>
-    </div>
+    </fieldset>
   );
 }
