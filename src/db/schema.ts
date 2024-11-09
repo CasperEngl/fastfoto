@@ -16,6 +16,8 @@ export const userType = pgEnum("user_type", [
   "client",
 ]);
 
+export const teamRole = pgEnum("team_role", ["owner", "admin", "member"]);
+
 export const Users = pgTable("users", {
   id: text("id")
     .primaryKey()
@@ -51,11 +53,12 @@ export const Accounts = pgTable(
     id_token: text("id_token"),
     session_state: text("session_state"),
   },
-  (account) => ({
-    compoundKey: primaryKey({
-      columns: [account.provider, account.providerAccountId],
+  (t) => [
+    primaryKey({
+      name: "accounts_pk",
+      columns: [t.provider, t.providerAccountId],
     }),
-  }),
+  ],
 );
 
 export const Sessions = pgTable("sessions", {
@@ -73,11 +76,12 @@ export const VerificationTokens = pgTable(
     token: text("token").notNull(),
     expires: timestamp("expires", { mode: "date" }).notNull(),
   },
-  (verificationToken) => ({
-    compositePk: primaryKey({
-      columns: [verificationToken.identifier, verificationToken.token],
+  (t) => [
+    primaryKey({
+      name: "verification_tokens_pk",
+      columns: [t.identifier, t.token],
     }),
-  }),
+  ],
 );
 
 export const Authenticators = pgTable(
@@ -94,11 +98,58 @@ export const Authenticators = pgTable(
     credentialBackedUp: boolean("credential_backed_up").notNull(),
     transports: text("transports"),
   },
-  (authenticator) => ({
-    compositePK: primaryKey({
-      columns: [authenticator.userId, authenticator.credentialID],
+  (t) => [
+    primaryKey({
+      name: "authenticators_pk",
+      columns: [t.userId, t.credentialID],
     }),
-  }),
+  ],
+);
+
+export const Teams = pgTable("teams", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name").notNull(),
+  logo: text("logo"),
+  createdById: text("created_by_id")
+    .references(() => Users.id, { onDelete: "cascade" })
+    .notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+export const TeamMembers = pgTable("team_members", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  teamId: text("team_id")
+    .references(() => Teams.id, { onDelete: "cascade" })
+    .notNull(),
+  userId: text("user_id")
+    .references(() => Users.id, { onDelete: "cascade" })
+    .notNull(),
+  role: teamRole("role").notNull().default("member"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const UsersToTeams = pgTable(
+  "users_to_teams",
+  {
+    userId: text("user_id")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade" }),
+    teamId: text("team_id")
+      .notNull()
+      .references(() => Teams.id, { onDelete: "cascade" }),
+    role: teamRole("role").notNull().default("member"),
+  },
+  (t) => [
+    primaryKey({
+      name: "users_to_teams_pk",
+      columns: [t.userId, t.teamId],
+    }),
+  ],
 );
 
 export const Albums = pgTable("albums", {
@@ -107,9 +158,12 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
-  photographerId: text("photographer_id")
+  teamId: text("team_id")
     .notNull()
-    .references(() => Users.id, { onDelete: "cascade" }),
+    .references(() => Teams.id, { onDelete: "cascade" }),
+  photographerId: text("photographer_id").references(() => Users.id, {
+    onDelete: "set null",
+  }),
   createdAt: timestamp("created_at", { mode: "date" })
     .notNull()
     .$defaultFn(() => new Date()),
@@ -163,18 +217,21 @@ export const UsersToAlbums = pgTable(
       .notNull()
       .references(() => Albums.id, { onDelete: "cascade" }),
   },
-  (t) => ({
-    pk: primaryKey({ columns: [t.userId, t.albumId] }),
-  }),
+  (t) => [
+    primaryKey({
+      name: "users_to_albums_pk",
+      columns: [t.userId, t.albumId],
+    }),
+  ],
 );
 
 export const PhotographerClients = pgTable("photographer_clients", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  photographerId: text("photographer_id")
+  teamId: text("team_id")
     .notNull()
-    .references(() => Users.id, { onDelete: "cascade" }),
+    .references(() => Teams.id, { onDelete: "cascade" }),
   clientId: text("client_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
@@ -188,20 +245,34 @@ export const PhotographerClients = pgTable("photographer_clients", {
 
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
+  teams: many(UsersToTeams),
   photographerAlbums: many(Albums, { relationName: "photographer" }),
-  photographerClients: many(PhotographerClients, {
-    relationName: "photographer",
-  }),
   clientPhotographers: many(PhotographerClients, { relationName: "client" }),
+}));
+
+export const TeamsRelations = relations(Teams, ({ many }) => ({
+  members: many(UsersToTeams),
+  albums: many(Albums),
+  clients: many(PhotographerClients),
+}));
+
+export const UsersToTeamsRelations = relations(UsersToTeams, ({ one }) => ({
+  team: one(Teams, {
+    fields: [UsersToTeams.teamId],
+    references: [Teams.id],
+  }),
+  user: one(Users, {
+    fields: [UsersToTeams.userId],
+    references: [Users.id],
+  }),
 }));
 
 export const PhotographerClientsRelations = relations(
   PhotographerClients,
   ({ one }) => ({
-    photographer: one(Users, {
-      fields: [PhotographerClients.photographerId],
-      references: [Users.id],
-      relationName: "photographer",
+    team: one(Teams, {
+      fields: [PhotographerClients.teamId],
+      references: [Teams.id],
     }),
     client: one(Users, {
       fields: [PhotographerClients.clientId],
@@ -214,6 +285,10 @@ export const PhotographerClientsRelations = relations(
 export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   photos: many(Photos),
   usersToAlbums: many(UsersToAlbums),
+  team: one(Teams, {
+    fields: [Albums.teamId],
+    references: [Teams.id],
+  }),
   photographer: one(Users, {
     fields: [Albums.photographerId],
     references: [Users.id],
