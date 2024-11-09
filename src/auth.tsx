@@ -17,7 +17,13 @@ declare module "next-auth" {
   }
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+export const {
+  handlers,
+  auth,
+  signIn,
+  signOut,
+  unstable_update: updateSession,
+} = NextAuth({
   debug: env.APP_DEBUG,
   pages: {
     verifyRequest: "/auth/verify",
@@ -41,7 +47,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           team: true,
         },
       });
-      console.log("userTeams", userTeams);
       const userPersonalTeam = userTeams?.find((team) => team.role === "owner");
       const selectedTeamId = session.user.teamId ?? userPersonalTeam?.teamId;
 
