@@ -29,6 +29,13 @@
       "when": 1731189915206,
       "tag": "0003_white_wendigo",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1731193352178,
+      "tag": "0004_wandering_reaper",
+      "breakpoints": true
     }
   ]
 }

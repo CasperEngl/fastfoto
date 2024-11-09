@@ -1,3 +1,4 @@
+CREATE EXTENSION IF NOT EXISTS pg_trgm;--> statement-breakpoint
 CREATE TYPE "public"."team_role" AS ENUM('owner', 'admin', 'member');--> statement-breakpoint
 CREATE TYPE "public"."user_type" AS ENUM('admin', 'photographer', 'client');--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "accounts" (
