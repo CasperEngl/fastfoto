@@ -185,3 +185,60 @@ export async function updateTeam(
 
   return updatedTeam;
 }
+
+export async function removeMember(teamId: string, memberId: string) {
+  await new Promise((resolve) => setTimeout(resolve, 2000));
+  const session = await auth();
+
+  invariant(session?.user?.id, "Not authenticated");
+
+  // Verify user has permission to remove members (owner or admin)
+  const currentUserMember = await db.query.TeamMembers.findFirst({
+    where: (members, { and, eq, or }) => {
+      invariant(session?.user?.id, "Not authenticated");
+
+      const isTeamMember = and(
+        eq(members.teamId, teamId),
+        eq(members.userId, session.user.id),
+      );
+
+      const hasPermission = or(
+        eq(members.role, "owner"),
+        eq(members.role, "admin"),
+      );
+
+      return and(isTeamMember, hasPermission);
+    },
+  });
+
+  if (!currentUserMember) {
+    throw new Error("Not authorized to remove team members");
+  }
+
+  // Get the member to be removed
+  const memberToRemove = await db.query.TeamMembers.findFirst({
+    where: (members, { and, eq }) =>
+      and(eq(members.teamId, teamId), eq(members.userId, memberId)),
+  });
+
+  if (!memberToRemove) {
+    throw new Error("Member not found");
+  }
+
+  // Prevent removing the team owner
+  if (memberToRemove.role === "owner") {
+    throw new Error("Cannot remove the team owner");
+  }
+
+  // If user is admin, they can't remove other admins
+  if (currentUserMember.role === "admin" && memberToRemove.role === "admin") {
+    throw new Error("Admins cannot remove other admins");
+  }
+
+  // Remove the member
+  await db
+    .delete(TeamMembers)
+    .where(
+      and(eq(TeamMembers.teamId, teamId), eq(TeamMembers.userId, memberId)),
+    );
+}
