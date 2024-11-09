@@ -1,12 +1,13 @@
 "use server";
 
-import { eq } from "drizzle-orm";
+import { and, eq, InferInsertModel } from "drizzle-orm";
 import VerifyEmailChangeEmail from "emails/verify-email-change";
+import invariant from "invariant";
 import ms from "ms";
 import { nanoid } from "nanoid";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { Users, VerificationTokens } from "~/db/schema";
+import { TeamMembers, Teams, Users, VerificationTokens } from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
 
@@ -50,4 +51,137 @@ export async function requestEmailChange(newEmail: string) {
     subject: "Verify your email change",
     react: <VerifyEmailChangeEmail verificationLink={verificationLink} />,
   });
+}
+
+export async function createTeam(data: { name: string }) {
+  const session = await auth();
+
+  invariant(session?.user?.id, "Not authenticated");
+
+  // Create the team
+  const [team] = await db
+    .insert(Teams)
+    .values({
+      name: data.name,
+      createdById: session.user.id,
+    })
+    .returning();
+
+  // Add the creator as the team owner
+  await db.insert(TeamMembers).values({
+    teamId: team.id,
+    userId: session.user.id,
+    role: "owner",
+  });
+
+  return team;
+}
+
+export async function deleteTeam(teamId: string) {
+  const session = await auth();
+
+  invariant(session?.user?.id, "Not authenticated");
+
+  // Verify user is the team owner
+  const teamMember = await db.query.TeamMembers.findFirst({
+    where: (members, { and, eq }) => {
+      invariant(session?.user?.id, "Not authenticated");
+
+      return and(
+        eq(members.teamId, teamId),
+        eq(members.userId, session.user.id),
+        eq(members.role, "owner"),
+      );
+    },
+  });
+
+  if (!teamMember) {
+    throw new Error("Not authorized to delete team");
+  }
+
+  // Delete team members first (due to foreign key constraints)
+  await db.delete(TeamMembers).where(eq(TeamMembers.teamId, teamId));
+
+  // Delete the team
+  await db.delete(Teams).where(eq(Teams.id, teamId));
+}
+
+export async function leaveTeam(teamId: string) {
+  const session = await auth();
+
+  invariant(session?.user?.id, "Not authenticated");
+
+  // Check if user is the owner
+  const teamMember = await db.query.TeamMembers.findFirst({
+    where: (members, { and, eq }) => {
+      invariant(session?.user?.id, "Not authenticated");
+
+      return and(
+        eq(members.teamId, teamId),
+        eq(members.userId, session.user.id!),
+      );
+    },
+  });
+
+  if (!teamMember) {
+    throw new Error("Not a member of this team");
+  }
+
+  if (teamMember.role === "owner") {
+    throw new Error("Team owner cannot leave. Delete the team instead.");
+  }
+
+  // Remove user from team
+  await db
+    .delete(TeamMembers)
+    .where(
+      and(
+        eq(TeamMembers.teamId, teamId),
+        eq(TeamMembers.userId, session.user.id),
+      ),
+    );
+}
+
+export async function updateTeam(
+  data: Omit<InferInsertModel<typeof Teams>, "createdById"> & {
+    id: string;
+  },
+) {
+  const session = await auth();
+
+  invariant(session?.user?.id, "Not authenticated");
+
+  // Verify user is the team owner or admin
+  const teamMember = await db.query.TeamMembers.findFirst({
+    where: (members, { and, eq, or }) => {
+      invariant(session?.user?.id, "Not authenticated");
+
+      const isTeamMember = and(
+        eq(members.teamId, data.id),
+        eq(members.userId, session.user.id),
+      );
+
+      const hasPermission = or(
+        eq(members.role, "owner"),
+        eq(members.role, "admin"),
+      );
+
+      return and(isTeamMember, hasPermission);
+    },
+  });
+
+  if (!teamMember) {
+    throw new Error("Not authorized to update team");
+  }
+
+  // Update the team
+  const [updatedTeam] = await db
+    .update(Teams)
+    .set({
+      name: data.name,
+    })
+    .where(eq(Teams.id, data.id))
+    .returning();
+
+  return updatedTeam;
 }
