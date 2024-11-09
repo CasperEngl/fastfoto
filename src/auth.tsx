@@ -7,20 +7,12 @@ import Passkey from "next-auth/providers/passkey";
 import Resend from "next-auth/providers/resend";
 import { revalidatePath } from "next/cache";
 import { db } from "~/db/client";
-import {
-  Accounts,
-  Authenticators,
-  Sessions,
-  Teams,
-  Users,
-  UsersToTeams,
-  VerificationTokens,
-} from "~/db/schema";
+import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
 
 declare module "next-auth" {
-  interface User extends InferSelectModel<typeof Users> {
+  interface User extends InferSelectModel<typeof schema.Users> {
     teamId: string;
   }
 }
@@ -32,19 +24,19 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     error: "/auth/error",
   },
   adapter: DrizzleAdapter(db, {
-    usersTable: Users,
-    accountsTable: Accounts,
-    authenticatorsTable: Authenticators,
-    verificationTokensTable: VerificationTokens,
-    sessionsTable: Sessions,
+    usersTable: schema.Users,
+    accountsTable: schema.Accounts,
+    authenticatorsTable: schema.Authenticators,
+    verificationTokensTable: schema.VerificationTokens,
+    sessionsTable: schema.Sessions,
   }),
   experimental: {
     enableWebAuthn: true,
   },
   callbacks: {
     session: async ({ session, user }) => {
-      const userTeams = await db.query.UsersToTeams.findMany({
-        where: eq(UsersToTeams.userId, user.id),
+      const userTeams = await db.query.TeamMembers.findMany({
+        where: eq(schema.TeamMembers.userId, user.id),
         with: {
           team: true,
         },
@@ -69,19 +61,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         // Ensure user has a personal team
         const [existingPersonalTeam] = await db
           .select()
-          .from(Teams)
-          .innerJoin(UsersToTeams, eq(Teams.id, UsersToTeams.teamId))
+          .from(schema.Teams)
+          .innerJoin(
+            schema.TeamMembers,
+            eq(schema.Teams.id, schema.TeamMembers.teamId),
+          )
           .where(
             and(
-              eq(UsersToTeams.userId, user.id),
-              eq(UsersToTeams.role, "owner"),
+              eq(schema.TeamMembers.userId, user.id),
+              eq(schema.TeamMembers.role, "owner"),
             ),
           );
 
         if (!existingPersonalTeam) {
           // Create personal team
           const [team] = await db
-            .insert(Teams)
+            .insert(schema.Teams)
             .values({
               name: user.name ? `${user.name}'s Team` : "My Team",
               createdById: user.id,
@@ -89,7 +84,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             .returning();
 
           // Associate user with team as owner
-          await db.insert(UsersToTeams).values({
+          await db.insert(schema.TeamMembers).values({
             userId: user.id,
             teamId: team.id,
             role: "owner",

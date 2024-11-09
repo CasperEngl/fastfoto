@@ -67,7 +67,7 @@ for (const photographer of photographers) {
 
   // Add photographer to team as owner
   await db
-    .insert(schema.UsersToTeams)
+    .insert(schema.TeamMembers)
     .values({
       userId: photographer[0].id,
       teamId: team[0].id,
@@ -104,11 +104,11 @@ for (const photographer of photographers) {
       // Check if the client is already a member of the team
       const existingMembership = await db
         .select()
-        .from(schema.UsersToTeams)
+        .from(schema.TeamMembers)
         .where(
           and(
-            eq(schema.UsersToTeams.userId, client[0].id),
-            eq(schema.UsersToTeams.teamId, team[0].id),
+            eq(schema.TeamMembers.userId, client[0].id),
+            eq(schema.TeamMembers.teamId, team[0].id),
           ),
         )
         .limit(1);
@@ -116,7 +116,7 @@ for (const photographer of photographers) {
       if (existingMembership.length === 0) {
         // Add client to team as member only if not already a member
         await db
-          .insert(schema.UsersToTeams)
+          .insert(schema.TeamMembers)
           .values({
             userId: client[0].id,
             teamId: team[0].id,

@@ -22,8 +22,8 @@ export default async function SettingsPage({
     return redirect("/login");
   }
 
-  const userTeams = await db.query.UsersToTeams.findMany({
-    where: eq(schema.UsersToTeams.userId, session.user.id),
+  const userTeams = await db.query.TeamMembers.findMany({
+    where: eq(schema.TeamMembers.userId, session.user.id),
     with: {
       team: {
         with: {
