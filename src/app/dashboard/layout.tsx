@@ -3,11 +3,10 @@ import invariant from "invariant";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Toaster } from "sonner";
-import { TEAM_COOKIE_NAME } from "~/app/globals";
+import { SIDEBAR_COOKIE_NAME, TEAM_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { AppSidebar } from "~/components/app-sidebar";
 import {
-  SIDEBAR_COOKIE_NAME,
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
