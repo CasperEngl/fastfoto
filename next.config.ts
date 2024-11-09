@@ -31,9 +31,12 @@ const nextConfig: NextConfig = {
     typedRoutes: true,
   },
   compiler: {
-    removeConsole: {
-      exclude: ["error", "warn", "info", "debug", "trace"],
-    },
+    removeConsole:
+      process.env.NODE_ENV === "production"
+        ? {
+            exclude: ["error", "warn", "info", "debug", "trace"],
+          }
+        : undefined,
   },
 };
 
