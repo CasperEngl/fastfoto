@@ -10,7 +10,6 @@ import {
   parseAsInteger,
   parseAsJson,
 } from "nuqs/server";
-import { columns } from "~/app/dashboard/a/users/columns";
 import {
   Table,
   TableBody,
@@ -120,7 +119,10 @@ export function DataTable<TData>({ table }: { table: ReactTable<TData> }) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={table.getAllColumns().length}
+                className="h-24 text-center"
+              >
                 No results.
               </TableCell>
             </TableRow>
