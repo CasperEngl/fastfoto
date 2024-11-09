@@ -4,7 +4,7 @@ import {
   SortingState,
 } from "@tanstack/react-table";
 import { Table as ReactTable } from "@tanstack/table-core";
-import { ArrowDown, ArrowUp, ArrowUpDown } from "lucide-react";
+import { ChevronDown, ChevronsUpDown, ChevronUp } from "lucide-react";
 import {
   createSearchParamsCache,
   parseAsInteger,
@@ -72,11 +72,11 @@ export function DataTable<TData>({ table }: { table: ReactTable<TData> }) {
                       {isSortable ? (
                         <div className="w-4">
                           {header.column.getIsSorted() === "asc" ? (
-                            <ArrowUp className="size-4" />
+                            <ChevronUp className="size-4" />
                           ) : header.column.getIsSorted() === "desc" ? (
-                            <ArrowDown className="size-4" />
+                            <ChevronDown className="size-4" />
                           ) : (
-                            <ArrowUpDown className="size-4" />
+                            <ChevronsUpDown className="size-4" />
                           )}
                         </div>
                       ) : null}
