@@ -3,9 +3,11 @@ import invariant from "invariant";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Toaster } from "sonner";
+import { TEAM_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { AppSidebar } from "~/components/app-sidebar";
 import {
+  SIDEBAR_COOKIE_NAME,
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
@@ -25,7 +27,7 @@ export default async function DashboardLayout({
   }
 
   const cookieStore = await cookies();
-  const defaultOpen = cookieStore.get("sidebar:state")?.value === "true";
+  const defaultOpen = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value === "true";
   // Get all teams that the current user is a member of
   const user = await db.query.Users.findFirst({
     where: eq(schema.Users.id, session.user.id),
@@ -39,7 +41,9 @@ export default async function DashboardLayout({
   });
   const personalTeam = user?.teams.find((team) => team.role === "owner")?.team;
   const userTeams = user?.teams.map((team) => team.team) ?? [];
-  const activeTeam = userTeams.find((team) => team.id === session.user?.teamId);
+  const activeTeam = userTeams.find(
+    (team) => team.id === cookieStore.get(TEAM_COOKIE_NAME)?.value,
+  );
 
   invariant(personalTeam, "Personal team not found");
 

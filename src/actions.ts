@@ -1,18 +1,13 @@
 "use server";
 
-import invariant from "invariant";
-import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 import "server-only";
-import { auth } from "~/auth";
+import { TEAM_COOKIE_NAME } from "~/app/globals";
 
-export async function changeTeam(team: string) {
-  const session = await auth();
+export async function changeTeam(teamId: string) {
+  const cookieStore = await cookies();
 
-  invariant(session?.user, "User is required");
+  cookieStore.set(TEAM_COOKIE_NAME, teamId);
 
-  session.user.teamId = team;
-
-  revalidatePath("/dashboard");
-
-  return session;
+  return teamId;
 }
