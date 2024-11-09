@@ -200,32 +200,35 @@ export const UsersToAlbums = pgTable(
   ],
 );
 
-export const PhotographerClients = pgTable("photographer_clients", {
-  id: text("id")
-    .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
-  teamId: text("team_id")
-    .notNull()
-    .references(() => Teams.id, { onDelete: "cascade" }),
-  clientId: text("client_id")
-    .notNull()
-    .references(() => Users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
-  updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
-    () => new Date(),
-  ),
-});
+export const TeamClients = pgTable(
+  "team_clients",
+  {
+    teamId: text("team_id")
+      .notNull()
+      .references(() => Teams.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (t) => [
+    primaryKey({
+      name: "team_clients_pk",
+      columns: [t.teamId, t.userId],
+    }),
+  ],
+);
 
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
   teams: many(TeamMembers),
-  clientPhotographers: many(PhotographerClients, { relationName: "client" }),
+  managedByTeams: many(TeamClients),
 }));
 
 export const TeamsRelations = relations(Teams, ({ many }) => ({
   members: many(TeamMembers),
   albums: many(Albums),
-  clients: many(PhotographerClients),
+  managedClients: many(TeamClients),
 }));
 
 export const TeamMembersRelations = relations(TeamMembers, ({ one }) => ({
@@ -238,21 +241,6 @@ export const TeamMembersRelations = relations(TeamMembers, ({ one }) => ({
     references: [Users.id],
   }),
 }));
-
-export const PhotographerClientsRelations = relations(
-  PhotographerClients,
-  ({ one }) => ({
-    team: one(Teams, {
-      fields: [PhotographerClients.teamId],
-      references: [Teams.id],
-    }),
-    client: one(Users, {
-      fields: [PhotographerClients.clientId],
-      references: [Users.id],
-      relationName: "client",
-    }),
-  }),
-);
 
 export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   photos: many(Photos),
@@ -278,5 +266,16 @@ export const PhotosRelations = relations(Photos, ({ one }) => ({
   album: one(Albums, {
     fields: [Photos.albumId],
     references: [Albums.id],
+  }),
+}));
+
+export const TeamClientsRelations = relations(TeamClients, ({ one }) => ({
+  team: one(Teams, {
+    fields: [TeamClients.teamId],
+    references: [Teams.id],
+  }),
+  user: one(Users, {
+    fields: [TeamClients.userId],
+    references: [Users.id],
   }),
 }));
