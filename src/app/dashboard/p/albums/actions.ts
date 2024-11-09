@@ -22,13 +22,18 @@ export async function deleteAlbum(albumId: string) {
     throw new Error("Album not found");
   }
 
+  // Verify user belongs to the album's team
+  if (album.teamId !== session.user.teamId) {
+    throw new Error("Unauthorized - Album belongs to different team");
+  }
+
   await db.delete(Albums).where(eq(Albums.id, albumId));
   revalidatePath("/p/albums");
 }
 
 export async function updateAlbum(
   albumId: string,
-  data: Omit<InferInsertModel<typeof Albums>, "photographerId"> & {
+  data: Omit<InferInsertModel<typeof Albums>, "teamId"> & {
     users: string[];
   },
 ) {
@@ -44,6 +49,11 @@ export async function updateAlbum(
 
   if (!album) {
     throw new Error("Album not found");
+  }
+
+  // Verify user belongs to the album's team
+  if (album.teamId !== session.user.teamId) {
+    throw new Error("Unauthorized - Album belongs to different team");
   }
 
   await db.transaction(async (tx) => {
