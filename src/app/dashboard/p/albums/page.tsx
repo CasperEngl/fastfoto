@@ -1,11 +1,13 @@
 import { and, asc, count, desc, eq, ilike, or, sql, SQL } from "drizzle-orm";
 import invariant from "invariant";
 import { Plus } from "lucide-react";
+import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchParams } from "nuqs/server";
 import { AlbumsDataTable } from "~/app/dashboard/p/albums/albums-data-table";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
+import { TEAM_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { searchParamsCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
@@ -20,8 +22,14 @@ export default async function AlbumsPage({
 }) {
   const { page, filters, sort } = searchParamsCache.parse(await searchParams);
   const session = await auth();
+  const cookieStore = await cookies();
+  const userTeamId = cookieStore.get(TEAM_COOKIE_NAME)?.value;
 
   if (!isPhotographer(session?.user)) {
+    return notFound();
+  }
+
+  if (!userTeamId) {
     return notFound();
   }
 
@@ -32,7 +40,7 @@ export default async function AlbumsPage({
 
   let whereClause = isAdmin(session.user)
     ? undefined
-    : eq(Albums.photographerId, session.user.id);
+    : eq(Albums.teamId, userTeamId);
 
   const nameFilter = filters.find((filter) => filter.id === "name");
 
