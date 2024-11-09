@@ -60,7 +60,7 @@ export function TeamSettingsForm({
         <UploadButton
           className={cn(
             !canManageTeam
-              ? "[&_[data-ut-element=button]]:cursor-default [&_[data-ut-element=button]]:opacity-50"
+              ? "[&_[data-ut-element=button]]:cursor-default [&_[data-ut-element=button]]:bg-primary [&_[data-ut-element=button]]:opacity-50"
               : null,
           )}
           endpoint="teamLogo"
