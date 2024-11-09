@@ -28,9 +28,7 @@ export const Users = pgTable("users", {
   pendingEmail: text("pending_email"),
   image: text("image"),
   userType: userType("user_type").notNull().default("client"),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
     () => new Date(),
   ),
@@ -131,26 +129,10 @@ export const TeamMembers = pgTable("team_members", {
     .notNull(),
   role: teamRole("role").notNull().default("member"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at")
+    .defaultNow()
+    .$onUpdateFn(() => new Date()),
 });
-
-export const UsersToTeams = pgTable(
-  "users_to_teams",
-  {
-    userId: text("user_id")
-      .notNull()
-      .references(() => Users.id, { onDelete: "cascade" }),
-    teamId: text("team_id")
-      .notNull()
-      .references(() => Teams.id, { onDelete: "cascade" }),
-    role: teamRole("role").notNull().default("member"),
-  },
-  (t) => [
-    primaryKey({
-      name: "users_to_teams_pk",
-      columns: [t.userId, t.teamId],
-    }),
-  ],
-);
 
 export const Albums = pgTable("albums", {
   id: text("id")
@@ -164,9 +146,7 @@ export const Albums = pgTable("albums", {
   photographerId: text("photographer_id").references(() => Users.id, {
     onDelete: "set null",
   }),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
     () => new Date(),
   ),
@@ -182,9 +162,7 @@ export const Photos = pgTable("photos", {
   url: text("url").notNull(),
   key: text("key").notNull(),
   caption: text("caption"),
-  uploadedAt: timestamp("uploaded_at", { mode: "date" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  uploadedAt: timestamp("uploaded_at", { mode: "date" }).notNull().defaultNow(),
   order: integer("order").notNull(),
   updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
     () => new Date(),
@@ -204,7 +182,7 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
   details: text("details"),
   performedAt: timestamp("performed_at", { mode: "date" })
     .notNull()
-    .$defaultFn(() => new Date()),
+    .defaultNow(),
 });
 
 export const UsersToAlbums = pgTable(
@@ -235,9 +213,7 @@ export const PhotographerClients = pgTable("photographer_clients", {
   clientId: text("client_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
-  createdAt: timestamp("created_at", { mode: "date" })
-    .notNull()
-    .$defaultFn(() => new Date()),
+  createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
     () => new Date(),
   ),
@@ -245,24 +221,24 @@ export const PhotographerClients = pgTable("photographer_clients", {
 
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
-  teams: many(UsersToTeams),
+  teams: many(TeamMembers),
   photographerAlbums: many(Albums, { relationName: "photographer" }),
   clientPhotographers: many(PhotographerClients, { relationName: "client" }),
 }));
 
 export const TeamsRelations = relations(Teams, ({ many }) => ({
-  members: many(UsersToTeams),
+  members: many(TeamMembers),
   albums: many(Albums),
   clients: many(PhotographerClients),
 }));
 
-export const UsersToTeamsRelations = relations(UsersToTeams, ({ one }) => ({
+export const TeamMembersRelations = relations(TeamMembers, ({ one }) => ({
   team: one(Teams, {
-    fields: [UsersToTeams.teamId],
+    fields: [TeamMembers.teamId],
     references: [Teams.id],
   }),
   user: one(Users, {
-    fields: [UsersToTeams.userId],
+    fields: [TeamMembers.userId],
     references: [Users.id],
   }),
 }));
