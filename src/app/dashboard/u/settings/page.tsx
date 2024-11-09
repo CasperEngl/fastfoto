@@ -1,10 +1,14 @@
+import { eq } from "drizzle-orm";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { PasskeyButton } from "~/app/dashboard/u/settings/passkey-button";
 import { SettingsForm } from "~/app/dashboard/u/settings/settings-form";
+import { TeamsManager } from "~/app/dashboard/u/settings/teams-manager";
 import { auth } from "~/auth";
 import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Separator } from "~/components/ui/separator";
+import { db } from "~/db/client";
+import * as schema from "~/db/schema";
 
 export default async function SettingsPage({
   searchParams,
@@ -14,9 +18,28 @@ export default async function SettingsPage({
   const { error, verified } = await searchParams;
   const session = await auth();
 
-  if (!session?.user) {
+  if (!session?.user?.id) {
     return redirect("/login");
   }
+
+  const userTeams = await db.query.UsersToTeams.findMany({
+    where: eq(schema.UsersToTeams.userId, session.user.id),
+    with: {
+      team: {
+        with: {
+          members: {
+            with: {
+              user: true,
+            },
+          },
+        },
+      },
+    },
+  });
+  const teams = userTeams.map((team) => ({
+    ...team.team,
+    members: team.team.members.map((member) => member.user),
+  }));
 
   return (
     <div className="container space-y-6 py-8">
@@ -53,6 +76,13 @@ export default async function SettingsPage({
         </p>
       </div>
       <PasskeyButton />
+      <div>
+        <h2 className="text-xl font-semibold tracking-tight">Teams</h2>
+        <p className="text-sm text-muted-foreground">
+          Manage your team memberships and permissions.
+        </p>
+      </div>
+      <TeamsManager teams={teams} />
     </div>
   );
 }
