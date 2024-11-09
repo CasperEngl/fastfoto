@@ -1,4 +1,5 @@
 import { faker } from "@faker-js/faker";
+import { and, eq } from "drizzle-orm";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import { capitalize } from "lodash-es";
 import { db, pool } from "~/db/client";
@@ -17,18 +18,7 @@ if (existingUsers.length > 0) {
 
 console.log("🌱 Starting database seeding...");
 
-// Create some users of different types
-const firstName = faker.person.firstName();
-await db
-  .insert(schema.Users)
-  .values({
-    name: firstName,
-    email: `admin+${firstName.toLowerCase()}@casperengelmann.com`,
-    userType: "admin",
-  })
-  .returning()
-  .execute();
-
+// Create photographers
 const photographers = await Promise.all(
   Array(3)
     .fill(null)
@@ -46,6 +36,7 @@ const photographers = await Promise.all(
     }),
 );
 
+// Create clients
 const clients = await Promise.all(
   Array(10)
     .fill(null)
@@ -63,8 +54,27 @@ const clients = await Promise.all(
     }),
 );
 
-// Create albums for photographers
+// Create teams for photographers
 for (const photographer of photographers) {
+  // Create a team for each photographer
+  const team = await db
+    .insert(schema.Teams)
+    .values({
+      name: `${photographer[0].name}'s Studio`,
+      createdById: photographer[0].id,
+    })
+    .returning();
+
+  // Add photographer to team as owner
+  await db
+    .insert(schema.UsersToTeams)
+    .values({
+      userId: photographer[0].id,
+      teamId: team[0].id,
+      role: "owner",
+    })
+    .execute();
+
   const numAlbums = faker.number.int({ min: 2, max: 5 });
 
   for (let i = 0; i < numAlbums; i++) {
@@ -79,6 +89,7 @@ for (const photographer of photographers) {
         ),
         description: faker.lorem.paragraph(),
         photographerId: photographer[0].id,
+        teamId: team[0].id, // Add the team ID here
       })
       .returning()
       .execute();
@@ -90,6 +101,31 @@ for (const photographer of photographers) {
     );
 
     for (const client of randomClients) {
+      // Check if the client is already a member of the team
+      const existingMembership = await db
+        .select()
+        .from(schema.UsersToTeams)
+        .where(
+          and(
+            eq(schema.UsersToTeams.userId, client[0].id),
+            eq(schema.UsersToTeams.teamId, team[0].id),
+          ),
+        )
+        .limit(1);
+
+      if (existingMembership.length === 0) {
+        // Add client to team as member only if not already a member
+        await db
+          .insert(schema.UsersToTeams)
+          .values({
+            userId: client[0].id,
+            teamId: team[0].id,
+            role: "member",
+          })
+          .execute();
+      }
+
+      // Add client to album
       await db
         .insert(schema.UsersToAlbums)
         .values({
@@ -97,9 +133,18 @@ for (const photographer of photographers) {
           albumId: album[0].id,
         })
         .execute();
+
+      // Create photographer-client relationship
+      await db
+        .insert(schema.PhotographerClients)
+        .values({
+          teamId: team[0].id,
+          clientId: client[0].id,
+        })
+        .execute();
     }
 
-    // Add some photos to each album
+    // Rest of the photo creation code remains the same
     const numPhotos = faker.number.int({ min: 5, max: 20 });
     for (let j = 0; j < numPhotos; j++) {
       await db
