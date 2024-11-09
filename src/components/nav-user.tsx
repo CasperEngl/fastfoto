@@ -4,14 +4,12 @@ import {
   BadgeCheck,
   Bell,
   ChevronsUpDown,
-  LogIn,
   LogOut,
   Sparkles,
   Wallet,
 } from "lucide-react";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
-import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
