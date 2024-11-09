@@ -37,13 +37,13 @@ export function TeamsManager({
   const selectedTeam = teams.find((team) => team.id === teamId) ?? teams[0];
 
   return (
-    <div className="flex overflow-clip rounded-md border border-border">
-      <Sidebar
-        collapsible="none"
-        className="grid-cols-4 divide-y divide-border border-r"
-      >
-        <SidebarContent>
-          <ScrollArea className="h-[400px]">
+    <ScrollArea className="h-[600px] rounded-md border">
+      <div className="flex">
+        <Sidebar
+          collapsible="none"
+          className="sticky top-0 grid-cols-4 divide-y divide-border border-r"
+        >
+          <SidebarContent>
             {teams.map((team) => (
               <SidebarGroupContent key={team.id} className="border-b">
                 <button
@@ -73,17 +73,17 @@ export function TeamsManager({
                 </button>
               </SidebarGroupContent>
             ))}
-          </ScrollArea>
-        </SidebarContent>
-      </Sidebar>
+          </SidebarContent>
+        </Sidebar>
 
-      <div className="flex-1 p-8">
-        <TeamSettingsForm
-          key={selectedTeam.id}
-          team={selectedTeam}
-          userManagableTeams={userManagableTeams}
-        />
+        <div className="flex-1 p-8">
+          <TeamSettingsForm
+            key={selectedTeam.id}
+            team={selectedTeam}
+            userManagableTeams={userManagableTeams}
+          />
+        </div>
       </div>
-    </div>
+    </ScrollArea>
   );
 }
