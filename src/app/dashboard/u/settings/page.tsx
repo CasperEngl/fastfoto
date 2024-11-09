@@ -1,4 +1,5 @@
 import { eq } from "drizzle-orm";
+import invariant from "invariant";
 import { CheckCircle2, XCircle } from "lucide-react";
 import { redirect } from "next/navigation";
 import { PasskeyButton } from "~/app/dashboard/u/settings/passkey-button";
@@ -9,6 +10,7 @@ import { Alert, AlertDescription, AlertTitle } from "~/components/ui/alert";
 import { Separator } from "~/components/ui/separator";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
+import { isTeamManager } from "~/role";
 
 export default async function SettingsPage({
   searchParams,
@@ -38,8 +40,18 @@ export default async function SettingsPage({
   });
   const teams = userTeams.map((team) => ({
     ...team.team,
-    members: team.team.members.map((member) => member.user),
+    members: team.team.members.map((member) => ({
+      ...member.user,
+      role: member.role,
+    })),
   }));
+  const userManagableTeams = teams
+    .filter((team) => {
+      invariant(session.user, "User is required");
+
+      return isTeamManager(session.user, team);
+    })
+    .map((team) => team.id);
 
   return (
     <div className="container space-y-6 py-8">
@@ -82,7 +94,7 @@ export default async function SettingsPage({
           Manage your team memberships and permissions.
         </p>
       </div>
-      <TeamsManager teams={teams} />
+      <TeamsManager teams={teams} userManagableTeams={userManagableTeams} />
     </div>
   );
 }
