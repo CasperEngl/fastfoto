@@ -1,15 +1,15 @@
 "use client";
 
 import {
-  BadgeCheck,
-  Bell,
   ChevronsUpDown,
+  CircleUser,
+  GalleryVerticalEnd,
   LogOut,
   Sparkles,
-  Wallet,
 } from "lucide-react";
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
+import Link from "next/link";
 
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -84,17 +84,17 @@ export function NavUser({ user }: { user: User }) {
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/u/settings">
+                  <CircleUser />
+                  Account
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Wallet />
-                Billing
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
+              <DropdownMenuItem asChild>
+                <Link href="/dashboard/t/settings">
+                  <GalleryVerticalEnd />
+                  Teams
+                </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
