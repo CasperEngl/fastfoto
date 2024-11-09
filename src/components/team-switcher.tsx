@@ -1,9 +1,11 @@
 "use client";
 
 import { InferSelectModel } from "drizzle-orm";
-import { ChevronsUpDown, GalleryVerticalEnd, Plus } from "lucide-react";
+import { ChevronsUpDown, Cog, GalleryVerticalEnd, Plus } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { changeTeam } from "~/actions";
+import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,7 +33,7 @@ export function TeamSwitcher({
 
   return (
     <SidebarMenu>
-      <SidebarMenuItem>
+      <SidebarMenuItem className="flex items-center gap-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
@@ -70,26 +72,41 @@ export function TeamSwitcher({
               Teams
             </DropdownMenuLabel>
             {teams.map((team) => (
-              <DropdownMenuItem
-                key={team.name}
-                onClick={() => changeTeam(team.id)}
-                className="gap-2 p-2"
-              >
-                <div className="flex size-6 items-center justify-center overflow-clip rounded-sm border">
-                  {team.logo ? (
-                    <Image
-                      src={team.logo}
-                      alt={team.name}
-                      width={32}
-                      height={32}
-                      className="rounded-sm"
-                    />
-                  ) : (
-                    <GalleryVerticalEnd className="size-4" />
-                  )}
-                </div>
-                <span className="whitespace-nowrap">{team.name}</span>
-              </DropdownMenuItem>
+              <div key={team.name} className="flex items-center gap-2">
+                <DropdownMenuItem
+                  onClick={() => changeTeam(team.id)}
+                  className="flex-1 gap-2 p-2"
+                >
+                  <div className="flex size-6 items-center justify-center overflow-clip rounded-sm border">
+                    {team.logo ? (
+                      <Image
+                        src={team.logo}
+                        alt={team.name}
+                        width={32}
+                        height={32}
+                        className="rounded-sm"
+                      />
+                    ) : (
+                      <GalleryVerticalEnd className="size-4" />
+                    )}
+                  </div>
+                  <span className="whitespace-nowrap">{team.name}</span>
+                </DropdownMenuItem>
+
+                <Button
+                  asChild
+                  variant="outline"
+                  size="icon"
+                  className="size-8 [&_svg]:size-4"
+                >
+                  <Link
+                    href={`/dashboard/t/settings?teamId=${team.id}`}
+                    title="Team settings"
+                  >
+                    <Cog />
+                  </Link>
+                </Button>
+              </div>
             ))}
             <DropdownMenuSeparator />
             <DropdownMenuItem className="gap-2 p-2">
