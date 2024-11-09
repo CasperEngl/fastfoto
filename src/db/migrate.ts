@@ -18,7 +18,7 @@ if (existingUsers.length > 0) {
 
 console.log("🌱 Starting database seeding...");
 
-// Create photographers
+// Create photographers (owners)
 const photographers = await Promise.all(
   Array(3)
     .fill(null)
@@ -31,12 +31,28 @@ const photographers = await Promise.all(
           email: `photographer+${firstName.toLowerCase()}@casperengelmann.com`,
           userType: "photographer",
         })
-        .returning()
-        .execute();
+        .returning();
     }),
 );
 
-// Create clients
+// Create team members (staff)
+const teamMembers = await Promise.all(
+  Array(6)
+    .fill(null)
+    .map(async () => {
+      const firstName = faker.person.firstName();
+      return await db
+        .insert(schema.Users)
+        .values({
+          name: firstName,
+          email: `staff+${firstName.toLowerCase()}@casperengelmann.com`,
+          userType: "photographer", // or consider adding a "staff" userType
+        })
+        .returning();
+    }),
+);
+
+// Create clients (separate from team members)
 const clients = await Promise.all(
   Array(10)
     .fill(null)
@@ -49,14 +65,12 @@ const clients = await Promise.all(
           email: `client+${firstName.toLowerCase()}@casperengelmann.com`,
           userType: "client",
         })
-        .returning()
-        .execute();
+        .returning();
     }),
 );
 
 // Create teams for photographers
 for (const photographer of photographers) {
-  // Create a team for each photographer
   const team = await db
     .insert(schema.Teams)
     .values({
@@ -65,15 +79,26 @@ for (const photographer of photographers) {
     })
     .returning();
 
-  // Add photographer to team as owner
-  await db
-    .insert(schema.TeamMembers)
-    .values({
-      userId: photographer[0].id,
+  // Add photographer as owner
+  await db.insert(schema.TeamMembers).values({
+    userId: photographer[0].id,
+    teamId: team[0].id,
+    role: "owner",
+  });
+
+  // Add random team members (staff)
+  const randomTeamMembers = faker.helpers.arrayElements(
+    teamMembers,
+    faker.number.int({ min: 1, max: 3 }),
+  );
+
+  for (const member of randomTeamMembers) {
+    await db.insert(schema.TeamMembers).values({
+      userId: member[0].id,
       teamId: team[0].id,
-      role: "owner",
-    })
-    .execute();
+      role: "member",
+    });
+  }
 
   const numAlbums = faker.number.int({ min: 2, max: 5 });
 
@@ -90,8 +115,7 @@ for (const photographer of photographers) {
         description: faker.lorem.paragraph(),
         teamId: team[0].id,
       })
-      .returning()
-      .execute();
+      .returning();
 
     // Add some random clients to each album
     const randomClients = faker.helpers.arrayElements(
@@ -100,66 +124,33 @@ for (const photographer of photographers) {
     );
 
     for (const client of randomClients) {
-      // Check if the client is already a member of the team
-      const existingMembership = await db
-        .select()
-        .from(schema.TeamMembers)
-        .where(
-          and(
-            eq(schema.TeamMembers.userId, client[0].id),
-            eq(schema.TeamMembers.teamId, team[0].id),
-          ),
-        )
-        .limit(1);
-
-      if (existingMembership.length === 0) {
-        // Add client to team as member only if not already a member
-        await db
-          .insert(schema.TeamMembers)
-          .values({
-            userId: client[0].id,
-            teamId: team[0].id,
-            role: "member",
-          })
-          .execute();
-      }
+      // Create team-client relationship
+      await db.insert(schema.TeamClients).values({
+        teamId: team[0].id,
+        userId: client[0].id,
+      });
 
       // Add client to album
-      await db
-        .insert(schema.UsersToAlbums)
-        .values({
-          userId: client[0].id,
-          albumId: album[0].id,
-        })
-        .execute();
-
-      // Create photographer-client relationship
-      await db
-        .insert(schema.PhotographerClients)
-        .values({
-          teamId: team[0].id,
-          clientId: client[0].id,
-        })
-        .execute();
+      await db.insert(schema.UsersToAlbums).values({
+        userId: client[0].id,
+        albumId: album[0].id,
+      });
     }
 
     // Rest of the photo creation code remains the same
     const numPhotos = faker.number.int({ min: 5, max: 20 });
     for (let j = 0; j < numPhotos; j++) {
-      await db
-        .insert(schema.Photos)
-        .values({
-          albumId: album[0].id,
-          url: faker.image.urlPicsumPhotos({
-            height: faker.number.int({ min: 400, max: 800 }),
-            width: faker.number.int({ min: 400, max: 800 }),
-            blur: 0,
-          }),
-          key: faker.string.uuid(),
-          caption: faker.lorem.sentence(),
-          order: j,
-        })
-        .execute();
+      await db.insert(schema.Photos).values({
+        albumId: album[0].id,
+        url: faker.image.urlPicsumPhotos({
+          height: faker.number.int({ min: 400, max: 800 }),
+          width: faker.number.int({ min: 400, max: 800 }),
+          blur: 0,
+        }),
+        key: faker.string.uuid(),
+        caption: faker.lorem.sentence(),
+        order: j,
+      });
     }
   }
 }
