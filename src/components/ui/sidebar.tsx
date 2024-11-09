@@ -24,10 +24,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "~/components/ui/tooltip";
-import { useIsMobile } from "~/hooks/use-mobile";
+import { useBreakpoint } from "~/hooks/use-breakpoint";
 import { cn } from "~/lib/utils";
-
-
 
 type SidebarContext = {
   state: "expanded" | "collapsed";
@@ -70,7 +68,7 @@ const SidebarProvider = React.forwardRef<
     },
     ref,
   ) => {
-    const isMobile = useIsMobile();
+    const isMobile = useBreakpoint();
     const [openMobile, setOpenMobile] = React.useState(false);
 
     // This is the internal state of the sidebar.
