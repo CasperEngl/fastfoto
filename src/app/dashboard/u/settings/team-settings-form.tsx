@@ -1,13 +1,18 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { capitalize } from "lodash-es";
+import { Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { match } from "ts-pattern";
 import * as z from "zod";
-import { updateTeam } from "~/app/dashboard/u/settings/actions";
+import { removeMember, updateTeam } from "~/app/dashboard/u/settings/actions";
 import { ManagedTeam } from "~/app/dashboard/u/settings/teams-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
+import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -19,6 +24,14 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "~/components/ui/table";
 import { UploadButton } from "~/lib/uploadthing";
 import { cn } from "~/lib/utils";
 
@@ -37,6 +50,8 @@ export function TeamSettingsForm({
   userManagableTeams: Array<string>;
 }) {
   const router = useRouter();
+  const [isRemoving, startTransition] = useTransition();
+  const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const form = useForm<z.infer<typeof teamFormSchema>>({
     resolver: zodResolver(teamFormSchema),
     defaultValues: {
@@ -113,6 +128,86 @@ export function TeamSettingsForm({
               </FormItem>
             )}
           />
+
+          <div className="space-y-4">
+            <h3 className="text-lg font-medium">Team Members</h3>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Member</TableHead>
+                  <TableHead>Role</TableHead>
+                  {canManageTeam && (
+                    <TableHead className="w-[100px]">Actions</TableHead>
+                  )}
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {team.members.map((member) => (
+                  <TableRow key={member.id}>
+                    <TableCell className="flex items-center gap-2">
+                      <Avatar className="size-8">
+                        <AvatarImage
+                          src={member.image ?? undefined}
+                          alt={member.name ?? "Member"}
+                        />
+                        <AvatarFallback>
+                          {member.name?.[0]?.toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{member.name}</span>
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={match(member.role)
+                          .with("owner", () => "destructive" as const)
+                          .with("admin", () => "outline" as const)
+                          .with("member", () => "default" as const)
+                          .exhaustive()}
+                      >
+                        {capitalize(member.role)}
+                      </Badge>
+                    </TableCell>
+                    {canManageTeam ? (
+                      <TableCell>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="size-8 p-0"
+                          disabled={removingMemberId === member.id}
+                          onClick={() => {
+                            setRemovingMemberId(member.id);
+                            startTransition(async () => {
+                              try {
+                                await removeMember(team.id, member.id);
+                                toast.success(
+                                  `${member.name} removed from team`,
+                                );
+                              } catch (error) {
+                                toast.error(
+                                  error instanceof Error
+                                    ? error.message
+                                    : "Failed to remove member",
+                                );
+                              } finally {
+                                setRemovingMemberId(null);
+                                router.refresh();
+                              }
+                            });
+                          }}
+                        >
+                          {removingMemberId === member.id ? (
+                            <Loader2 className="size-4 animate-spin" />
+                          ) : (
+                            <X className="size-4" />
+                          )}
+                        </Button>
+                      </TableCell>
+                    ) : null}
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
             {form.formState.isSubmitting ? "Updating..." : "Update team"}
