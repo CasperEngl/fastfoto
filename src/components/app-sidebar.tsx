@@ -101,6 +101,18 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                  isActive={pathname?.startsWith("/p/clients")}
+                  tooltip="Clients"
+                >
+                  <Link href="/dashboard/p/clients">
+                    <Users />
+                    Clients
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           ) : null}
 
