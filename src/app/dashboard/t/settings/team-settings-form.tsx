@@ -100,6 +100,7 @@ export function TeamSettingsForm({
                 id: team.id,
                 ...values,
               });
+              router.refresh();
               toast.success("Team updated successfully");
             } catch (error) {
               toast.error(
