@@ -38,13 +38,13 @@ export function TeamSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
+              <div className="flex aspect-square size-8 items-center justify-center overflow-clip rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                 {activeTeam.logo ? (
                   <Image
                     src={activeTeam.logo}
                     alt={activeTeam.name}
-                    width={48}
-                    height={48}
+                    width={32}
+                    height={32}
                     className="rounded-lg"
                   />
                 ) : (
@@ -75,13 +75,13 @@ export function TeamSwitcher({
                 onClick={() => changeTeam(team.id)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-sm border">
+                <div className="flex size-6 items-center justify-center overflow-clip rounded-sm border">
                   {team.logo ? (
                     <Image
                       src={team.logo}
                       alt={team.name}
-                      width={48}
-                      height={48}
+                      width={32}
+                      height={32}
                       className="rounded-sm"
                     />
                   ) : (
