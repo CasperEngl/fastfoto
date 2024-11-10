@@ -14,5 +14,6 @@ COPY src/db ./src/db
 COPY src/env.ts ./src/env.ts
 
 RUN bun install
+RUN bunx drizzle-kit migrate
 
-CMD ["npx", "tsx", "src/db/migrate.ts"]
+CMD ["bun", "src/db/migrate.ts"]
