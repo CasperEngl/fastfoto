@@ -6,6 +6,8 @@ import NextAuth from "next-auth";
 import Passkey from "next-auth/providers/passkey";
 import Resend from "next-auth/providers/resend";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
 import { resend } from "~/email";
@@ -13,9 +15,7 @@ import { env } from "~/env";
 import { isPhotographer } from "~/role";
 
 declare module "next-auth" {
-  interface User extends InferSelectModel<typeof schema.Users> {
-    studioId?: string;
-  }
+  interface User extends InferSelectModel<typeof schema.Users> {}
 }
 
 export const {
@@ -42,14 +42,17 @@ export const {
   },
   callbacks: {
     session: async ({ session, user }) => {
-      console.log("[Auth] Session callback - User:", {
-        id: user.id,
-        type: user.userType,
-        email: user.email,
-      });
+      session.user = user;
 
       if (user.userType === "photographer") {
         try {
+          const cookieStore = await cookies();
+          const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
+
+          if (selectedStudioId) {
+            return session;
+          }
+
           const userStudios = await db.query.StudioMembers.findMany({
             where: eq(schema.StudioMembers.userId, user.id),
             with: {
@@ -57,53 +60,28 @@ export const {
             },
           });
 
-          console.log("[Auth] Photographer studios found:", userStudios.length);
-
           const userPersonalStudio = userStudios?.find(
             (studio) => studio.role === "owner",
           );
-          const selectedStudioId =
-            session.user.studioId ?? userPersonalStudio?.studioId;
 
-          if (!selectedStudioId) {
-            console.error("[Auth] No studio found for photographer:", user.id);
+          if (!userPersonalStudio) {
+            return session;
           }
 
-          invariant(selectedStudioId, "Photographer must have a studio");
-
-          session.user = {
-            ...user,
-            studioId: selectedStudioId,
-          };
-
-          console.log(
-            "[Auth] Session updated with studioId:",
-            selectedStudioId,
-          );
+          cookieStore.set(STUDIO_COOKIE_NAME, userPersonalStudio?.studioId);
         } catch (error) {
-          console.error("[Auth] Error in session callback:", error);
           throw error;
         }
-      } else {
-        session.user = user;
-        console.log("[Auth] Non-photographer session created");
       }
 
       return session;
     },
     signIn: async ({ user }) => {
-      console.log("[Auth] Sign in callback started for user:", {
-        id: user.id,
-        email: user.email,
-      });
-
       setTimeout(async () => {
         try {
           invariant(user.id, "User ID is required");
 
           if (isPhotographer(user)) {
-            console.log("[Auth] Creating personal studio for photographer");
-
             const [existingPersonalStudio] = await db
               .select()
               .from(schema.Studios)
@@ -119,8 +97,6 @@ export const {
               );
 
             if (!existingPersonalStudio) {
-              console.log("[Auth] No personal studio found, creating new one");
-
               const [studio] = await db
                 .insert(schema.Studios)
                 .values({
@@ -135,18 +111,11 @@ export const {
                 role: "owner",
               });
 
-              console.log("[Auth] Created new studio:", studio.id);
               revalidatePath("/dashboard", "layout");
-            } else {
-              console.log(
-                "[Auth] Existing personal studio found:",
-                existingPersonalStudio.studios.id,
-              );
             }
           }
         } catch (error) {
-          console.error("[Auth] Error in signIn callback:", error);
-          // We don't throw here to prevent login failures, but log the error
+          // Silent error to prevent login failures
         }
       }, 100);
 
@@ -160,11 +129,6 @@ export const {
       from: '"Fast Foto" <noreply@casperengelmann.com>',
       async sendVerificationRequest(params) {
         try {
-          console.log(
-            "[Auth] Sending verification email to:",
-            params.identifier,
-          );
-
           await resend.emails.send({
             from: "Fast Foto <noreply@casperengelmann.com>",
             to: params.identifier,
@@ -176,10 +140,7 @@ export const {
               />
             ),
           });
-
-          console.log("[Auth] Verification email sent successfully");
         } catch (error) {
-          console.error("[Auth] Error sending verification email:", error);
           throw error;
         }
       },
