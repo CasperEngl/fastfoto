@@ -71,6 +71,7 @@
     "react-hook-form": "^7.53.1",
     "resend": "^4.0.1-alpha.0",
     "server-only": "^0.0.1",
+    "server-only-context": "^0.1.0",
     "sonner": "^1.5.0",
     "tailwind-merge": "^2.5.4",
     "ts-pattern": "^5.5.0",
