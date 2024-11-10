@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1731113184653,
-      "tag": "0000_supreme_hannibal_king",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1731114570181,
-      "tag": "0001_legal_catseye",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1731120159760,
-      "tag": "0002_bumpy_vermin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1731189915206,
-      "tag": "0003_white_wendigo",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1731193352178,
-      "tag": "0004_wandering_reaper",
+      "when": 1731200923950,
+      "tag": "0000_jittery_nova",
       "breakpoints": true
     }
   ]

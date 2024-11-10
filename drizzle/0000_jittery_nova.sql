@@ -23,7 +23,7 @@ CREATE TABLE IF NOT EXISTS "admin_audit_logs" (
 	"entity_type" text NOT NULL,
 	"entity_id" text NOT NULL,
 	"details" text,
-	"performed_at" timestamp NOT NULL
+	"performed_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "albums" (
@@ -31,8 +31,7 @@ CREATE TABLE IF NOT EXISTS "albums" (
 	"name" text NOT NULL,
 	"description" text,
 	"team_id" text NOT NULL,
-	"photographer_id" text,
-	"created_at" timestamp NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp
 );
 --> statement-breakpoint
@@ -49,21 +48,13 @@ CREATE TABLE IF NOT EXISTS "authenticators" (
 	CONSTRAINT "authenticators_credential_id_unique" UNIQUE("credential_id")
 );
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "photographer_clients" (
-	"id" text PRIMARY KEY NOT NULL,
-	"team_id" text NOT NULL,
-	"client_id" text NOT NULL,
-	"created_at" timestamp NOT NULL,
-	"updated_at" timestamp
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "photos" (
 	"id" text PRIMARY KEY NOT NULL,
 	"album_id" text NOT NULL,
 	"url" text NOT NULL,
 	"key" text NOT NULL,
 	"caption" text,
-	"uploaded_at" timestamp NOT NULL,
+	"uploaded_at" timestamp DEFAULT now() NOT NULL,
 	"order" integer NOT NULL,
 	"updated_at" timestamp
 );
@@ -74,17 +65,26 @@ CREATE TABLE IF NOT EXISTS "sessions" (
 	"expires" timestamp NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "team_clients" (
+	"team_id" text NOT NULL,
+	"user_id" text NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	CONSTRAINT "team_clients_pk" PRIMARY KEY("team_id","user_id")
+);
+--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "team_members" (
 	"id" text PRIMARY KEY NOT NULL,
 	"team_id" text NOT NULL,
 	"user_id" text NOT NULL,
 	"role" "team_role" DEFAULT 'member' NOT NULL,
-	"created_at" timestamp DEFAULT now() NOT NULL
+	"created_at" timestamp DEFAULT now() NOT NULL,
+	"updated_at" timestamp DEFAULT now()
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "teams" (
 	"id" text PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
+	"logo" text,
 	"created_by_id" text NOT NULL,
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
@@ -98,7 +98,7 @@ CREATE TABLE IF NOT EXISTS "users" (
 	"pending_email" text,
 	"image" text,
 	"user_type" "user_type" DEFAULT 'client' NOT NULL,
-	"created_at" timestamp NOT NULL,
+	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp,
 	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
@@ -107,13 +107,6 @@ CREATE TABLE IF NOT EXISTS "users_to_albums" (
 	"user_id" text NOT NULL,
 	"album_id" text NOT NULL,
 	CONSTRAINT "users_to_albums_pk" PRIMARY KEY("user_id","album_id")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "users_to_teams" (
-	"user_id" text NOT NULL,
-	"team_id" text NOT NULL,
-	"role" "team_role" DEFAULT 'member' NOT NULL,
-	CONSTRAINT "users_to_teams_pk" PRIMARY KEY("user_id","team_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "verification_tokens" (
@@ -142,25 +135,7 @@ EXCEPTION
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "albums" ADD CONSTRAINT "albums_photographer_id_users_id_fk" FOREIGN KEY ("photographer_id") REFERENCES "public"."users"("id") ON DELETE set null ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
  ALTER TABLE "authenticators" ADD CONSTRAINT "authenticators_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "photographer_clients" ADD CONSTRAINT "photographer_clients_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "photographer_clients" ADD CONSTRAINT "photographer_clients_client_id_users_id_fk" FOREIGN KEY ("client_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -173,6 +148,18 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "sessions" ADD CONSTRAINT "sessions_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "team_clients" ADD CONSTRAINT "team_clients_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;
+EXCEPTION
+ WHEN duplicate_object THEN null;
+END $$;
+--> statement-breakpoint
+DO $$ BEGIN
+ ALTER TABLE "team_clients" ADD CONSTRAINT "team_clients_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
@@ -203,18 +190,6 @@ END $$;
 --> statement-breakpoint
 DO $$ BEGIN
  ALTER TABLE "users_to_albums" ADD CONSTRAINT "users_to_albums_album_id_albums_id_fk" FOREIGN KEY ("album_id") REFERENCES "public"."albums"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "users_to_teams" ADD CONSTRAINT "users_to_teams_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
-EXCEPTION
- WHEN duplicate_object THEN null;
-END $$;
---> statement-breakpoint
-DO $$ BEGIN
- ALTER TABLE "users_to_teams" ADD CONSTRAINT "users_to_teams_team_id_teams_id_fk" FOREIGN KEY ("team_id") REFERENCES "public"."teams"("id") ON DELETE cascade ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
