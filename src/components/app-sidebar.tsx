@@ -1,6 +1,7 @@
 "use client";
 
 import { InferSelectModel } from "drizzle-orm";
+import { AnimatePresence, motion } from "framer-motion";
 import invariant from "invariant";
 import { Album, ArrowLeft, Home, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
@@ -18,6 +19,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from "~/components/ui/sidebar";
 import type * as schema from "~/db/schema";
 import { isAdmin, isClient, isPhotographer } from "~/role";
@@ -30,6 +32,7 @@ interface AppSidebarProps {
 export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
   const pathname = usePathname();
   const session = useSession();
+  const sidebar = useSidebar();
 
   invariant(session.data?.user, "User is required");
 
@@ -38,16 +41,26 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
       <SidebarContent>
         {teams.length > 0 ? (
           <SidebarGroup className="items-start">
-            <Button
-              asChild
-              variant="link"
-              className="items-center p-0 px-2 text-xs [&_svg]:size-3"
-            >
-              <Link href="/">
-                <ArrowLeft className="-translate-y-px" />
-                Frontpage
-              </Link>
-            </Button>
+            <AnimatePresence initial={false}>
+              {sidebar.state === "expanded" ? (
+                <motion.div
+                  initial={{ opacity: 0, x: -10, height: 0 }}
+                  animate={{ opacity: 1, x: 0, height: "auto" }}
+                  exit={{ opacity: 0, x: -10, height: 0 }}
+                >
+                  <Button
+                    asChild
+                    variant="link"
+                    className="items-center p-0 px-2 text-xs [&_svg]:size-3"
+                  >
+                    <Link href="/">
+                      <ArrowLeft className="-translate-y-px" />
+                      Frontpage
+                    </Link>
+                  </Button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
             <SidebarGroupLabel>Team</SidebarGroupLabel>
             <TeamSwitcher teams={teams} activeTeam={activeTeam} />
           </SidebarGroup>
