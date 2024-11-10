@@ -3,7 +3,7 @@
 import { InferSelectModel } from "drizzle-orm";
 import { AnimatePresence, motion } from "framer-motion";
 import invariant from "invariant";
-import { Album, ArrowLeft, Home, Users } from "lucide-react";
+import { Album, ArrowLeft, Gauge, Home, Images, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -73,17 +73,20 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
               <SidebarMenuButton
                 asChild
                 isActive={pathname === "/"}
-                tooltip="Home"
+                tooltip="Dashboard"
               >
                 <Link href="/dashboard">
-                  <Home />
+                  <Gauge />
                   Dashboard
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>
           </SidebarMenu>
+        </SidebarGroup>
 
-          {isAdmin(session.data?.user) ? (
+        {isAdmin(session.data?.user) ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Admin</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -98,9 +101,12 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          ) : null}
+          </SidebarGroup>
+        ) : null}
 
-          {isPhotographer(session.data?.user) ? (
+        {isPhotographer(session.data?.user) ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Studio</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -109,7 +115,7 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                   tooltip="Albums"
                 >
                   <Link href="/dashboard/p/albums">
-                    <Album />
+                    <Images />
                     Albums
                   </Link>
                 </SidebarMenuButton>
@@ -127,9 +133,12 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          ) : null}
+          </SidebarGroup>
+        ) : null}
 
-          {isClient(session.data?.user) ? (
+        {isClient(session.data?.user) ? (
+          <SidebarGroup>
+            <SidebarGroupLabel>Client</SidebarGroupLabel>
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton
@@ -142,8 +151,8 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
             </SidebarMenu>
-          ) : null}
-        </SidebarGroup>
+          </SidebarGroup>
+        ) : null}
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={session.data.user} />
