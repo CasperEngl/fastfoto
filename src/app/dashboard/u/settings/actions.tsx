@@ -187,7 +187,6 @@ export async function updateTeam(
 }
 
 export async function removeMember(teamId: string, memberId: string) {
-  await new Promise((resolve) => setTimeout(resolve, 2000));
   const session = await auth();
 
   invariant(session?.user?.id, "Not authenticated");
