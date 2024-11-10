@@ -42,67 +42,111 @@ export const {
   },
   callbacks: {
     session: async ({ session, user }) => {
+      console.log("[Auth] Session callback - User:", {
+        id: user.id,
+        type: user.userType,
+        email: user.email,
+      });
+
       if (user.userType === "photographer") {
-        const userStudios = await db.query.StudioMembers.findMany({
-          where: eq(schema.StudioMembers.userId, user.id),
-          with: {
-            studio: true,
-          },
-        });
-        const userPersonalStudio = userStudios?.find(
-          (studio) => studio.role === "owner",
-        );
-        const selectedStudioId =
-          session.user.studioId ?? userPersonalStudio?.studioId;
+        try {
+          const userStudios = await db.query.StudioMembers.findMany({
+            where: eq(schema.StudioMembers.userId, user.id),
+            with: {
+              studio: true,
+            },
+          });
 
-        invariant(selectedStudioId, "Photographer must have a studio");
+          console.log("[Auth] Photographer studios found:", userStudios.length);
 
-        session.user = {
-          ...user,
-          studioId: selectedStudioId,
-        };
+          const userPersonalStudio = userStudios?.find(
+            (studio) => studio.role === "owner",
+          );
+          const selectedStudioId =
+            session.user.studioId ?? userPersonalStudio?.studioId;
+
+          if (!selectedStudioId) {
+            console.error("[Auth] No studio found for photographer:", user.id);
+          }
+
+          invariant(selectedStudioId, "Photographer must have a studio");
+
+          session.user = {
+            ...user,
+            studioId: selectedStudioId,
+          };
+
+          console.log(
+            "[Auth] Session updated with studioId:",
+            selectedStudioId,
+          );
+        } catch (error) {
+          console.error("[Auth] Error in session callback:", error);
+          throw error;
+        }
       } else {
         session.user = user;
+        console.log("[Auth] Non-photographer session created");
       }
 
       return session;
     },
     signIn: async ({ user }) => {
+      console.log("[Auth] Sign in callback started for user:", {
+        id: user.id,
+        email: user.email,
+      });
+
       setTimeout(async () => {
-        invariant(user.id, "User ID is required");
+        try {
+          invariant(user.id, "User ID is required");
 
-        if (isPhotographer(user)) {
-          const [existingPersonalStudio] = await db
-            .select()
-            .from(schema.Studios)
-            .innerJoin(
-              schema.StudioMembers,
-              eq(schema.Studios.id, schema.StudioMembers.studioId),
-            )
-            .where(
-              and(
-                eq(schema.StudioMembers.userId, user.id),
-                eq(schema.StudioMembers.role, "owner"),
-              ),
-            );
+          if (isPhotographer(user)) {
+            console.log("[Auth] Creating personal studio for photographer");
 
-          if (!existingPersonalStudio) {
-            const [studio] = await db
-              .insert(schema.Studios)
-              .values({
-                name: user.name ? `${user.name}'s Studio` : "My Studio",
-                createdById: user.id,
-              })
-              .returning();
+            const [existingPersonalStudio] = await db
+              .select()
+              .from(schema.Studios)
+              .innerJoin(
+                schema.StudioMembers,
+                eq(schema.Studios.id, schema.StudioMembers.studioId),
+              )
+              .where(
+                and(
+                  eq(schema.StudioMembers.userId, user.id),
+                  eq(schema.StudioMembers.role, "owner"),
+                ),
+              );
 
-            await db.insert(schema.StudioMembers).values({
-              userId: user.id,
-              studioId: studio.id,
-              role: "owner",
-            });
+            if (!existingPersonalStudio) {
+              console.log("[Auth] No personal studio found, creating new one");
 
-            revalidatePath("/dashboard", "layout");
+              const [studio] = await db
+                .insert(schema.Studios)
+                .values({
+                  name: user.name ? `${user.name}'s Studio` : "My Studio",
+                  createdById: user.id,
+                })
+                .returning();
+
+              await db.insert(schema.StudioMembers).values({
+                userId: user.id,
+                studioId: studio.id,
+                role: "owner",
+              });
+
+              console.log("[Auth] Created new studio:", studio.id);
+              revalidatePath("/dashboard", "layout");
+            } else {
+              console.log(
+                "[Auth] Existing personal studio found:",
+                existingPersonalStudio.Studios.id,
+              );
+            }
           }
+        } catch (error) {
+          console.error("[Auth] Error in signIn callback:", error);
+          // We don't throw here to prevent login failures, but log the error
         }
       }, 100);
 
@@ -115,54 +159,30 @@ export const {
       apiKey: env.RESEND_KEY,
       from: '"Fast Foto" <noreply@casperengelmann.com>',
       async sendVerificationRequest(params) {
-        await resend.emails.send({
-          from: "Fast Foto <noreply@casperengelmann.com>",
-          to: params.identifier,
-          subject: "Sign in to Fast Foto",
-          react: (
-            <LoginMagicLinkEmail
-              loginUrl={params.url}
-              expiresAt={params.expires.getTime()}
-            />
-          ),
-        });
+        try {
+          console.log(
+            "[Auth] Sending verification email to:",
+            params.identifier,
+          );
+
+          await resend.emails.send({
+            from: "Fast Foto <noreply@casperengelmann.com>",
+            to: params.identifier,
+            subject: "Sign in to Fast Foto",
+            react: (
+              <LoginMagicLinkEmail
+                loginUrl={params.url}
+                expiresAt={params.expires.getTime()}
+              />
+            ),
+          });
+
+          console.log("[Auth] Verification email sent successfully");
+        } catch (error) {
+          console.error("[Auth] Error sending verification email:", error);
+          throw error;
+        }
       },
     }),
-    // CredentialsProvider({
-    //   name: "Credentials",
-    //   credentials: {
-    //     email: { label: "Email", type: "email" },
-    //     password: { label: "Password", type: "password" },
-    //   },
-    //   async authorize(credentials) {
-    //     if (!credentials.email || !credentials.password) {
-    //       return null;
-    //     }
-
-    //     const { email, password } = z
-    //       .object({
-    //         email: z.string().email(),
-    //         password: z.string(),
-    //       })
-    //       .parse(credentials);
-
-    //     const [user] = await db
-    //       .select()
-    //       .from(Users)
-    //       .where(eq(Users.email, email));
-
-    //     if (!user) {
-    //       return null;
-    //     }
-
-    //     return {
-    //       id: user.id,
-    //       name: user.name,
-    //       email: user.email,
-    //       image: user.image,
-    //       isAdmin: user.isAdmin,
-    //     };
-    //   },
-    // }),
   ],
 });
