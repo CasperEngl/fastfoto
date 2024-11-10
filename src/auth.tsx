@@ -140,7 +140,7 @@ export const {
             } else {
               console.log(
                 "[Auth] Existing personal studio found:",
-                existingPersonalStudio.Studios.id,
+                existingPersonalStudio.studios.id,
               );
             }
           }
