@@ -22,8 +22,7 @@ import {
   SidebarMenuItem,
 } from "~/components/ui/sidebar";
 import type * as schema from "~/db/schema";
-
-const pluralize = new Intl.PluralRules("en-US");
+import { pluralize } from "~/lib/plural-rules";
 
 export type ManagedTeam = InferSelectModel<typeof schema.Teams> & {
   members: Array<
