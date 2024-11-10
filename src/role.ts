@@ -14,7 +14,7 @@ export function isClient(user?: User): user is User & { userType: "client" } {
   return user?.userType === "client";
 }
 
-export function isPhotographer(
+export function hasPhotographerUserType(
   user?: User,
 ): user is User & { userType: "photographer" } {
   if (isAdmin(user)) {
@@ -24,7 +24,7 @@ export function isPhotographer(
   return user?.userType === "photographer";
 }
 
-export function isStudioManager(
+export function hasStudioManagerRole(
   user: User,
   studio: InferSelectModel<typeof schema.Studios> & {
     members: Array<InferSelectModel<typeof schema.Users> & { role: string }>;

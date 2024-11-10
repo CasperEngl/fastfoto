@@ -5,7 +5,7 @@ import { StudiosManager } from "~/app/dashboard/t/settings/studios-manager";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
-import { isStudioManager } from "~/role";
+import { hasStudioManagerRole } from "~/role";
 
 export default async function StudioSettingsPage() {
   const session = await auth();
@@ -39,7 +39,7 @@ export default async function StudioSettingsPage() {
     .filter((studio) => {
       invariant(session.user, "User is required");
 
-      return isStudioManager(session.user, studio);
+      return hasStudioManagerRole(session.user, studio);
     })
     .map((studio) => studio.id);
 

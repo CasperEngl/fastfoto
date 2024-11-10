@@ -6,12 +6,12 @@ import { utapi } from "~/app/api/uploadthing/core";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Photos } from "~/db/schema";
-import { isPhotographer } from "~/role";
+import { hasPhotographerUserType } from "~/role";
 
 export async function deletePhoto(key: string) {
   const session = await auth();
 
-  if (!isPhotographer(session?.user)) {
+  if (!hasPhotographerUserType(session?.user)) {
     return notFound();
   }
 

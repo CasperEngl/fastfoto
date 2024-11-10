@@ -13,7 +13,7 @@ import { dataTableCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
-import { isAdmin, isPhotographer } from "~/role";
+import { isAdmin, hasPhotographerUserType } from "~/role";
 
 export default async function AlbumsPage({
   searchParams,
@@ -26,7 +26,7 @@ export default async function AlbumsPage({
   const cookieStore = await cookies();
   const userStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  if (!isPhotographer(session?.user)) {
+  if (!hasPhotographerUserType(session?.user)) {
     return notFound();
   }
 

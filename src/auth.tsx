@@ -12,7 +12,7 @@ import { db } from "~/db/client";
 import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
-import { isPhotographer } from "~/role";
+import { hasPhotographerUserType } from "~/role";
 
 declare module "next-auth" {
   interface User extends InferSelectModel<typeof schema.Users> {}
@@ -81,7 +81,7 @@ export const {
         try {
           invariant(user.id, "User ID is required");
 
-          if (isPhotographer(user)) {
+          if (hasPhotographerUserType(user)) {
             const [existingPersonalStudio] = await db
               .select()
               .from(schema.Studios)

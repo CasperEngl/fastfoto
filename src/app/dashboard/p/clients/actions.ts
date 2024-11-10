@@ -8,14 +8,14 @@ import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
-import { isPhotographer } from "~/role";
+import { hasPhotographerUserType } from "~/role";
 
 export async function deleteClient(clientId: string) {
   const session = await auth();
   const cookieStore = await cookies();
   const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  if (!isPhotographer(session?.user)) {
+  if (!hasPhotographerUserType(session?.user)) {
     throw new Error("Unauthorized");
   }
 
