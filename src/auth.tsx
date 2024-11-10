@@ -10,10 +10,11 @@ import { db } from "~/db/client";
 import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
+import { isPhotographer } from "~/role";
 
 declare module "next-auth" {
   interface User extends InferSelectModel<typeof schema.Users> {
-    teamId: string;
+    teamId?: string;
   }
 }
 
@@ -41,21 +42,27 @@ export const {
   },
   callbacks: {
     session: async ({ session, user }) => {
-      const userTeams = await db.query.TeamMembers.findMany({
-        where: eq(schema.TeamMembers.userId, user.id),
-        with: {
-          team: true,
-        },
-      });
-      const userPersonalTeam = userTeams?.find((team) => team.role === "owner");
-      const selectedTeamId = session.user.teamId ?? userPersonalTeam?.teamId;
+      if (user.userType === "photographer") {
+        const userTeams = await db.query.TeamMembers.findMany({
+          where: eq(schema.TeamMembers.userId, user.id),
+          with: {
+            team: true,
+          },
+        });
+        const userPersonalTeam = userTeams?.find(
+          (team) => team.role === "owner",
+        );
+        const selectedTeamId = session.user.teamId ?? userPersonalTeam?.teamId;
 
-      invariant(selectedTeamId, "User must have a team");
+        invariant(selectedTeamId, "Photographer must have a team");
 
-      session.user = {
-        ...user,
-        teamId: selectedTeamId,
-      };
+        session.user = {
+          ...user,
+          teamId: selectedTeamId,
+        };
+      } else {
+        session.user = user;
+      }
 
       return session;
     },
@@ -63,39 +70,38 @@ export const {
       setTimeout(async () => {
         invariant(user.id, "User ID is required");
 
-        // Ensure user has a personal team
-        const [existingPersonalTeam] = await db
-          .select()
-          .from(schema.Teams)
-          .innerJoin(
-            schema.TeamMembers,
-            eq(schema.Teams.id, schema.TeamMembers.teamId),
-          )
-          .where(
-            and(
-              eq(schema.TeamMembers.userId, user.id),
-              eq(schema.TeamMembers.role, "owner"),
-            ),
-          );
+        if (isPhotographer(user)) {
+          const [existingPersonalTeam] = await db
+            .select()
+            .from(schema.Teams)
+            .innerJoin(
+              schema.TeamMembers,
+              eq(schema.Teams.id, schema.TeamMembers.teamId),
+            )
+            .where(
+              and(
+                eq(schema.TeamMembers.userId, user.id),
+                eq(schema.TeamMembers.role, "owner"),
+              ),
+            );
 
-        if (!existingPersonalTeam) {
-          // Create personal team
-          const [team] = await db
-            .insert(schema.Teams)
-            .values({
-              name: user.name ? `${user.name}'s Team` : "My Team",
-              createdById: user.id,
-            })
-            .returning();
+          if (!existingPersonalTeam) {
+            const [team] = await db
+              .insert(schema.Teams)
+              .values({
+                name: user.name ? `${user.name}'s Team` : "My Team",
+                createdById: user.id,
+              })
+              .returning();
 
-          // Associate user with team as owner
-          await db.insert(schema.TeamMembers).values({
-            userId: user.id,
-            teamId: team.id,
-            role: "owner",
-          });
+            await db.insert(schema.TeamMembers).values({
+              userId: user.id,
+              teamId: team.id,
+              role: "owner",
+            });
 
-          revalidatePath("/dashboard", "layout");
+            revalidatePath("/dashboard", "layout");
+          }
         }
       }, 100);
 
