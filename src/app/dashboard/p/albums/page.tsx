@@ -45,10 +45,6 @@ export default async function AlbumsPage({
     return notFound();
   }
 
-  if (!userStudioId) {
-    return notFound();
-  }
-
   invariant(session.user.id, "User ID is required");
 
   // Parse page number from query params
@@ -56,7 +52,9 @@ export default async function AlbumsPage({
 
   let whereClause = isAdmin(session.user)
     ? undefined
-    : eq(Albums.studioId, userStudioId);
+    : !userStudioId
+      ? sql`false`
+      : eq(Albums.studioId, userStudioId);
 
   debug.log("Initial where clause:", {
     isAdmin: isAdmin(session.user),
@@ -101,6 +99,11 @@ export default async function AlbumsPage({
     orderByClause,
     limit: ITEMS_PER_PAGE,
     offset: (page - 1) * ITEMS_PER_PAGE,
+  });
+
+  debug.log("Initial where clause:", {
+    isAdmin: isAdmin(session.user),
+    whereClause,
   });
 
   // Fetch paginated albums

@@ -1,4 +1,4 @@
-import { count, desc, eq } from "drizzle-orm";
+import { count, desc, eq, sql } from "drizzle-orm";
 import invariant from "invariant";
 import { Plus } from "lucide-react";
 import { cookies } from "next/headers";
@@ -29,10 +29,6 @@ export default async function ClientsPage({
     return notFound();
   }
 
-  if (!userStudioId) {
-    return notFound();
-  }
-
   invariant(session.user.id, "User ID is required");
 
   // Parse page number from query params
@@ -41,6 +37,10 @@ export default async function ClientsPage({
   // Fetch paginated clients
   const clients = await db.query.StudioClients.findMany({
     where(fields, operators) {
+      if (!userStudioId) {
+        return sql`false`;
+      }
+
       return operators.eq(fields.studioId, userStudioId);
     },
     orderBy: desc(schema.StudioClients.createdAt),
@@ -56,7 +56,11 @@ export default async function ClientsPage({
   const [{ count: totalCount }] = await db
     .select({ count: count() })
     .from(schema.StudioClients)
-    .where(eq(schema.StudioClients.studioId, userStudioId));
+    .where(
+      !userStudioId
+        ? sql`false`
+        : eq(schema.StudioClients.studioId, userStudioId),
+    );
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
