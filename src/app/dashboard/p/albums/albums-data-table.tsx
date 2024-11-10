@@ -9,7 +9,7 @@ import { useQueryStates } from "nuqs";
 import { useState } from "react";
 import { AlbumActions } from "~/app/dashboard/p/albums/album-actions";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
-import { DataTable, searchParamsParsers } from "~/components/data-table";
+import { DataTable, dataTableParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
@@ -39,7 +39,7 @@ export function AlbumsDataTable({
   totalPages,
   totalResults,
 }: DataTableProps) {
-  const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
+  const [searchParams, setSearchParams] = useQueryStates(dataTableParsers, {
     shallow: false,
   });
 

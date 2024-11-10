@@ -9,7 +9,7 @@ import { AlbumsDataTable } from "~/app/dashboard/p/albums/albums-data-table";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/albums/config";
 import { TEAM_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
-import { searchParamsCache } from "~/components/data-table";
+import { dataTableCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
@@ -20,7 +20,7 @@ export default async function AlbumsPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { page, filters, sort } = searchParamsCache.parse(await searchParams);
+  const { page, filters, sort } = dataTableCache.parse(await searchParams);
   const session = await auth();
   const cookieStore = await cookies();
   const userTeamId = cookieStore.get(TEAM_COOKIE_NAME)?.value;

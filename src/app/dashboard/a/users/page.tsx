@@ -6,7 +6,7 @@ import { SearchParams } from "nuqs/server";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/a/users/config";
 import { UsersDataTable } from "~/app/dashboard/a/users/users-data-table";
 import { auth } from "~/auth";
-import { searchParamsCache } from "~/components/data-table";
+import { dataTableCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
@@ -17,7 +17,7 @@ export default async function UsersPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { page, filters, sort } = searchParamsCache.parse(await searchParams);
+  const { page, filters, sort } = dataTableCache.parse(await searchParams);
   console.log("page", page);
   const session = await auth();
 

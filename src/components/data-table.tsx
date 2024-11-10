@@ -20,7 +20,7 @@ import {
 } from "~/components/ui/table";
 import { cn } from "~/lib/utils";
 
-export const searchParamsParsers = {
+export const dataTableParsers = {
   page: parseAsInteger.withDefault(1),
   sort: parseAsJson<SortingState>((value) => {
     if (!Array.isArray(value)) return [];
@@ -32,7 +32,7 @@ export const searchParamsParsers = {
   }).withDefault([]),
 };
 
-export const searchParamsCache = createSearchParamsCache(searchParamsParsers);
+export const dataTableCache = createSearchParamsCache(dataTableParsers);
 
 export function DataTable<TData>({ table }: { table: ReactTable<TData> }) {
   return (

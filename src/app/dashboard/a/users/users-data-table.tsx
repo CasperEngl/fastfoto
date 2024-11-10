@@ -8,7 +8,7 @@ import { useQueryStates } from "nuqs";
 import { match } from "ts-pattern";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/a/users/config";
 import { UserActions } from "~/app/dashboard/a/users/user-actions";
-import { DataTable, searchParamsParsers } from "~/components/data-table";
+import { DataTable, dataTableParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -30,7 +30,7 @@ export function UsersDataTable({
   totalPages,
   totalResults,
 }: DataTableProps) {
-  const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
+  const [searchParams, setSearchParams] = useQueryStates(dataTableParsers, {
     shallow: false,
   });
 

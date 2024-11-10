@@ -8,7 +8,7 @@ import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { ClientActions } from "~/app/dashboard/p/clients/client-actions";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/p/clients/config";
-import { DataTable, searchParamsParsers } from "~/components/data-table";
+import { DataTable, dataTableParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Checkbox } from "~/components/ui/checkbox";
 import * as schema from "~/db/schema";
@@ -31,7 +31,7 @@ export function ClientsDataTable({
   totalResults,
   totalPages,
 }: DataTableProps) {
-  const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
+  const [searchParams, setSearchParams] = useQueryStates(dataTableParsers, {
     shallow: false,
   });
   const session = useSession();
