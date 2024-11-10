@@ -16,7 +16,7 @@ export const userType = pgEnum("user_type", [
   "client",
 ]);
 
-export const teamRole = pgEnum("team_role", ["owner", "admin", "member"]);
+export const studioRole = pgEnum("studio_role", ["owner", "admin", "member"]);
 
 export const Users = pgTable("users", {
   id: text("id")
@@ -104,7 +104,7 @@ export const Authenticators = pgTable(
   ],
 );
 
-export const Teams = pgTable("teams", {
+export const Studios = pgTable("studios", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
@@ -117,17 +117,17 @@ export const Teams = pgTable("teams", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-export const TeamMembers = pgTable("team_members", {
+export const StudioMembers = pgTable("studio_members", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  teamId: text("team_id")
-    .references(() => Teams.id, { onDelete: "cascade" })
+  studioId: text("studio_id")
+    .references(() => Studios.id, { onDelete: "cascade" })
     .notNull(),
   userId: text("user_id")
     .references(() => Users.id, { onDelete: "cascade" })
     .notNull(),
-  role: teamRole("role").notNull().default("member"),
+  role: studioRole("role").notNull().default("member"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()
@@ -140,9 +140,9 @@ export const Albums = pgTable("albums", {
     .$defaultFn(() => crypto.randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
-  teamId: text("team_id")
+  studioId: text("studio_id")
     .notNull()
-    .references(() => Teams.id, { onDelete: "cascade" }),
+    .references(() => Studios.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
     () => new Date(),
@@ -200,12 +200,12 @@ export const UsersToAlbums = pgTable(
   ],
 );
 
-export const TeamClients = pgTable(
-  "team_clients",
+export const StudioClients = pgTable(
+  "studio_clients",
   {
-    teamId: text("team_id")
+    studioId: text("studio_id")
       .notNull()
-      .references(() => Teams.id, { onDelete: "cascade" }),
+      .references(() => Studios.id, { onDelete: "cascade" }),
     userId: text("user_id")
       .notNull()
       .references(() => Users.id, { onDelete: "cascade" }),
@@ -213,31 +213,31 @@ export const TeamClients = pgTable(
   },
   (t) => [
     primaryKey({
-      name: "team_clients_pk",
-      columns: [t.teamId, t.userId],
+      name: "studio_clients_pk",
+      columns: [t.studioId, t.userId],
     }),
   ],
 );
 
 export const UsersRelations = relations(Users, ({ many }) => ({
   usersToAlbums: many(UsersToAlbums),
-  teams: many(TeamMembers),
-  managedByTeams: many(TeamClients),
+  studios: many(StudioMembers),
+  managedByStudios: many(StudioClients),
 }));
 
-export const TeamsRelations = relations(Teams, ({ many }) => ({
-  members: many(TeamMembers),
+export const StudiosRelations = relations(Studios, ({ many }) => ({
+  members: many(StudioMembers),
   albums: many(Albums),
-  managedClients: many(TeamClients),
+  managedClients: many(StudioClients),
 }));
 
-export const TeamMembersRelations = relations(TeamMembers, ({ one }) => ({
-  team: one(Teams, {
-    fields: [TeamMembers.teamId],
-    references: [Teams.id],
+export const StudioMembersRelations = relations(StudioMembers, ({ one }) => ({
+  studio: one(Studios, {
+    fields: [StudioMembers.studioId],
+    references: [Studios.id],
   }),
   user: one(Users, {
-    fields: [TeamMembers.userId],
+    fields: [StudioMembers.userId],
     references: [Users.id],
   }),
 }));
@@ -245,9 +245,9 @@ export const TeamMembersRelations = relations(TeamMembers, ({ one }) => ({
 export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   photos: many(Photos),
   usersToAlbums: many(UsersToAlbums),
-  team: one(Teams, {
-    fields: [Albums.teamId],
-    references: [Teams.id],
+  studio: one(Studios, {
+    fields: [Albums.studioId],
+    references: [Studios.id],
   }),
 }));
 
@@ -269,13 +269,13 @@ export const PhotosRelations = relations(Photos, ({ one }) => ({
   }),
 }));
 
-export const TeamClientsRelations = relations(TeamClients, ({ one }) => ({
-  team: one(Teams, {
-    fields: [TeamClients.teamId],
-    references: [Teams.id],
+export const StudioClientsRelations = relations(StudioClients, ({ one }) => ({
+  studio: one(Studios, {
+    fields: [StudioClients.studioId],
+    references: [Studios.id],
   }),
   user: one(Users, {
-    fields: [TeamClients.userId],
+    fields: [StudioClients.userId],
     references: [Users.id],
   }),
 }));
