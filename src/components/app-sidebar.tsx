@@ -26,7 +26,7 @@ import { isAdmin, isClient, isPhotographer } from "~/role";
 
 interface AppSidebarProps {
   teams: InferSelectModel<typeof schema.Teams>[];
-  activeTeam: InferSelectModel<typeof schema.Teams>;
+  activeTeam?: InferSelectModel<typeof schema.Teams>;
 }
 
 export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {

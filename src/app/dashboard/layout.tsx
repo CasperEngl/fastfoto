@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import invariant from "invariant";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Toaster } from "sonner";
@@ -43,8 +42,6 @@ export default async function DashboardLayout({
   const activeTeam = userTeams.find(
     (team) => team.id === cookieStore.get(TEAM_COOKIE_NAME)?.value,
   );
-
-  invariant(personalTeam, "Personal team not found");
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
