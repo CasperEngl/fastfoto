@@ -75,53 +75,58 @@ export function TeamsManager({
         </Select>
       ) : (
         <div className="flex w-full overflow-clip rounded-md border">
-          <Sidebar collapsible="none" className="min-w-max max-w-[300px]">
-            <SidebarContent className="sticky top-0">
-              <SidebarMenu>
-                {teams.map((team) => (
-                  <SidebarMenuItem key={team.id}>
-                    <SidebarMenuButton
-                      isActive={team.id === teamId}
-                      onClick={() => setTeamId(team.id)}
-                      className="flex h-auto w-full items-center gap-3 rounded-l-none p-3"
-                    >
-                      <Avatar className="size-10 shrink-0">
-                        <AvatarImage
-                          src={team.logo ?? undefined}
-                          alt={`${team.name} logo`}
-                        />
-                        <AvatarFallback>
-                          {team.name.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-
-                      <div className="flex-1">
-                        <div className="truncate text-base text-foreground">
-                          {team.name}
-                        </div>
-                        <div className="text-xs text-muted-foreground">
-                          {pluralize.select(team.members.length) === "one"
-                            ? `${team.members.length} member`
-                            : `${team.members.length} members`}
-                        </div>
-                      </div>
-
-                      <motion.div
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{
-                          opacity: team.id === teamId ? 1 : 0,
-                          x: team.id === teamId ? 0 : -10,
-                        }}
-                        transition={{ duration: 0.2 }}
+          <div className="border-r p-2">
+            <Sidebar
+              collapsible="none"
+              className="min-w-max max-w-[300px] rounded-md bg-transparent"
+            >
+              <SidebarContent className="sticky top-0">
+                <SidebarMenu>
+                  {teams.map((team) => (
+                    <SidebarMenuItem key={team.id}>
+                      <SidebarMenuButton
+                        isActive={team.id === teamId}
+                        onClick={() => setTeamId(team.id)}
+                        className="flex h-auto w-full items-center gap-3 p-3 hover:bg-sidebar-accent/50 data-[active=true]:bg-sidebar-accent/50 data-[active=true]:text-sidebar-accent-foreground"
                       >
-                        <ChevronRight className="size-6 text-muted-foreground/50" />
-                      </motion.div>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarContent>
-          </Sidebar>
+                        <Avatar className="size-10 shrink-0">
+                          <AvatarImage
+                            src={team.logo ?? undefined}
+                            alt={`${team.name} logo`}
+                          />
+                          <AvatarFallback>
+                            {team.name.slice(0, 2).toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+
+                        <div className="flex-1">
+                          <div className="truncate text-base text-foreground">
+                            {team.name}
+                          </div>
+                          <div className="text-xs text-muted-foreground">
+                            {pluralize.select(team.members.length) === "one"
+                              ? `${team.members.length} member`
+                              : `${team.members.length} members`}
+                          </div>
+                        </div>
+
+                        <motion.div
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{
+                            opacity: team.id === teamId ? 1 : 0,
+                            x: team.id === teamId ? 0 : -10,
+                          }}
+                          transition={{ duration: 0.2 }}
+                        >
+                          <ChevronRight className="size-6 text-muted-foreground/50" />
+                        </motion.div>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarContent>
+            </Sidebar>
+          </div>
 
           <div className="flex-1 p-8">
             <TeamSettingsForm
