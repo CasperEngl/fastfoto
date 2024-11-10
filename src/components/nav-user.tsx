@@ -93,7 +93,7 @@ export function NavUser({ user }: { user: User }) {
               <DropdownMenuItem asChild>
                 <Link href="/dashboard/t/settings">
                   <GalleryVerticalEnd />
-                  Teams
+                  Studios
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>

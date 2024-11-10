@@ -4,7 +4,7 @@ import { InferSelectModel } from "drizzle-orm";
 import { motion } from "framer-motion";
 import { ChevronRight } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
-import { TeamSettingsForm } from "~/app/dashboard/t/settings/team-settings-form";
+import { StudioSettingsForm } from "~/app/dashboard/t/settings/studio-settings-form";
 import { useContentBreakpoint } from "~/app/hooks/use-content-breakpoint";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
@@ -24,48 +24,49 @@ import {
 import type * as schema from "~/db/schema";
 import { pluralize } from "~/lib/plural-rules";
 
-export type ManagedTeam = InferSelectModel<typeof schema.Teams> & {
+export type ManagedStudio = InferSelectModel<typeof schema.Studios> & {
   members: Array<
     InferSelectModel<typeof schema.Users> & {
-      role: InferSelectModel<typeof schema.TeamMembers>["role"];
+      role: InferSelectModel<typeof schema.StudioMembers>["role"];
     }
   >;
 };
 
-export function TeamsManager({
-  teams,
-  userManagableTeams,
+export function StudiosManager({
+  studios,
+  userManagableStudios,
 }: {
-  teams: Array<ManagedTeam>;
-  userManagableTeams: Array<string>;
+  studios: Array<ManagedStudio>;
+  userManagableStudios: Array<string>;
 }) {
-  const [teamId, setTeamId] = useQueryState(
-    "teamId",
-    parseAsString.withDefault(teams[0].id),
+  const [studioId, setStudioId] = useQueryState(
+    "studio",
+    parseAsString.withDefault(studios[0].id),
   );
-  const selectedTeam = teams.find((team) => team.id === teamId) ?? teams[0];
+  const selectedStudio =
+    studios.find((studio) => studio.id === studioId) ?? studios[0];
   const isMobile = useContentBreakpoint("md");
 
   return (
     <div className="flex flex-col items-start gap-4">
       {isMobile ? (
-        <Select value={teamId} onValueChange={(value) => setTeamId(value)}>
+        <Select value={studioId} onValueChange={(value) => setStudioId(value)}>
           <SelectTrigger className="inline-flex w-auto">
             <SelectValue>
               <div className="pr-2">
-                {teams.find((team) => team.id === teamId)?.name}
+                {studios.find((studio) => studio.id === studioId)?.name}
               </div>
             </SelectValue>
           </SelectTrigger>
           <SelectContent>
-            {teams.map((team) => (
-              <SelectItem key={team.id} value={team.id}>
+            {studios.map((studio) => (
+              <SelectItem key={studio.id} value={studio.id}>
                 <div>
-                  <div>{team.name}</div>
+                  <div>{studio.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {pluralize.select(team.members.length) === "one"
-                      ? `${team.members.length} member`
-                      : `${team.members.length} members`}
+                    {pluralize.select(studio.members.length) === "one"
+                      ? `${studio.members.length} member`
+                      : `${studio.members.length} members`}
                   </div>
                 </div>
               </SelectItem>
@@ -81,39 +82,39 @@ export function TeamsManager({
             >
               <SidebarContent className="sticky top-0">
                 <SidebarMenu>
-                  {teams.map((team) => (
-                    <SidebarMenuItem key={team.id}>
+                  {studios.map((studio) => (
+                    <SidebarMenuItem key={studio.id}>
                       <SidebarMenuButton
-                        isActive={team.id === teamId}
-                        onClick={() => setTeamId(team.id)}
+                        isActive={studio.id === studioId}
+                        onClick={() => setStudioId(studio.id)}
                         className="flex h-auto w-full items-center gap-3 p-3 hover:bg-sidebar-accent/50 data-[active=true]:bg-sidebar-accent/50 data-[active=true]:text-sidebar-accent-foreground"
                       >
                         <Avatar className="size-10 shrink-0">
                           <AvatarImage
-                            src={team.logo ?? undefined}
-                            alt={`${team.name} logo`}
+                            src={studio.logo ?? undefined}
+                            alt={`${studio.name} logo`}
                           />
                           <AvatarFallback>
-                            {team.name.slice(0, 2).toUpperCase()}
+                            {studio.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
 
                         <div className="flex-1">
                           <div className="truncate text-base text-foreground">
-                            {team.name}
+                            {studio.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {pluralize.select(team.members.length) === "one"
-                              ? `${team.members.length} member`
-                              : `${team.members.length} members`}
+                            {pluralize.select(studio.members.length) === "one"
+                              ? `${studio.members.length} member`
+                              : `${studio.members.length} members`}
                           </div>
                         </div>
 
                         <motion.div
                           initial={{ opacity: 0, x: -10 }}
                           animate={{
-                            opacity: team.id === teamId ? 1 : 0,
-                            x: team.id === teamId ? 0 : -10,
+                            opacity: studio.id === studioId ? 1 : 0,
+                            x: studio.id === studioId ? 0 : -10,
                           }}
                           transition={{ duration: 0.2 }}
                         >
@@ -128,10 +129,10 @@ export function TeamsManager({
           </div>
 
           <div className="flex-1 p-8">
-            <TeamSettingsForm
-              key={selectedTeam.id}
-              team={selectedTeam}
-              userManagableTeams={userManagableTeams}
+            <StudioSettingsForm
+              key={selectedStudio.id}
+              studio={selectedStudio}
+              userManagableStudios={userManagableStudios}
             />
           </div>
         </div>
@@ -140,10 +141,10 @@ export function TeamsManager({
       {isMobile && (
         <div className="w-full rounded-md border">
           <div className="p-4">
-            <TeamSettingsForm
-              key={selectedTeam.id}
-              team={selectedTeam}
-              userManagableTeams={userManagableTeams}
+            <StudioSettingsForm
+              key={selectedStudio.id}
+              studio={selectedStudio}
+              userManagableStudios={userManagableStudios}
             />
           </div>
         </div>

@@ -9,8 +9,8 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { match } from "ts-pattern";
 import * as z from "zod";
-import { ManagedTeam } from "~/app/dashboard/t/settings/teams-manager";
-import { removeMember, updateTeam } from "~/app/dashboard/u/settings/actions";
+import { ManagedStudio } from "~/app/dashboard/t/settings/studios-manager";
+import { removeMember, updateStudio } from "~/app/dashboard/u/settings/actions";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
 import { Button } from "~/components/ui/button";
@@ -35,55 +35,55 @@ import {
 import { UploadButton } from "~/lib/uploadthing";
 import { cn } from "~/lib/utils";
 
-const teamFormSchema = z.object({
+const studioFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
   }),
   members: z.array(z.string()).default([]),
 });
 
-export function TeamSettingsForm({
-  team,
-  userManagableTeams,
+export function StudioSettingsForm({
+  studio,
+  userManagableStudios,
 }: {
-  team: ManagedTeam;
-  userManagableTeams: Array<string>;
+  studio: ManagedStudio;
+  userManagableStudios: Array<string>;
 }) {
   const router = useRouter();
   const [isRemoving, startTransition] = useTransition();
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
-  const form = useForm<z.infer<typeof teamFormSchema>>({
-    resolver: zodResolver(teamFormSchema),
+  const form = useForm<z.infer<typeof studioFormSchema>>({
+    resolver: zodResolver(studioFormSchema),
     defaultValues: {
-      name: team.name,
-      members: team.members.map((member) => member.id),
+      name: studio.name,
+      members: studio.members.map((member) => member.id),
     },
   });
-  const canManageTeam = userManagableTeams.includes(team.id);
+  const canManageStudio = userManagableStudios.includes(studio.id);
 
   return (
-    <fieldset className="space-y-8" disabled={!canManageTeam}>
+    <fieldset className="space-y-8" disabled={!canManageStudio}>
       <div className="flex items-center gap-x-6">
         <Avatar className="size-24">
           <AvatarImage
-            src={team.logo ?? undefined}
-            alt={team.name ?? "Team Logo"}
+            src={studio.logo ?? undefined}
+            alt={studio.name ?? "Studio Logo"}
           />
-          <AvatarFallback>{team.name?.[0]?.toUpperCase()}</AvatarFallback>
+          <AvatarFallback>{studio.name?.[0]?.toUpperCase()}</AvatarFallback>
         </Avatar>
 
         <UploadButton
           className={cn(
-            !canManageTeam
+            !canManageStudio
               ? "[&_[data-ut-element=button]]:cursor-default [&_[data-ut-element=button]]:bg-primary [&_[data-ut-element=button]]:opacity-50"
               : null,
           )}
-          endpoint="teamLogo"
+          endpoint="studioLogo"
           input={{
-            teamId: team.id,
+            studioId: studio.id,
           }}
           onClientUploadComplete={() => {
-            toast.success("Team logo updated");
+            toast.success("Studio logo updated");
             router.refresh();
           }}
           onUploadError={(error: Error) => {
@@ -96,17 +96,17 @@ export function TeamSettingsForm({
         <form
           onSubmit={form.handleSubmit(async (values) => {
             try {
-              await updateTeam({
-                id: team.id,
+              await updateStudio({
+                id: studio.id,
                 ...values,
               });
               router.refresh();
-              toast.success("Team updated successfully");
+              toast.success("Studio updated successfully");
             } catch (error) {
               toast.error(
                 error instanceof Error
                   ? error.message
-                  : "Failed to update team",
+                  : "Failed to update studio",
               );
             }
           })}
@@ -119,10 +119,10 @@ export function TeamSettingsForm({
               <FormItem>
                 <FormLabel>Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="Team name" {...field} />
+                  <Input placeholder="Studio name" {...field} />
                 </FormControl>
                 <FormDescription>
-                  This is the team name that will be displayed across the
+                  This is the studio name that will be displayed across the
                   platform.
                 </FormDescription>
                 <FormMessage />
@@ -131,19 +131,19 @@ export function TeamSettingsForm({
           />
 
           <div className="space-y-4">
-            <h3 className="text-lg font-medium">Team Members</h3>
+            <h3 className="text-lg font-medium">Studio Members</h3>
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>Member</TableHead>
                   <TableHead>Role</TableHead>
-                  {canManageTeam && (
+                  {canManageStudio && (
                     <TableHead className="w-[100px]">Actions</TableHead>
                   )}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {team.members.map((member) => (
+                {studio.members.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell className="flex items-center gap-2">
                       <Avatar className="size-8">
@@ -168,7 +168,7 @@ export function TeamSettingsForm({
                         {capitalize(member.role)}
                       </Badge>
                     </TableCell>
-                    {canManageTeam ? (
+                    {canManageStudio ? (
                       <TableCell>
                         <Button
                           variant="ghost"
@@ -179,9 +179,9 @@ export function TeamSettingsForm({
                             setRemovingMemberId(member.id);
                             startTransition(async () => {
                               try {
-                                await removeMember(team.id, member.id);
+                                await removeMember(studio.id, member.id);
                                 toast.success(
-                                  `${member.name} removed from team`,
+                                  `${member.name} removed from studio`,
                                 );
                               } catch (error) {
                                 toast.error(
@@ -211,7 +211,7 @@ export function TeamSettingsForm({
           </div>
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
-            {form.formState.isSubmitting ? "Updating..." : "Update team"}
+            {form.formState.isSubmitting ? "Updating..." : "Update studio"}
           </Button>
         </form>
       </Form>

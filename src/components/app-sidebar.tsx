@@ -8,7 +8,7 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NavUser } from "~/components/nav-user";
-import { TeamSwitcher } from "~/components/team-switcher";
+import { StudioSwitcher } from "~/components/studio-switcher";
 import { Button } from "~/components/ui/button";
 import {
   Sidebar,
@@ -26,11 +26,11 @@ import type * as schema from "~/db/schema";
 import { isAdmin, isClient, isPhotographer } from "~/role";
 
 interface AppSidebarProps {
-  teams: InferSelectModel<typeof schema.Teams>[];
-  activeTeam?: InferSelectModel<typeof schema.Teams>;
+  studios: InferSelectModel<typeof schema.Studios>[];
+  activeStudio?: InferSelectModel<typeof schema.Studios>;
 }
 
-export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
+export function AppSidebar({ studios, activeStudio }: AppSidebarProps) {
   const pathname = usePathname();
   const session = useSession();
   const sidebar = useSidebar();
@@ -40,7 +40,7 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarContent>
-        {activeTeam && teams.length > 0 ? (
+        {activeStudio && studios.length > 0 ? (
           <SidebarHeader className="gap-0">
             <AnimatePresence initial={false}>
               {sidebar.state === "expanded" ? (
@@ -62,9 +62,9 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
                 </motion.div>
               ) : null}
             </AnimatePresence>
-            <SidebarGroupLabel>Team</SidebarGroupLabel>
-            {activeTeam ? (
-              <TeamSwitcher teams={teams} activeTeam={activeTeam} />
+            <SidebarGroupLabel>Studio</SidebarGroupLabel>
+            {activeStudio ? (
+              <StudioSwitcher studios={studios} activeStudio={activeStudio} />
             ) : null}
           </SidebarHeader>
         ) : null}

@@ -5,15 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1731200923950,
-      "tag": "0000_jittery_nova",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1731262794152,
-      "tag": "0001_pale_captain_stacy",
+      "when": 1731262866629,
+      "tag": "0000_cute_starfox",
       "breakpoints": true
     }
   ]

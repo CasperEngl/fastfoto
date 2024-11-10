@@ -25,8 +25,8 @@ export async function createClient(data: { emails: string[] }) {
     });
 
     for (const user of users) {
-      await tx.insert(schema.TeamClients).values({
-        teamId: session.user.teamId,
+      await tx.insert(schema.StudioClients).values({
+        studioId: session.user.studioId,
         userId: user.id,
       });
     }

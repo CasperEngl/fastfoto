@@ -14,12 +14,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { TeamClients } from "~/db/schema";
+import * as schema from "~/db/schema";
 
 export function ClientActions({
   client,
 }: {
-  client: InferSelectModel<typeof TeamClients>;
+  client: InferSelectModel<typeof schema.StudioClients>;
 }) {
   const [isPending, startTransition] = useTransition();
 

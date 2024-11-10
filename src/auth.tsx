@@ -14,7 +14,7 @@ import { isPhotographer } from "~/role";
 
 declare module "next-auth" {
   interface User extends InferSelectModel<typeof schema.Users> {
-    teamId?: string;
+    studioId?: string;
   }
 }
 
@@ -43,22 +43,23 @@ export const {
   callbacks: {
     session: async ({ session, user }) => {
       if (user.userType === "photographer") {
-        const userTeams = await db.query.TeamMembers.findMany({
-          where: eq(schema.TeamMembers.userId, user.id),
+        const userStudios = await db.query.StudioMembers.findMany({
+          where: eq(schema.StudioMembers.userId, user.id),
           with: {
-            team: true,
+            studio: true,
           },
         });
-        const userPersonalTeam = userTeams?.find(
-          (team) => team.role === "owner",
+        const userPersonalStudio = userStudios?.find(
+          (studio) => studio.role === "owner",
         );
-        const selectedTeamId = session.user.teamId ?? userPersonalTeam?.teamId;
+        const selectedStudioId =
+          session.user.studioId ?? userPersonalStudio?.studioId;
 
-        invariant(selectedTeamId, "Photographer must have a team");
+        invariant(selectedStudioId, "Photographer must have a studio");
 
         session.user = {
           ...user,
-          teamId: selectedTeamId,
+          studioId: selectedStudioId,
         };
       } else {
         session.user = user;
@@ -71,32 +72,32 @@ export const {
         invariant(user.id, "User ID is required");
 
         if (isPhotographer(user)) {
-          const [existingPersonalTeam] = await db
+          const [existingPersonalStudio] = await db
             .select()
-            .from(schema.Teams)
+            .from(schema.Studios)
             .innerJoin(
-              schema.TeamMembers,
-              eq(schema.Teams.id, schema.TeamMembers.teamId),
+              schema.StudioMembers,
+              eq(schema.Studios.id, schema.StudioMembers.studioId),
             )
             .where(
               and(
-                eq(schema.TeamMembers.userId, user.id),
-                eq(schema.TeamMembers.role, "owner"),
+                eq(schema.StudioMembers.userId, user.id),
+                eq(schema.StudioMembers.role, "owner"),
               ),
             );
 
-          if (!existingPersonalTeam) {
-            const [team] = await db
-              .insert(schema.Teams)
+          if (!existingPersonalStudio) {
+            const [studio] = await db
+              .insert(schema.Studios)
               .values({
-                name: user.name ? `${user.name}'s Team` : "My Team",
+                name: user.name ? `${user.name}'s Studio` : "My Studio",
                 createdById: user.id,
               })
               .returning();
 
-            await db.insert(schema.TeamMembers).values({
+            await db.insert(schema.StudioMembers).values({
               userId: user.id,
-              teamId: team.id,
+              studioId: studio.id,
               role: "owner",
             });
 

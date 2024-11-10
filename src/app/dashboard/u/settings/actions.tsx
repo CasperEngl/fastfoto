@@ -7,7 +7,7 @@ import ms from "ms";
 import { nanoid } from "nanoid";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { TeamMembers, Teams, Users, VerificationTokens } from "~/db/schema";
+import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
 
@@ -18,9 +18,9 @@ export async function updateProfile(data: { name: string }) {
   }
 
   await db
-    .update(Users)
+    .update(schema.Users)
     .set({ name: data.name })
-    .where(eq(Users.id, session.user.id!));
+    .where(eq(schema.Users.id, session.user.id!));
 }
 
 export async function requestEmailChange(newEmail: string) {
@@ -35,11 +35,11 @@ export async function requestEmailChange(newEmail: string) {
 
   // Store the pending email
   await db
-    .update(Users)
+    .update(schema.Users)
     .set({ pendingEmail: newEmail })
-    .where(eq(Users.id, session.user.id!));
+    .where(eq(schema.Users.id, session.user.id!));
 
-  await db.insert(VerificationTokens).values({
+  await db.insert(schema.VerificationTokens).values({
     identifier: session.user.email!,
     token,
     expires: new Date(Date.now() + ms("1d")),
@@ -53,97 +53,99 @@ export async function requestEmailChange(newEmail: string) {
   });
 }
 
-export async function createTeam(data: { name: string }) {
+export async function createStudio(data: { name: string }) {
   const session = await auth();
 
   invariant(session?.user?.id, "Not authenticated");
 
-  // Create the team
-  const [team] = await db
-    .insert(Teams)
+  // Create the studio
+  const [studio] = await db
+    .insert(schema.Studios)
     .values({
       name: data.name,
       createdById: session.user.id,
     })
     .returning();
 
-  // Add the creator as the team owner
-  await db.insert(TeamMembers).values({
-    teamId: team.id,
+  // Add the creator as the studio owner
+  await db.insert(schema.StudioMembers).values({
+    studioId: studio.id,
     userId: session.user.id,
     role: "owner",
   });
 
-  return team;
+  return studio;
 }
 
-export async function deleteTeam(teamId: string) {
+export async function deleteStudio(studioId: string) {
   const session = await auth();
 
   invariant(session?.user?.id, "Not authenticated");
 
-  // Verify user is the team owner
-  const teamMember = await db.query.TeamMembers.findFirst({
+  // Verify user is the studio owner
+  const studioMember = await db.query.StudioMembers.findFirst({
     where: (members, { and, eq }) => {
       invariant(session?.user?.id, "Not authenticated");
 
       return and(
-        eq(members.teamId, teamId),
+        eq(members.studioId, studioId),
         eq(members.userId, session.user.id),
         eq(members.role, "owner"),
       );
     },
   });
 
-  if (!teamMember) {
-    throw new Error("Not authorized to delete team");
+  if (!studioMember) {
+    throw new Error("Not authorized to delete studio");
   }
 
-  // Delete team members first (due to foreign key constraints)
-  await db.delete(TeamMembers).where(eq(TeamMembers.teamId, teamId));
+  // Delete studio members first (due to foreign key constraints)
+  await db
+    .delete(schema.StudioMembers)
+    .where(eq(schema.StudioMembers.studioId, studioId));
 
-  // Delete the team
-  await db.delete(Teams).where(eq(Teams.id, teamId));
+  // Delete the studio
+  await db.delete(schema.Studios).where(eq(schema.Studios.id, studioId));
 }
 
-export async function leaveTeam(teamId: string) {
+export async function leaveStudio(studioId: string) {
   const session = await auth();
 
   invariant(session?.user?.id, "Not authenticated");
 
   // Check if user is the owner
-  const teamMember = await db.query.TeamMembers.findFirst({
+  const studioMember = await db.query.StudioMembers.findFirst({
     where: (members, { and, eq }) => {
       invariant(session?.user?.id, "Not authenticated");
 
       return and(
-        eq(members.teamId, teamId),
+        eq(members.studioId, studioId),
         eq(members.userId, session.user.id!),
       );
     },
   });
 
-  if (!teamMember) {
-    throw new Error("Not a member of this team");
+  if (!studioMember) {
+    throw new Error("Not a member of this studio");
   }
 
-  if (teamMember.role === "owner") {
-    throw new Error("Team owner cannot leave. Delete the team instead.");
+  if (studioMember.role === "owner") {
+    throw new Error("Studio owner cannot leave. Delete the studio instead.");
   }
 
-  // Remove user from team
+  // Remove user from studio
   await db
-    .delete(TeamMembers)
+    .delete(schema.StudioMembers)
     .where(
       and(
-        eq(TeamMembers.teamId, teamId),
-        eq(TeamMembers.userId, session.user.id),
+        eq(schema.StudioMembers.studioId, studioId),
+        eq(schema.StudioMembers.userId, session.user.id),
       ),
     );
 }
 
-export async function updateTeam(
-  data: Omit<InferInsertModel<typeof Teams>, "createdById"> & {
+export async function updateStudio(
+  data: Omit<InferInsertModel<typeof schema.Studios>, "createdById"> & {
     id: string;
   },
 ) {
@@ -151,13 +153,13 @@ export async function updateTeam(
 
   invariant(session?.user?.id, "Not authenticated");
 
-  // Verify user is the team owner or admin
-  const teamMember = await db.query.TeamMembers.findFirst({
+  // Verify user is the studio owner or admin
+  const studioMember = await db.query.StudioMembers.findFirst({
     where: (members, { and, eq, or }) => {
       invariant(session?.user?.id, "Not authenticated");
 
-      const isTeamMember = and(
-        eq(members.teamId, data.id),
+      const isStudioMember = and(
+        eq(members.studioId, data.id),
         eq(members.userId, session.user.id),
       );
 
@@ -166,38 +168,38 @@ export async function updateTeam(
         eq(members.role, "admin"),
       );
 
-      return and(isTeamMember, hasPermission);
+      return and(isStudioMember, hasPermission);
     },
   });
 
-  if (!teamMember) {
-    throw new Error("Not authorized to update team");
+  if (!studioMember) {
+    throw new Error("Not authorized to update studio");
   }
 
-  // Update the team
-  const [updatedTeam] = await db
-    .update(Teams)
+  // Update the studio
+  const [updatedStudio] = await db
+    .update(schema.Studios)
     .set({
       name: data.name,
     })
-    .where(eq(Teams.id, data.id))
+    .where(eq(schema.Studios.id, data.id))
     .returning();
 
-  return updatedTeam;
+  return updatedStudio;
 }
 
-export async function removeMember(teamId: string, memberId: string) {
+export async function removeMember(studioId: string, memberId: string) {
   const session = await auth();
 
   invariant(session?.user?.id, "Not authenticated");
 
   // Verify user has permission to remove members (owner or admin)
-  const currentUserMember = await db.query.TeamMembers.findFirst({
+  const currentUserMember = await db.query.StudioMembers.findFirst({
     where: (members, { and, eq, or }) => {
       invariant(session?.user?.id, "Not authenticated");
 
-      const isTeamMember = and(
-        eq(members.teamId, teamId),
+      const isStudioMember = and(
+        eq(members.studioId, studioId),
         eq(members.userId, session.user.id),
       );
 
@@ -206,27 +208,27 @@ export async function removeMember(teamId: string, memberId: string) {
         eq(members.role, "admin"),
       );
 
-      return and(isTeamMember, hasPermission);
+      return and(isStudioMember, hasPermission);
     },
   });
 
   if (!currentUserMember) {
-    throw new Error("Not authorized to remove team members");
+    throw new Error("Not authorized to remove studio members");
   }
 
   // Get the member to be removed
-  const memberToRemove = await db.query.TeamMembers.findFirst({
+  const memberToRemove = await db.query.StudioMembers.findFirst({
     where: (members, { and, eq }) =>
-      and(eq(members.teamId, teamId), eq(members.userId, memberId)),
+      and(eq(members.studioId, studioId), eq(members.userId, memberId)),
   });
 
   if (!memberToRemove) {
     throw new Error("Member not found");
   }
 
-  // Prevent removing the team owner
+  // Prevent removing the studio owner
   if (memberToRemove.role === "owner") {
-    throw new Error("Cannot remove the team owner");
+    throw new Error("Cannot remove the studio owner");
   }
 
   // If user is admin, they can't remove other admins
@@ -236,8 +238,11 @@ export async function removeMember(teamId: string, memberId: string) {
 
   // Remove the member
   await db
-    .delete(TeamMembers)
+    .delete(schema.StudioMembers)
     .where(
-      and(eq(TeamMembers.teamId, teamId), eq(TeamMembers.userId, memberId)),
+      and(
+        eq(schema.StudioMembers.studioId, studioId),
+        eq(schema.StudioMembers.userId, memberId),
+      ),
     );
 }

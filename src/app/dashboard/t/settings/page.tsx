@@ -1,23 +1,23 @@
 import { eq } from "drizzle-orm";
 import invariant from "invariant";
 import { redirect } from "next/navigation";
-import { TeamsManager } from "~/app/dashboard/t/settings/teams-manager";
+import { StudiosManager } from "~/app/dashboard/t/settings/studios-manager";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
-import { isTeamManager } from "~/role";
+import { isStudioManager } from "~/role";
 
-export default async function TeamSettingsPage() {
+export default async function StudioSettingsPage() {
   const session = await auth();
 
   if (!session?.user?.id) {
     return redirect("/login");
   }
 
-  const userTeams = await db.query.TeamMembers.findMany({
-    where: eq(schema.TeamMembers.userId, session.user.id),
+  const userStudios = await db.query.StudioMembers.findMany({
+    where: eq(schema.StudioMembers.userId, session.user.id),
     with: {
-      team: {
+      studio: {
         with: {
           members: {
             with: {
@@ -28,30 +28,33 @@ export default async function TeamSettingsPage() {
       },
     },
   });
-  const teams = userTeams.map((team) => ({
-    ...team.team,
-    members: team.team.members.map((member) => ({
+  const studios = userStudios.map((studio) => ({
+    ...studio.studio,
+    members: studio.studio.members.map((member) => ({
       ...member.user,
       role: member.role,
     })),
   }));
-  const userManagableTeams = teams
-    .filter((team) => {
+  const userManagableStudios = studios
+    .filter((studio) => {
       invariant(session.user, "User is required");
 
-      return isTeamManager(session.user, team);
+      return isStudioManager(session.user, studio);
     })
-    .map((team) => team.id);
+    .map((studio) => studio.id);
 
   return (
     <div className="container space-y-6 py-8">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Teams</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Studios</h1>
         <p className="text-sm text-muted-foreground">
-          Manage your team memberships and permissions.
+          Manage your studio memberships and permissions.
         </p>
       </div>
-      <TeamsManager teams={teams} userManagableTeams={userManagableTeams} />
+      <StudiosManager
+        studios={studios}
+        userManagableStudios={userManagableStudios}
+      />
     </div>
   );
 }

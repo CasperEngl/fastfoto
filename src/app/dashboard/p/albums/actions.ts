@@ -22,9 +22,9 @@ export async function deleteAlbum(albumId: string) {
     throw new Error("Album not found");
   }
 
-  // Verify user belongs to the album's team
-  if (album.teamId !== session.user.teamId) {
-    throw new Error("Unauthorized - Album belongs to different team");
+  // Verify user belongs to the album's studio
+  if (album.studioId !== session.user.studioId) {
+    throw new Error("Unauthorized - Album belongs to different studio");
   }
 
   await db.delete(Albums).where(eq(Albums.id, albumId));
@@ -33,7 +33,7 @@ export async function deleteAlbum(albumId: string) {
 
 export async function updateAlbum(
   albumId: string,
-  data: Omit<InferInsertModel<typeof Albums>, "teamId"> & {
+  data: Omit<InferInsertModel<typeof Albums>, "studioId"> & {
     users: string[];
   },
 ) {
@@ -51,9 +51,9 @@ export async function updateAlbum(
     throw new Error("Album not found");
   }
 
-  // Verify user belongs to the album's team
-  if (album.teamId !== session.user.teamId) {
-    throw new Error("Unauthorized - Album belongs to different team");
+  // Verify user belongs to the album's studio
+  if (album.studioId !== session.user.studioId) {
+    throw new Error("Unauthorized - Album belongs to different studio");
   }
 
   await db.transaction(async (tx) => {

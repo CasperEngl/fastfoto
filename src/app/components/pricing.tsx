@@ -170,15 +170,15 @@ export function Pricing() {
           <Plan
             name="Studio"
             price="$79"
-            description="For professional studios and teams."
+            description="For professional studios."
             href="/register"
             features={[
               "Unlimited everything",
-              "Team collaboration",
+              "Studio collaboration",
               "Custom branding",
               "Advanced analytics",
               "API access",
-              "Multiple team members",
+              "Multiple studio members",
               "Dedicated support",
               "Custom contracts",
             ]}

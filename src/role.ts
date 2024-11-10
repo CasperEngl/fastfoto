@@ -4,13 +4,13 @@ import * as schema from "~/db/schema";
 
 export function isAdmin(
   user?: User,
-): user is User & { userType: "admin"; teamId: string } {
+): user is User & { userType: "admin"; studioId: string } {
   return user?.userType === "admin";
 }
 
 export function isClient(
   user?: User,
-): user is User & { userType: "client"; teamId?: never } {
+): user is User & { userType: "client"; studioId?: never } {
   if (isAdmin(user)) {
     return true;
   }
@@ -20,7 +20,7 @@ export function isClient(
 
 export function isPhotographer(
   user?: User,
-): user is User & { userType: "photographer"; teamId: string } {
+): user is User & { userType: "photographer"; studioId: string } {
   if (isAdmin(user)) {
     return true;
   }
@@ -28,9 +28,9 @@ export function isPhotographer(
   return user?.userType === "photographer";
 }
 
-export function isTeamManager(
+export function isStudioManager(
   user: User,
-  team: InferSelectModel<typeof schema.Teams> & {
+  studio: InferSelectModel<typeof schema.Studios> & {
     members: Array<InferSelectModel<typeof schema.Users> & { role: string }>;
   },
 ): user is User {
@@ -38,7 +38,7 @@ export function isTeamManager(
     return true;
   }
 
-  return team.members.some((member) => {
+  return studio.members.some((member) => {
     const userMatch = user.id === member.id;
     const isOwner = member.role === "owner";
     const isAdmin = member.role === "admin";

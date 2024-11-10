@@ -1,5 +1,5 @@
 {
-  "id": "e5581999-25bf-424b-9ff4-1e9bdbe676a2",
+  "id": "9dabb030-b978-499f-91b9-ad0de92192f1",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -197,8 +197,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "team_id": {
-          "name": "team_id",
+        "studio_id": {
+          "name": "studio_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -219,12 +219,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "albums_team_id_teams_id_fk": {
-          "name": "albums_team_id_teams_id_fk",
+        "albums_studio_id_studios_id_fk": {
+          "name": "albums_studio_id_studios_id_fk",
           "tableFrom": "albums",
-          "tableTo": "teams",
+          "tableTo": "studios",
           "columnsFrom": [
-            "team_id"
+            "studio_id"
           ],
           "columnsTo": [
             "id"
@@ -451,12 +451,12 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.team_clients": {
-      "name": "team_clients",
+    "public.studio_clients": {
+      "name": "studio_clients",
       "schema": "",
       "columns": {
-        "team_id": {
-          "name": "team_id",
+        "studio_id": {
+          "name": "studio_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -477,12 +477,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "team_clients_team_id_teams_id_fk": {
-          "name": "team_clients_team_id_teams_id_fk",
-          "tableFrom": "team_clients",
-          "tableTo": "teams",
+        "studio_clients_studio_id_studios_id_fk": {
+          "name": "studio_clients_studio_id_studios_id_fk",
+          "tableFrom": "studio_clients",
+          "tableTo": "studios",
           "columnsFrom": [
-            "team_id"
+            "studio_id"
           ],
           "columnsTo": [
             "id"
@@ -490,9 +490,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "team_clients_user_id_users_id_fk": {
-          "name": "team_clients_user_id_users_id_fk",
-          "tableFrom": "team_clients",
+        "studio_clients_user_id_users_id_fk": {
+          "name": "studio_clients_user_id_users_id_fk",
+          "tableFrom": "studio_clients",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -505,10 +505,10 @@
         }
       },
       "compositePrimaryKeys": {
-        "team_clients_pk": {
-          "name": "team_clients_pk",
+        "studio_clients_pk": {
+          "name": "studio_clients_pk",
           "columns": [
-            "team_id",
+            "studio_id",
             "user_id"
           ]
         }
@@ -518,8 +518,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.team_members": {
-      "name": "team_members",
+    "public.studio_members": {
+      "name": "studio_members",
       "schema": "",
       "columns": {
         "id": {
@@ -528,8 +528,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "team_id": {
-          "name": "team_id",
+        "studio_id": {
+          "name": "studio_id",
           "type": "text",
           "primaryKey": false,
           "notNull": true
@@ -542,7 +542,7 @@
         },
         "role": {
           "name": "role",
-          "type": "team_role",
+          "type": "studio_role",
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": true,
@@ -565,12 +565,12 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "team_members_team_id_teams_id_fk": {
-          "name": "team_members_team_id_teams_id_fk",
-          "tableFrom": "team_members",
-          "tableTo": "teams",
+        "studio_members_studio_id_studios_id_fk": {
+          "name": "studio_members_studio_id_studios_id_fk",
+          "tableFrom": "studio_members",
+          "tableTo": "studios",
           "columnsFrom": [
-            "team_id"
+            "studio_id"
           ],
           "columnsTo": [
             "id"
@@ -578,9 +578,9 @@
           "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "team_members_user_id_users_id_fk": {
-          "name": "team_members_user_id_users_id_fk",
-          "tableFrom": "team_members",
+        "studio_members_user_id_users_id_fk": {
+          "name": "studio_members_user_id_users_id_fk",
+          "tableFrom": "studio_members",
           "tableTo": "users",
           "columnsFrom": [
             "user_id"
@@ -598,8 +598,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.teams": {
-      "name": "teams",
+    "public.studios": {
+      "name": "studios",
       "schema": "",
       "columns": {
         "id": {
@@ -643,9 +643,9 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "teams_created_by_id_users_id_fk": {
-          "name": "teams_created_by_id_users_id_fk",
-          "tableFrom": "teams",
+        "studios_created_by_id_users_id_fk": {
+          "name": "studios_created_by_id_users_id_fk",
+          "tableFrom": "studios",
           "tableTo": "users",
           "columnsFrom": [
             "created_by_id"
@@ -842,8 +842,8 @@
     }
   },
   "enums": {
-    "public.team_role": {
-      "name": "team_role",
+    "public.studio_role": {
+      "name": "studio_role",
       "schema": "public",
       "values": [
         "owner",

@@ -34,8 +34,8 @@ const photographers = await Promise.all(
     }),
 );
 
-// Create team members (staff)
-const teamMembers = await Promise.all(
+// Create studio members (staff)
+const studioMembers = await Promise.all(
   Array(6)
     .fill(null)
     .map(async () => {
@@ -45,13 +45,13 @@ const teamMembers = await Promise.all(
         .values({
           name: firstName,
           email: `staff+${firstName.toLowerCase()}@casperengelmann.com`,
-          userType: "photographer", // or consider adding a "staff" userType
+          userType: "photographer",
         })
         .returning();
     }),
 );
 
-// Create clients (separate from team members)
+// Create clients (separate from studio members)
 const clients = await Promise.all(
   Array(10)
     .fill(null)
@@ -68,10 +68,10 @@ const clients = await Promise.all(
     }),
 );
 
-// Create teams for photographers
+// Create studios for photographers
 for (const photographer of photographers) {
-  const team = await db
-    .insert(schema.Teams)
+  const studio = await db
+    .insert(schema.Studios)
     .values({
       name: `${photographer[0].name}'s Studio`,
       createdById: photographer[0].id,
@@ -79,24 +79,24 @@ for (const photographer of photographers) {
     .returning();
 
   // Add photographer as owner
-  await db.insert(schema.TeamMembers).values({
+  await db.insert(schema.StudioMembers).values({
     userId: photographer[0].id,
-    teamId: team[0].id,
+    studioId: studio[0].id,
     role: "owner",
   });
 
-  // Add random team members (staff)
-  const randomTeamMembers = faker.helpers.arrayElements(
-    teamMembers,
+  // Add random studio members (staff)
+  const randomStudioMembers = faker.helpers.arrayElements(
+    studioMembers,
     faker.number.int({ min: 1, max: 3 }),
   );
 
-  for (const member of randomTeamMembers) {
+  for (const member of randomStudioMembers) {
     await db
-      .insert(schema.TeamMembers)
+      .insert(schema.StudioMembers)
       .values({
         userId: member[0].id,
-        teamId: team[0].id,
+        studioId: studio[0].id,
         role: "member",
       })
       .onConflictDoNothing();
@@ -115,7 +115,7 @@ for (const photographer of photographers) {
           }),
         ),
         description: faker.lorem.paragraph(),
-        teamId: team[0].id,
+        studioId: studio[0].id,
       })
       .returning();
 
@@ -126,11 +126,11 @@ for (const photographer of photographers) {
     );
 
     for (const client of randomClients) {
-      // Create team-client relationship
+      // Create studio-client relationship
       await db
-        .insert(schema.TeamClients)
+        .insert(schema.StudioClients)
         .values({
-          teamId: team[0].id,
+          studioId: studio[0].id,
           userId: client[0].id,
         })
         .onConflictDoNothing();

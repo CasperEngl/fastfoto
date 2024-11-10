@@ -15,22 +15,22 @@ export async function deleteClient(clientId: string) {
     throw new Error("Unauthorized");
   }
 
-  const client = await db.query.TeamClients.findFirst({
-    where: eq(schema.TeamClients.userId, clientId),
+  const client = await db.query.StudioClients.findFirst({
+    where: eq(schema.StudioClients.userId, clientId),
   });
 
   if (!client) {
     throw new Error("Client not found");
   }
 
-  // Verify user belongs to the client's team
-  if (client.teamId !== session.user.teamId) {
-    throw new Error("Unauthorized - Client belongs to different team");
+  // Verify user belongs to the client's studio
+  if (client.studioId !== session.user.studioId) {
+    throw new Error("Unauthorized - Client belongs to different studio");
   }
 
   await db
-    .delete(schema.TeamClients)
-    .where(eq(schema.TeamClients.userId, clientId));
+    .delete(schema.StudioClients)
+    .where(eq(schema.StudioClients.userId, clientId));
 
   revalidatePath("/dashboard/p/clients");
 }

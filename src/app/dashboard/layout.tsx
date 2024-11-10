@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Toaster } from "sonner";
-import { SIDEBAR_COOKIE_NAME, TEAM_COOKIE_NAME } from "~/app/globals";
+import { SIDEBAR_COOKIE_NAME, STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { AppSidebar } from "~/components/app-sidebar";
 import {
@@ -26,26 +26,31 @@ export default async function DashboardLayout({
 
   const cookieStore = await cookies();
   const defaultOpen = cookieStore.get(SIDEBAR_COOKIE_NAME)?.value === "true";
-  // Get all teams that the current user is a member of
+  // Get all studios that the current user is a member of
   const user = await db.query.Users.findFirst({
     where: eq(schema.Users.id, session.user.id),
     with: {
-      teams: {
+      studios: {
         with: {
-          team: true,
+          studio: true,
         },
       },
     },
   });
-  const personalTeam = user?.teams.find((team) => team.role === "owner")?.team;
-  const userTeams = user?.teams.map((team) => team.team) ?? [];
-  const activeTeam = userTeams.find(
-    (team) => team.id === cookieStore.get(TEAM_COOKIE_NAME)?.value,
+  const personalStudio = user?.studios.find(
+    (studio) => studio.role === "owner",
+  )?.studio;
+  const userStudios = user?.studios.map((studio) => studio.studio) ?? [];
+  const activeStudio = userStudios.find(
+    (studio) => studio.id === cookieStore.get(STUDIO_COOKIE_NAME)?.value,
   );
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
-      <AppSidebar teams={userTeams} activeTeam={activeTeam ?? personalTeam} />
+      <AppSidebar
+        studios={userStudios}
+        activeStudio={activeStudio ?? personalStudio}
+      />
 
       <SidebarInset className="w-full">
         <header className="border-b">

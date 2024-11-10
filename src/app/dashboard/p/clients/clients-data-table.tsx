@@ -14,7 +14,7 @@ import { Checkbox } from "~/components/ui/checkbox";
 import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
-export type ClientColumn = InferSelectModel<typeof schema.TeamClients> & {
+export type ClientColumn = InferSelectModel<typeof schema.StudioClients> & {
   user: InferSelectModel<typeof schema.Users>;
 };
 

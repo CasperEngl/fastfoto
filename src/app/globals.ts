@@ -1,6 +1,6 @@
 import ms from 'ms';
 
-export const TEAM_COOKIE_NAME = "team:id";
+export const STUDIO_COOKIE_NAME = "studio:id";
 
 export const SIDEBAR_COOKIE_NAME = "sidebar:state";
 export const SIDEBAR_COOKIE_MAX_AGE = ms("1 week");

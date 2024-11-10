@@ -2,12 +2,12 @@
 
 import { cookies } from "next/headers";
 import "server-only";
-import { TEAM_COOKIE_NAME } from "~/app/globals";
+import { STUDIO_COOKIE_NAME } from "~/app/globals";
 
-export async function changeTeam(teamId: string) {
+export async function changeStudio(studioId: string) {
   const cookieStore = await cookies();
 
-  cookieStore.set(TEAM_COOKIE_NAME, teamId);
+  cookieStore.set(STUDIO_COOKIE_NAME, studioId);
 
-  return teamId;
+  return studioId;
 }

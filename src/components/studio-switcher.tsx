@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { changeTeam } from "~/actions";
+import { changeStudio } from "~/actions";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -27,12 +27,12 @@ import {
 } from "~/components/ui/sidebar";
 import type * as schema from "~/db/schema";
 
-export function TeamSwitcher({
-  teams,
-  activeTeam,
+export function StudioSwitcher({
+  studios,
+  activeStudio,
 }: {
-  teams: InferSelectModel<typeof schema.Teams>[];
-  activeTeam: InferSelectModel<typeof schema.Teams>;
+  studios: InferSelectModel<typeof schema.Studios>[];
+  activeStudio: InferSelectModel<typeof schema.Studios>;
 }) {
   const { isMobile } = useSidebar();
 
@@ -46,10 +46,10 @@ export function TeamSwitcher({
               className="border bg-white data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
               <div className="flex aspect-square size-8 items-center justify-center overflow-clip rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                {activeTeam.logo ? (
+                {activeStudio.logo ? (
                   <Image
-                    src={activeTeam.logo}
-                    alt={activeTeam.name}
+                    src={activeStudio.logo}
+                    alt={activeStudio.name}
                     width={32}
                     height={32}
                     className="rounded-lg"
@@ -60,7 +60,7 @@ export function TeamSwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-semibold">
-                  {activeTeam.name}
+                  {activeStudio.name}
                 </span>
                 {/* <span className="truncate text-xs">{activeTeam.plan}</span> */}
               </div>
@@ -74,19 +74,19 @@ export function TeamSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-xs text-muted-foreground">
-              Teams
+              Studios
             </DropdownMenuLabel>
-            {teams.map((team) => (
-              <div key={team.name} className="flex items-center gap-2">
+            {studios.map((studio) => (
+              <div key={studio.name} className="flex items-center gap-2">
                 <DropdownMenuItem
-                  onClick={() => changeTeam(team.id)}
+                  onClick={() => changeStudio(studio.id)}
                   className="flex-1 gap-2 p-2"
                 >
                   <div className="flex size-6 items-center justify-center overflow-clip rounded-sm border">
-                    {team.logo ? (
+                    {studio.logo ? (
                       <Image
-                        src={team.logo}
-                        alt={team.name}
+                        src={studio.logo}
+                        alt={studio.name}
                         width={32}
                         height={32}
                         className="rounded-sm"
@@ -95,7 +95,7 @@ export function TeamSwitcher({
                       <GalleryVerticalEnd className="size-4" />
                     )}
                   </div>
-                  <span className="whitespace-nowrap">{team.name}</span>
+                  <span className="whitespace-nowrap">{studio.name}</span>
                 </DropdownMenuItem>
 
                 <Button
@@ -105,8 +105,8 @@ export function TeamSwitcher({
                   className="size-8 [&_svg]:size-4"
                 >
                   <Link
-                    href={`/dashboard/t/settings?teamId=${team.id}`}
-                    title="Team settings"
+                    href={`/dashboard/t/settings?teamId=${studio.id}`}
+                    title="Studio settings"
                   >
                     <Settings />
                   </Link>
@@ -118,7 +118,9 @@ export function TeamSwitcher({
               <div className="flex size-6 items-center justify-center rounded-md border bg-background">
                 <Plus className="size-4" />
               </div>
-              <div className="font-medium text-muted-foreground">Add team</div>
+              <div className="font-medium text-muted-foreground">
+                Add studio
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

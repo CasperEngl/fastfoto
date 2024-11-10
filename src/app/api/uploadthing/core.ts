@@ -68,10 +68,10 @@ export const ourFileRouter = {
 
       return { url: file.url };
     }),
-  teamLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
+  studioLogo: f({ image: { maxFileSize: "4MB", maxFileCount: 1 } })
     .input(
       z.object({
-        teamId: z.string().uuid(),
+        studioId: z.string().uuid(),
       }),
     )
     .middleware(async ({ input }) => {
@@ -81,32 +81,32 @@ export const ourFileRouter = {
         throw new UploadThingError("Unauthorized");
       }
 
-      const teamMember = await db.query.TeamMembers.findFirst({
-        where: (teamMembers, { and, eq }) => {
+      const studioMember = await db.query.StudioMembers.findFirst({
+        where: (studioMembers, { and, eq }) => {
           invariant(session?.user?.id, "Not authenticated");
 
           return and(
-            eq(teamMembers.teamId, input.teamId),
-            eq(teamMembers.userId, session.user.id),
-            eq(teamMembers.role, "owner"),
+            eq(studioMembers.studioId, input.studioId),
+            eq(studioMembers.userId, session.user.id),
+            eq(studioMembers.role, "owner"),
           );
         },
       });
 
-      if (!teamMember) {
-        throw new UploadThingError("Unauthorized - Must be team owner");
+      if (!studioMember) {
+        throw new UploadThingError("Unauthorized - Must be studio owner");
       }
 
-      return { userId: session.user.id, teamId: input.teamId };
+      return { userId: session.user.id, studioId: input.studioId };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       await db
-        .update(schema.Teams)
+        .update(schema.Studios)
         .set({
           logo: file.url,
           updatedAt: new Date(),
         })
-        .where(eq(schema.Teams.id, metadata.teamId))
+        .where(eq(schema.Studios.id, metadata.studioId))
         .execute();
 
       return { url: file.url };
