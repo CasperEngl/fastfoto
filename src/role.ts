@@ -2,11 +2,15 @@ import { InferSelectModel } from "drizzle-orm";
 import { User } from "next-auth";
 import * as schema from "~/db/schema";
 
-export function isAdmin(user?: User): user is User & { userType: "admin" } {
+export function isAdmin(
+  user?: User,
+): user is User & { userType: "admin"; teamId: string } {
   return user?.userType === "admin";
 }
 
-export function isClient(user?: User): user is User & { userType: "client" } {
+export function isClient(
+  user?: User,
+): user is User & { userType: "client"; teamId?: never } {
   if (isAdmin(user)) {
     return true;
   }
@@ -16,7 +20,7 @@ export function isClient(user?: User): user is User & { userType: "client" } {
 
 export function isPhotographer(
   user?: User,
-): user is User & { userType: "photographer" } {
+): user is User & { userType: "photographer"; teamId: string } {
   if (isAdmin(user)) {
     return true;
   }

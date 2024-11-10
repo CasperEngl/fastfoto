@@ -20,7 +20,7 @@ export async function createAlbum(
   }
 
   const [album] = await db.transaction(async (tx) => {
-    invariant(session.user?.id, "User ID is required");
+    invariant(isPhotographer(session.user), "User must be a photographer");
 
     const [newAlbum] = await tx
       .insert(Albums)

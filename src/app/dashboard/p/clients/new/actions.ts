@@ -16,6 +16,7 @@ export async function createClient(data: { emails: string[] }) {
 
   await db.transaction(async (tx) => {
     invariant(session.user?.id, "User ID is required");
+    invariant(isPhotographer(session.user), "User must be a photographer");
 
     const users = await tx.query.Users.findMany({
       where(fields, operators) {
