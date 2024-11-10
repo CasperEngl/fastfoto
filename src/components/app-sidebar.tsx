@@ -3,7 +3,7 @@
 import { InferSelectModel } from "drizzle-orm";
 import { AnimatePresence, motion } from "framer-motion";
 import invariant from "invariant";
-import { Album, ArrowLeft, Gauge, Home, Images, Users } from "lucide-react";
+import { Album, ArrowLeft, Gauge, Images, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,6 +16,7 @@ import {
   SidebarFooter,
   SidebarGroup,
   SidebarGroupLabel,
+  SidebarHeader,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -39,8 +40,8 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
   return (
     <Sidebar collapsible="icon" variant="inset">
       <SidebarContent>
-        {teams.length > 0 ? (
-          <SidebarGroup className="items-start">
+        {activeTeam && teams.length > 0 ? (
+          <SidebarHeader className="gap-0">
             <AnimatePresence initial={false}>
               {sidebar.state === "expanded" ? (
                 <motion.div
@@ -62,8 +63,10 @@ export function AppSidebar({ teams, activeTeam }: AppSidebarProps) {
               ) : null}
             </AnimatePresence>
             <SidebarGroupLabel>Team</SidebarGroupLabel>
-            <TeamSwitcher teams={teams} activeTeam={activeTeam} />
-          </SidebarGroup>
+            {activeTeam ? (
+              <TeamSwitcher teams={teams} activeTeam={activeTeam} />
+            ) : null}
+          </SidebarHeader>
         ) : null}
 
         <SidebarGroup>

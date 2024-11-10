@@ -32,13 +32,9 @@ export function TeamSwitcher({
   activeTeam,
 }: {
   teams: InferSelectModel<typeof schema.Teams>[];
-  activeTeam?: InferSelectModel<typeof schema.Teams>;
+  activeTeam: InferSelectModel<typeof schema.Teams>;
 }) {
   const { isMobile } = useSidebar();
-
-  if (!activeTeam) {
-    return null;
-  }
 
   return (
     <SidebarMenu>
