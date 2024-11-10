@@ -21,12 +21,14 @@ export type ClientColumn = InferSelectModel<typeof schema.TeamClients> & {
 interface DataTableProps {
   data: ClientColumn[];
   totalPages: number;
+  totalResults: number;
   currentPage: number;
 }
 
 export function ClientsDataTable({
   data,
   currentPage,
+  totalResults,
   totalPages,
 }: DataTableProps) {
   const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
@@ -163,6 +165,7 @@ export function ClientsDataTable({
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        totalResults={totalResults}
         onNextPage={() => {
           setSearchParams({ page: currentPage + 1 });
         }}

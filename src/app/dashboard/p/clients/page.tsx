@@ -76,6 +76,7 @@ export default async function ClientsPage({
         data={clients}
         currentPage={page}
         totalPages={totalPages}
+        totalResults={totalCount}
       />
     </div>
   );

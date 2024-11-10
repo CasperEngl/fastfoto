@@ -88,7 +88,12 @@ export default async function UsersPage({
         </Button>
       </div>
 
-      <UsersDataTable data={users} currentPage={page} totalPages={totalPages} />
+      <UsersDataTable
+        data={users}
+        currentPage={page}
+        totalPages={totalPages}
+        totalResults={totalCount}
+      />
     </div>
   );
 }

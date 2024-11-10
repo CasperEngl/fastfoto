@@ -30,12 +30,14 @@ interface DataTableProps {
   data: AlbumColumn[];
   totalPages: number;
   currentPage: number;
+  totalResults: number;
 }
 
 export function AlbumsDataTable({
   data,
   currentPage,
   totalPages,
+  totalResults,
 }: DataTableProps) {
   const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
     shallow: false,
@@ -124,7 +126,7 @@ export function AlbumsDataTable({
                     </button>
                   </PopoverTrigger>
                   <PopoverContent
-                    className="py-2 px-4 max-w-min"
+                    className="max-w-min px-4 py-2"
                     onMouseEnter={() => setOpen(true)}
                     onMouseLeave={() => setOpen(false)}
                   >
@@ -237,7 +239,7 @@ export function AlbumsDataTable({
 
   return (
     <div>
-      <div className="flex items-center py-4">
+      <div className="py-4">
         <Input
           placeholder="Filter by name..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
@@ -257,6 +259,7 @@ export function AlbumsDataTable({
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        totalResults={totalResults}
         onNextPage={() => {
           setSearchParams({ page: currentPage + 1 });
         }}

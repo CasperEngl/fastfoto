@@ -117,6 +117,7 @@ export default async function AlbumsPage({
         data={albums}
         currentPage={page}
         totalPages={totalPages}
+        totalResults={totalCount}
       />
     </div>
   );

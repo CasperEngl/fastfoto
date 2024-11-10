@@ -21,12 +21,14 @@ interface DataTableProps {
   data: UserColumn[];
   totalPages: number;
   currentPage: number;
+  totalResults: number;
 }
 
 export function UsersDataTable({
   data,
   currentPage,
   totalPages,
+  totalResults,
 }: DataTableProps) {
   const [searchParams, setSearchParams] = useQueryStates(searchParamsParsers, {
     shallow: false,
@@ -87,8 +89,8 @@ export function UsersDataTable({
         accessorKey: "userType",
         header: "User Type",
         cell: ({ row }) => (
-          <div className="flex gap-2 items-center">
-            <span className="flex items-center justify-center size-8 rounded-full bg-muted">
+          <div className="flex items-center gap-2">
+            <span className="flex size-8 items-center justify-center rounded-full bg-muted">
               {match(row.original.userType)
                 .with("admin", () => (
                   <ShieldCheck className="size-4 text-gray-600" />
@@ -190,6 +192,7 @@ export function UsersDataTable({
       <Pagination
         currentPage={currentPage}
         totalPages={totalPages}
+        totalResults={totalResults}
         onNextPage={() => {
           setSearchParams({ page: currentPage + 1 });
         }}
