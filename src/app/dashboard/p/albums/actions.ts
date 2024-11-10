@@ -2,6 +2,8 @@
 
 import { eq, InferInsertModel } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Albums, UsersToAlbums } from "~/db/schema";
@@ -9,6 +11,8 @@ import { isPhotographer } from "~/role";
 
 export async function deleteAlbum(albumId: string) {
   const session = await auth();
+  const cookieStore = await cookies();
+  const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
   if (!isPhotographer(session?.user)) {
     throw new Error("Unauthorized");
@@ -23,7 +27,7 @@ export async function deleteAlbum(albumId: string) {
   }
 
   // Verify user belongs to the album's studio
-  if (album.studioId !== session.user.studioId) {
+  if (album.studioId !== selectedStudioId) {
     throw new Error("Unauthorized - Album belongs to different studio");
   }
 
@@ -38,6 +42,8 @@ export async function updateAlbum(
   },
 ) {
   const session = await auth();
+  const cookieStore = await cookies();
+  const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
   if (!isPhotographer(session?.user)) {
     throw new Error("Unauthorized");
@@ -52,7 +58,7 @@ export async function updateAlbum(
   }
 
   // Verify user belongs to the album's studio
-  if (album.studioId !== session.user.studioId) {
+  if (album.studioId !== selectedStudioId) {
     throw new Error("Unauthorized - Album belongs to different studio");
   }
 

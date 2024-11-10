@@ -38,8 +38,10 @@ type FormValues = z.infer<typeof formSchema>;
 
 export function CreateAlbumForm({
   users,
+  selectedStudioId,
 }: {
   users: InferSelectModel<typeof Users>[];
+  selectedStudioId: string;
 }) {
   const session = useSession();
   const searchParams = useSearchParams();
@@ -68,7 +70,7 @@ export function CreateAlbumForm({
             try {
               const album = await createAlbum({
                 ...values,
-                studioId: session.data.user.studioId,
+                studioId: selectedStudioId,
               });
               toast.success("Album created successfully");
               router.push(`/dashboard/p/albums/${album.id}`);

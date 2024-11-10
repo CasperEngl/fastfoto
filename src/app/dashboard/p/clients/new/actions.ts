@@ -2,6 +2,8 @@
 
 import invariant from "invariant";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
@@ -9,6 +11,8 @@ import { isPhotographer } from "~/role";
 
 export async function createClient(data: { emails: string[] }) {
   const session = await auth();
+  const cookieStore = await cookies();
+  const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
   if (!isPhotographer(session?.user)) {
     throw new Error("Unauthorized");
@@ -16,7 +20,7 @@ export async function createClient(data: { emails: string[] }) {
 
   await db.transaction(async (tx) => {
     invariant(session.user?.id, "User ID is required");
-    invariant(isPhotographer(session.user), "User must be a photographer");
+    invariant(selectedStudioId, "User must select a studio");
 
     const users = await tx.query.Users.findMany({
       where(fields, operators) {
@@ -26,7 +30,7 @@ export async function createClient(data: { emails: string[] }) {
 
     for (const user of users) {
       await tx.insert(schema.StudioClients).values({
-        studioId: session.user.studioId,
+        studioId: selectedStudioId,
         userId: user.id,
       });
     }
