@@ -15,33 +15,18 @@ import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
 import { isAdmin, isPhotographer } from "~/role";
 
-const debug = {
-  log: (...args: unknown[]) => console.log("[Albums Page]", ...args),
-  error: (...args: unknown[]) => console.error("[Albums Page Error]", ...args),
-};
-
 export default async function AlbumsPage({
   searchParams,
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  debug.log("Rendering albums page with searchParams:", await searchParams);
-
   const { page, filters, sort } = dataTableCache.parse(await searchParams);
-  debug.log("Parsed table cache:", { page, filters, sort });
 
   const session = await auth();
   const cookieStore = await cookies();
   const userStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  debug.log("Auth context:", {
-    userId: session?.user?.id,
-    userStudioId,
-    isPhotographer: isPhotographer(session?.user),
-  });
-
   if (!isPhotographer(session?.user)) {
-    debug.log("Access denied: User is not a photographer");
     return notFound();
   }
 
@@ -56,17 +41,10 @@ export default async function AlbumsPage({
       ? sql`false`
       : eq(Albums.studioId, userStudioId);
 
-  debug.log("Initial where clause:", {
-    isAdmin: isAdmin(session.user),
-    whereClause,
-  });
-
   const nameFilter = filters.find((filter) => filter.id === "name");
 
   if (nameFilter) {
-    debug.log("Applying name filter:", nameFilter.value);
     whereClause = and(whereClause, ilike(Albums.name, `%${nameFilter.value}%`));
-
     whereClause = or(
       whereClause,
       sql`SIMILARITY(${Albums.name}, ${nameFilter.value}) > 0.1`,
@@ -76,14 +54,12 @@ export default async function AlbumsPage({
   let orderByClause: SQL<unknown>[] = [desc(Albums.updatedAt)];
 
   if (sort.length > 0) {
-    debug.log("Applying sort:", sort);
     orderByClause = [];
     for (const column of sort) {
       // @ts-expect-error column.id should be a valid Albums column
       const albumsColumn = Albums[column.id];
 
       if (!albumsColumn) {
-        debug.error(`Invalid sort column:`, column.id);
         continue;
       }
 
@@ -93,18 +69,6 @@ export default async function AlbumsPage({
       ];
     }
   }
-
-  debug.log("Executing albums query with:", {
-    whereClause,
-    orderByClause,
-    limit: ITEMS_PER_PAGE,
-    offset: (page - 1) * ITEMS_PER_PAGE,
-  });
-
-  debug.log("Initial where clause:", {
-    isAdmin: isAdmin(session.user),
-    whereClause,
-  });
 
   // Fetch paginated albums
   const albums = await db.query.Albums.findMany({
@@ -121,7 +85,6 @@ export default async function AlbumsPage({
     limit: ITEMS_PER_PAGE,
     offset,
   }).then((albums) => {
-    debug.log("Retrieved albums count:", albums.length);
     return albums.map((album) => ({
       ...album,
       users: album.usersToAlbums.map(({ user }) => user),
@@ -132,12 +95,6 @@ export default async function AlbumsPage({
     .select({ count: count() })
     .from(Albums)
     .where(whereClause);
-
-  debug.log("Query results:", {
-    totalCount,
-    totalPages: Math.ceil(totalCount / ITEMS_PER_PAGE),
-    currentPage: page,
-  });
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
