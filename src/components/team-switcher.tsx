@@ -1,7 +1,12 @@
 "use client";
 
 import { InferSelectModel } from "drizzle-orm";
-import { ChevronsUpDown, Cog, GalleryVerticalEnd, Plus } from "lucide-react";
+import {
+  ChevronsUpDown,
+  GalleryVerticalEnd,
+  Plus,
+  Settings,
+} from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { changeTeam } from "~/actions";
@@ -103,7 +108,7 @@ export function TeamSwitcher({
                     href={`/dashboard/t/settings?teamId=${team.id}`}
                     title="Team settings"
                   >
-                    <Cog />
+                    <Settings />
                   </Link>
                 </Button>
               </div>
