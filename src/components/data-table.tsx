@@ -10,6 +10,7 @@ import {
   parseAsInteger,
   parseAsJson,
 } from "nuqs/server";
+import { match } from "ts-pattern";
 import {
   Table,
   TableBody,
@@ -50,18 +51,25 @@ export function DataTable<TData>({ table }: { table: ReactTable<TData> }) {
                     key={header.id}
                     className={cn(
                       "whitespace-nowrap",
-                      align === "start"
-                        ? "text-start"
-                        : align === "center"
-                          ? "text-center"
-                          : align === "end"
-                            ? "text-end"
-                            : "",
+                      match(align)
+                        .with("start", () => "text-start")
+                        .with("center", () => "text-center")
+                        .with("end", () => "text-end")
+                        .otherwise(() => ""),
                       isSortable && "cursor-pointer select-none",
                     )}
                     onClick={header.column.getToggleSortingHandler()}
                   >
-                    <div className="flex items-center justify-between gap-2">
+                    <div
+                      className={cn(
+                        "flex items-center gap-2",
+                        match(align)
+                          .with("start", () => "justify-start")
+                          .with("center", () => "justify-center")
+                          .with("end", () => "justify-end")
+                          .otherwise(() => ""),
+                      )}
+                    >
                       {header.isPlaceholder
                         ? null
                         : flexRender(
