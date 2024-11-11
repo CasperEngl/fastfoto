@@ -51,8 +51,6 @@ export default async function ClientsPage({
     offset,
   });
 
-  console.log("clients", clients);
-
   const [{ count: totalCount }] = await db
     .select({ count: count() })
     .from(schema.StudioClients)
