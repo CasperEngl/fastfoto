@@ -18,7 +18,6 @@ export default async function UsersPage({
   searchParams: Promise<SearchParams>;
 }) {
   const { page, filters, sort } = dataTableCache.parse(await searchParams);
-  console.log("page", page);
   const session = await auth();
 
   if (!isAdmin(session?.user)) {

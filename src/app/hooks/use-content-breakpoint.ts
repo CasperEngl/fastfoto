@@ -27,12 +27,5 @@ export function useContentBreakpoint(
         ),
   });
 
-  console.log(
-    "sidebar width",
-    convertRemToPixels(
-      sidebar.state === "collapsed" ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
-    ),
-  );
-
   return matches && !sidebar.isMobile;
 }

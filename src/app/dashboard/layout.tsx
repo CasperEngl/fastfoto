@@ -46,9 +46,6 @@ export default async function DashboardLayout({
     (studio) => studio.id === cookieStore.get(STUDIO_COOKIE_NAME)?.value,
   );
 
-  console.log("userStudios", userStudios);
-  console.log("activeStudio", activeStudio);
-
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <DefaultStudioCookie studios={userStudios} activeStudio={activeStudio} />
