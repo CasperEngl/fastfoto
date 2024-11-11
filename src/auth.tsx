@@ -1,14 +1,13 @@
 import { DrizzleAdapter } from "@auth/drizzle-adapter";
-import { and, eq, InferSelectModel } from "drizzle-orm";
+import { and, InferSelectModel } from "drizzle-orm";
 import LoginMagicLinkEmail from "emails/login-magic-link";
 import invariant from "invariant";
 import NextAuth from "next-auth";
 import Passkey from "next-auth/providers/passkey";
 import Resend from "next-auth/providers/resend";
 import { revalidatePath } from "next/cache";
-import { cookies } from "next/headers";
-import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { db } from "~/db/client";
+import { hasStudioRole, userStudios } from "~/db/queries/studio-member.queries";
 import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
@@ -52,19 +51,10 @@ export const {
           invariant(user.id, "User ID is required");
 
           if (isPhotographer(user)) {
-            const [existingPersonalStudio] = await db
-              .select()
-              .from(schema.Studios)
-              .innerJoin(
-                schema.StudioMembers,
-                eq(schema.Studios.id, schema.StudioMembers.studioId),
-              )
-              .where(
-                and(
-                  eq(schema.StudioMembers.userId, user.id),
-                  eq(schema.StudioMembers.role, "owner"),
-                ),
-              );
+            const existingPersonalStudio =
+              await db.query.StudioMembers.findFirst({
+                where: and(userStudios(user.id), hasStudioRole("owner")),
+              });
 
             if (!existingPersonalStudio) {
               const [studio] = await db
@@ -75,13 +65,15 @@ export const {
                 })
                 .returning();
 
+              invariant(studio?.id, "Studio ID is required");
+
               await db.insert(schema.StudioMembers).values({
                 userId: user.id,
                 studioId: studio.id,
                 role: "owner",
               });
 
-              revalidatePath("/dashboard", "layout");
+              revalidatePath("/dashboard");
             }
           }
         } catch (error) {
