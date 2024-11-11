@@ -76,7 +76,7 @@ export function UsersDataTable({
             </Avatar>
             <Link
               href={`/dashboard/a/users/${row.original.id}`}
-              className="hover:underline"
+              className="whitespace-nowrap hover:underline"
             >
               {row.getValue("name")}
             </Link>
