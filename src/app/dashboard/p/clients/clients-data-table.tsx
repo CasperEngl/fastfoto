@@ -11,6 +11,7 @@ import { ITEMS_PER_PAGE } from "~/app/dashboard/p/clients/config";
 import { DataTable, dataTableParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Checkbox } from "~/components/ui/checkbox";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
@@ -160,7 +161,11 @@ export function ClientsDataTable({
 
   return (
     <div>
-      <DataTable table={table} />
+      <ScrollArea className="max-w-full">
+        <DataTable table={table} />
+
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <Pagination
         currentPage={currentPage}

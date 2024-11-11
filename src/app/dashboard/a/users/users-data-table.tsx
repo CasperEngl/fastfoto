@@ -14,6 +14,7 @@ import { Pagination } from "~/components/pagination";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Input } from "~/components/ui/input";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import { Users } from "~/db/schema";
 
 type UserColumn = InferSelectModel<typeof Users>;
@@ -212,7 +213,11 @@ export function UsersDataTable({
         />
       </div>
 
-      <DataTable table={table} />
+      <ScrollArea className="max-w-full">
+        <DataTable table={table} />
+
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <Pagination
         currentPage={currentPage}

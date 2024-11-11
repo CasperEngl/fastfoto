@@ -18,6 +18,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "~/components/ui/popover";
+import { ScrollArea, ScrollBar } from "~/components/ui/scroll-area";
 import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
@@ -254,7 +255,11 @@ export function AlbumsDataTable({
         />
       </div>
 
-      <DataTable table={table} />
+      <ScrollArea className="max-w-full">
+        <DataTable table={table} />
+
+        <ScrollBar orientation="horizontal" />
+      </ScrollArea>
 
       <Pagination
         currentPage={currentPage}
