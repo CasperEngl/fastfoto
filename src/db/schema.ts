@@ -7,6 +7,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -182,27 +183,12 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
     .defaultNow(),
 });
 
-export const UsersToAlbums = pgTable(
-  "users_to_albums",
-  {
-    userId: text("user_id")
-      .notNull()
-      .references(() => Users.id, { onDelete: "cascade" }),
-    albumId: text("album_id")
-      .notNull()
-      .references(() => Albums.id, { onDelete: "cascade" }),
-  },
-  (t) => [
-    primaryKey({
-      name: "users_to_albums_pk",
-      columns: [t.userId, t.albumId],
-    }),
-  ],
-);
-
 export const StudioClients = pgTable(
   "studio_clients",
   {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
     studioId: text("studio_id")
       .notNull()
       .references(() => Studios.id, { onDelete: "cascade" }),
@@ -211,24 +197,44 @@ export const StudioClients = pgTable(
       .references(() => Users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (t) => [
-    primaryKey({
-      name: "studio_clients_pk",
-      columns: [t.studioId, t.userId],
-    }),
-  ],
+  (t) => ({
+    uniqueIndex: uniqueIndex("studio_clients_studio_id_user_id_unique").on(
+      t.studioId,
+      t.userId,
+    ),
+  }),
+);
+
+export const AlbumClients = pgTable(
+  "album_clients",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    albumId: text("album_id")
+      .notNull()
+      .references(() => Albums.id, { onDelete: "cascade" }),
+    studioClientId: text("studio_client_id")
+      .notNull()
+      .references(() => StudioClients.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+  },
+  (t) => ({
+    uniqueIndex: uniqueIndex(
+      "album_clients_album_id_studio_client_id_unique",
+    ).on(t.albumId, t.studioClientId),
+  }),
 );
 
 export const UsersRelations = relations(Users, ({ many }) => ({
-  usersToAlbums: many(UsersToAlbums),
   studios: many(StudioMembers),
-  managedByStudios: many(StudioClients),
+  studioClients: many(StudioClients),
 }));
 
 export const StudiosRelations = relations(Studios, ({ many }) => ({
   members: many(StudioMembers),
   albums: many(Albums),
-  managedClients: many(StudioClients),
+  clients: many(StudioClients),
 }));
 
 export const StudioMembersRelations = relations(StudioMembers, ({ one }) => ({
@@ -244,21 +250,21 @@ export const StudioMembersRelations = relations(StudioMembers, ({ one }) => ({
 
 export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
   photos: many(Photos),
-  usersToAlbums: many(UsersToAlbums),
+  clients: many(AlbumClients),
   studio: one(Studios, {
     fields: [Albums.studioId],
     references: [Studios.id],
   }),
 }));
 
-export const UsersToAlbumsRelations = relations(UsersToAlbums, ({ one }) => ({
+export const AlbumClientsRelations = relations(AlbumClients, ({ one }) => ({
   album: one(Albums, {
-    fields: [UsersToAlbums.albumId],
+    fields: [AlbumClients.albumId],
     references: [Albums.id],
   }),
-  user: one(Users, {
-    fields: [UsersToAlbums.userId],
-    references: [Users.id],
+  studioClient: one(StudioClients, {
+    fields: [AlbumClients.studioClientId],
+    references: [StudioClients.id],
   }),
 }));
 

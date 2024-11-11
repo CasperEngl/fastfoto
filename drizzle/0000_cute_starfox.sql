@@ -1,6 +1,14 @@
 CREATE EXTENSION IF NOT EXISTS pg_trgm WITH SCHEMA public;--> statement-breakpoint
-CREATE TYPE "public"."studio_role" AS ENUM('owner', 'admin', 'member');--> statement-breakpoint
-CREATE TYPE "public"."user_type" AS ENUM('admin', 'photographer', 'client');--> statement-breakpoint
+DO $$ BEGIN
+    CREATE TYPE "public"."studio_role" AS ENUM('owner', 'admin', 'member');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
+DO $$ BEGIN
+    CREATE TYPE "public"."user_type" AS ENUM('admin', 'photographer', 'client');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;--> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "accounts" (
 	"user_id" text NOT NULL,
 	"type" text NOT NULL,

@@ -8,6 +8,13 @@
       "when": 1731262866629,
       "tag": "0000_cute_starfox",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1731286261019,
+      "tag": "0001_lucky_whirlwind",
+      "breakpoints": true
     }
   ]
 }
