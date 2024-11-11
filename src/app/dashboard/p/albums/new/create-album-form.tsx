@@ -3,12 +3,15 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { InferSelectModel } from "drizzle-orm";
 import invariant from "invariant";
+import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
 import {
@@ -21,12 +24,9 @@ import {
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
-import { Users } from "~/db/schema";
-import { createAlbum } from "./actions";
-import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
+import * as schema from "~/db/schema";
 import { isAdmin, isPhotographer } from "~/role";
-import Link from "next/link";
-import { X } from "lucide-react";
+import { createAlbum } from "./actions";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
@@ -37,10 +37,14 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 export function CreateAlbumForm({
-  users,
+  clients,
   selectedStudioId,
 }: {
-  users: InferSelectModel<typeof Users>[];
+  clients: Array<
+    InferSelectModel<typeof schema.StudioClients> & {
+      user: InferSelectModel<typeof schema.Users>;
+    }
+  >;
   selectedStudioId: string;
 }) {
   const session = useSession();
@@ -56,6 +60,10 @@ export function CreateAlbumForm({
       users: searchParams.get("userId") ? [searchParams.get("userId")!] : [],
     },
   });
+
+  function findUserName(userId: string) {
+    return clients.find((client) => client.user.id === userId)?.user.name ?? "";
+  }
 
   return (
     <Form {...form}>
@@ -91,9 +99,9 @@ export function CreateAlbumForm({
               <FormLabel>Users</FormLabel>
               <div>
                 <Combobox
-                  options={users.map((user) => ({
-                    value: user.id,
-                    label: user.name ?? "",
+                  options={clients.map((client) => ({
+                    value: client.user.id,
+                    label: client.user.name ?? "",
                   }))}
                   value={field.value}
                   onValueChange={field.onChange}
@@ -105,13 +113,15 @@ export function CreateAlbumForm({
                 <div className="flex flex-wrap gap-2">
                   {field.value
                     .toSorted((a, b) => {
-                      const userA = users.find((u) => u.id === a)?.name ?? "";
-                      const userB = users.find((u) => u.id === b)?.name ?? "";
+                      const userA = findUserName(a);
+                      const userB = findUserName(b);
 
                       return userA.localeCompare(userB);
                     })
                     .map((userId) => {
-                      const user = users.find((u) => u.id === userId);
+                      const user = clients.find(
+                        (client) => client.user.id === userId,
+                      )?.user;
 
                       return (
                         <div
