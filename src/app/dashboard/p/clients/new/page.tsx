@@ -1,14 +1,14 @@
 import { notFound } from "next/navigation";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { hasPhotographerUserType } from "~/role";
+import { isPhotographer } from "~/role";
 import { CreateClientForm } from "./create-client-form";
 
 export default async function CreateClientPage() {
   const session = await auth();
   const users = await db.query.Users.findMany();
 
-  if (!hasPhotographerUserType(session?.user)) {
+  if (!isPhotographer(session?.user)) {
     return notFound();
   }
 

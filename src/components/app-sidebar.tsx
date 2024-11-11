@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "~/components/ui/sidebar";
 import type * as schema from "~/db/schema";
-import { hasPhotographerUserType, isAdmin, isClient } from "~/role";
+import { isPhotographer, isAdmin, isClient } from "~/role";
 
 interface AppSidebarProps {
   studios: InferSelectModel<typeof schema.Studios>[];
@@ -108,7 +108,7 @@ export function AppSidebar({ studios, activeStudio }: AppSidebarProps) {
           </SidebarGroup>
         ) : null}
 
-        {hasPhotographerUserType(session.data?.user) ? (
+        {isPhotographer(session.data?.user) ? (
           <SidebarGroup>
             <SidebarGroupLabel>Studio</SidebarGroupLabel>
             <SidebarMenu>

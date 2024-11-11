@@ -5,7 +5,7 @@ import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { Alert } from "~/components/ui/alert";
 import { db } from "~/db/client";
-import { hasPhotographerUserType } from "~/role";
+import { isPhotographer } from "~/role";
 
 export default async function CreateAlbumPage() {
   const session = await auth();
@@ -13,7 +13,7 @@ export default async function CreateAlbumPage() {
   const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
   const users = await db.query.Users.findMany();
 
-  if (!hasPhotographerUserType(session?.user)) {
+  if (!isPhotographer(session?.user)) {
     return notFound();
   }
 

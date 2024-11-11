@@ -14,7 +14,7 @@ export function isClient(user?: User): user is User & { userType: "client" } {
   return user?.userType === "client";
 }
 
-export function hasPhotographerUserType(
+export function isPhotographer(
   user?: User,
 ): user is User & { userType: "photographer" } {
   if (isAdmin(user)) {

@@ -12,7 +12,7 @@ import { dataTableCache } from "~/components/data-table";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
-import { hasPhotographerUserType } from "~/role";
+import { isPhotographer } from "~/role";
 import { ClientsDataTable } from "./clients-data-table";
 
 export default async function ClientsPage({
@@ -25,7 +25,7 @@ export default async function ClientsPage({
   const cookieStore = await cookies();
   const userStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  if (!hasPhotographerUserType(session?.user)) {
+  if (!isPhotographer(session?.user)) {
     return notFound();
   }
 

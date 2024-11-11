@@ -24,7 +24,7 @@ import { Textarea } from "~/components/ui/textarea";
 import { Users } from "~/db/schema";
 import { createAlbum } from "./actions";
 import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
-import { isAdmin, hasPhotographerUserType } from "~/role";
+import { isAdmin, isPhotographer } from "~/role";
 import Link from "next/link";
 import { X } from "lucide-react";
 
@@ -63,7 +63,7 @@ export function CreateAlbumForm({
         onSubmit={form.handleSubmit((values) => {
           startTransition(async () => {
             invariant(
-              hasPhotographerUserType(session.data?.user),
+              isPhotographer(session.data?.user),
               "User must be a photographer",
             );
 

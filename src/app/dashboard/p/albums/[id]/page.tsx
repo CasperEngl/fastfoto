@@ -6,7 +6,7 @@ import { EditAlbumForm } from "~/app/dashboard/p/albums/[id]/edit-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Albums } from "~/db/schema";
-import { hasPhotographerUserType } from "~/role";
+import { isPhotographer } from "~/role";
 
 export default async function AlbumPage({
   params,
@@ -16,7 +16,7 @@ export default async function AlbumPage({
   const { id } = z.object({ id: z.string() }).parse(await params);
   const session = await auth();
 
-  if (!hasPhotographerUserType(session?.user)) {
+  if (!isPhotographer(session?.user)) {
     return notFound();
   }
 
