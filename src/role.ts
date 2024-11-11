@@ -27,14 +27,14 @@ export function isPhotographer(
 export function hasStudioManagerRole(
   user: User,
   studio: InferSelectModel<typeof schema.Studios> & {
-    members: Array<InferSelectModel<typeof schema.Users> & { role: string }>;
+    users: Array<InferSelectModel<typeof schema.Users> & { role: string }>;
   },
 ): user is User {
   if (isAdmin(user)) {
     return true;
   }
 
-  return studio.members.some((member) => {
+  return studio.users.some((member) => {
     const userMatch = user.id === member.id;
     const isOwner = member.role === "owner";
     const isAdmin = member.role === "admin";

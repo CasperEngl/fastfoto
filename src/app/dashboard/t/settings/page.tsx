@@ -19,7 +19,7 @@ export default async function StudioSettingsPage() {
     with: {
       studio: {
         with: {
-          members: {
+          studioMembers: {
             with: {
               user: true,
             },
@@ -30,7 +30,7 @@ export default async function StudioSettingsPage() {
   });
   const studios = userStudios.map((studio) => ({
     ...studio.studio,
-    members: studio.studio.members.map((member) => ({
+    users: studio.studio.studioMembers.map((member) => ({
       ...member.user,
       role: member.role,
     })),
