@@ -1,11 +1,11 @@
 import crypto from "crypto";
 import { eq } from "drizzle-orm";
-import invariant from "invariant";
 import { createUploadthing, type FileRouter } from "uploadthing/next";
 import { UploadThingError, UTApi } from "uploadthing/server";
 import { z } from "zod";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
+import { isStudioManager } from "~/db/queries/studio-member.queries";
 import * as schema from "~/db/schema";
 
 const f = createUploadthing();
@@ -81,20 +81,15 @@ export const ourFileRouter = {
         throw new UploadThingError("Unauthorized");
       }
 
-      const studioMember = await db.query.StudioMembers.findFirst({
-        where: (studioMembers, { and, eq }) => {
-          invariant(session?.user?.id, "Not authenticated");
-
-          return and(
-            eq(studioMembers.studioId, input.studioId),
-            eq(studioMembers.userId, session.user.id),
-            eq(studioMembers.role, "owner"),
-          );
+      const studioManager = await db.query.StudioMembers.findFirst({
+        where: isStudioManager(input.studioId, session.user.id),
+        columns: {
+          id: true,
         },
       });
 
-      if (!studioMember) {
-        throw new UploadThingError("Unauthorized - Must be studio owner");
+      if (!studioManager) {
+        throw new UploadThingError("Unauthorized - Must be a studio manager");
       }
 
       return { userId: session.user.id, studioId: input.studioId };
