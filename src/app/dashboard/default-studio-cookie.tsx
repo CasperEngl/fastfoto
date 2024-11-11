@@ -13,10 +13,12 @@ export function DefaultStudioCookie({
   activeStudio?: InferSelectModel<typeof schema.Studios>;
 }) {
   useEffect(() => {
-    if (!activeStudio) {
-      changeStudio(studios[0].id);
+    const firstStudioId = studios[0]?.id;
+
+    if (!activeStudio && firstStudioId) {
+      changeStudio(firstStudioId);
     }
-  }, []);
+  }, [studios, activeStudio]);
 
   return null;
 }
