@@ -197,12 +197,12 @@ export const StudioClients = pgTable(
       .references(() => Users.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (t) => ({
-    uniqueIndex: uniqueIndex("studio_clients_studio_id_user_id_unique").on(
+  (t) => [
+    uniqueIndex("studio_clients_studio_id_user_id_unique").on(
       t.studioId,
       t.userId,
     ),
-  }),
+  ],
 );
 
 export const AlbumClients = pgTable(
@@ -219,11 +219,12 @@ export const AlbumClients = pgTable(
       .references(() => StudioClients.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
   },
-  (t) => ({
-    uniqueIndex: uniqueIndex(
-      "album_clients_album_id_studio_client_id_unique",
-    ).on(t.albumId, t.studioClientId),
-  }),
+  (t) => [
+    uniqueIndex("album_clients_album_id_studio_client_id_unique").on(
+      t.albumId,
+      t.studioClientId,
+    ),
+  ],
 );
 
 export const UsersRelations = relations(Users, ({ many }) => ({
