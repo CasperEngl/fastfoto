@@ -1,5 +1,5 @@
 {
-  "id": "9dabb030-b978-499f-91b9-ad0de92192f1",
+  "id": "2e7be81c-2e1c-44f0-9b6f-91c8de7601ce",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -161,6 +161,93 @@
           "tableTo": "users",
           "columnsFrom": [
             "admin_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.album_clients": {
+      "name": "album_clients",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "album_id": {
+          "name": "album_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "studio_client_id": {
+          "name": "studio_client_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "album_clients_album_id_studio_client_id_unique": {
+          "name": "album_clients_album_id_studio_client_id_unique",
+          "columns": [
+            {
+              "expression": "album_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "studio_client_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "album_clients_album_id_albums_id_fk": {
+          "name": "album_clients_album_id_albums_id_fk",
+          "tableFrom": "album_clients",
+          "tableTo": "albums",
+          "columnsFrom": [
+            "album_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "album_clients_studio_client_id_studio_clients_id_fk": {
+          "name": "album_clients_studio_client_id_studio_clients_id_fk",
+          "tableFrom": "album_clients",
+          "tableTo": "studio_clients",
+          "columnsFrom": [
+            "studio_client_id"
           ],
           "columnsTo": [
             "id"
@@ -455,6 +542,12 @@
       "name": "studio_clients",
       "schema": "",
       "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true
+        },
         "studio_id": {
           "name": "studio_id",
           "type": "text",
@@ -475,7 +568,29 @@
           "default": "now()"
         }
       },
-      "indexes": {},
+      "indexes": {
+        "studio_clients_studio_id_user_id_unique": {
+          "name": "studio_clients_studio_id_user_id_unique",
+          "columns": [
+            {
+              "expression": "studio_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
       "foreignKeys": {
         "studio_clients_studio_id_studios_id_fk": {
           "name": "studio_clients_studio_id_studios_id_fk",
@@ -504,15 +619,7 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {
-        "studio_clients_pk": {
-          "name": "studio_clients_pk",
-          "columns": [
-            "studio_id",
-            "user_id"
-          ]
-        }
-      },
+      "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
@@ -737,66 +844,6 @@
           ]
         }
       },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.users_to_albums": {
-      "name": "users_to_albums",
-      "schema": "",
-      "columns": {
-        "user_id": {
-          "name": "user_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "album_id": {
-          "name": "album_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "users_to_albums_user_id_users_id_fk": {
-          "name": "users_to_albums_user_id_users_id_fk",
-          "tableFrom": "users_to_albums",
-          "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "users_to_albums_album_id_albums_id_fk": {
-          "name": "users_to_albums_album_id_albums_id_fk",
-          "tableFrom": "users_to_albums",
-          "tableTo": "albums",
-          "columnsFrom": [
-            "album_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {
-        "users_to_albums_pk": {
-          "name": "users_to_albums_pk",
-          "columns": [
-            "user_id",
-            "album_id"
-          ]
-        }
-      },
-      "uniqueConstraints": {},
       "policies": {},
       "checkConstraints": {},
       "isRLSEnabled": false
