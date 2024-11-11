@@ -41,7 +41,6 @@ function MobileRow<TData>({ row }: { row: Row<TData> }) {
     <TableRow className="flex flex-col border-b p-4 last:border-b-0 hover:bg-inherit sm:table-row sm:p-0">
       {row.getVisibleCells().map((cell) => {
         const header = cell.column.columnDef.header;
-        if (cell.column.id === "select") return null;
 
         return (
           <TableCell
