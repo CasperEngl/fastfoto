@@ -310,7 +310,7 @@ export function EditAlbumForm({
                             );
                             setOptimisticPhotos(updatedPhotos);
 
-                            await deletePhoto(photo.key);
+                            await deletePhoto(album.id, photo.key);
 
                             toast.success("Photo deleted successfully");
                             router.refresh();
