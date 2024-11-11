@@ -41,6 +41,11 @@ export const {
     enableWebAuthn: true,
   },
   callbacks: {
+    session({ session, user }) {
+      session.user = user;
+
+      return session;
+    },
     signIn: async ({ user }) => {
       setTimeout(async () => {
         try {
