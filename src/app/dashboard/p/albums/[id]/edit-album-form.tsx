@@ -39,7 +39,7 @@ const albumFormSchema = z.object({
     message: "Name must be at least 2 characters.",
   }),
   description: z.string().optional(),
-  users: z.array(z.string()).default([]).catch([]),
+  clients: z.array(z.string()).default([]).catch([]),
 });
 
 type AlbumFormValues = z.infer<typeof albumFormSchema>;
@@ -50,13 +50,17 @@ interface OptimisticPhoto extends InferSelectModel<typeof schema.Photos> {
 
 export function EditAlbumForm({
   album,
-  clients,
+  studioClients,
 }: {
   album: InferSelectModel<typeof schema.Albums> & {
     photos: InferSelectModel<typeof schema.Photos>[];
-    clients: InferSelectModel<typeof schema.Users>[];
+    clients: InferSelectModel<typeof schema.StudioClients>[];
   };
-  clients: InferSelectModel<typeof schema.Users>[];
+  studioClients: Array<
+    InferSelectModel<typeof schema.StudioClients> & {
+      user: InferSelectModel<typeof schema.Users>;
+    }
+  >;
 }) {
   const session = useSession();
   const router = useRouter();
@@ -78,7 +82,7 @@ export function EditAlbumForm({
     defaultValues: {
       name: album.name ?? "",
       description: album.description ?? "",
-      users: album.clients.map((user) => user.id),
+      clients: album.clients.map((client) => client.id),
     },
   });
 
@@ -93,7 +97,7 @@ export function EditAlbumForm({
               await updateAlbum(params.id.toString(), {
                 name: values.name,
                 description: values.description || null,
-                users: values.users || [],
+                clients: values.clients || [],
               });
               toast.success("Album updated successfully");
               form.reset(form.getValues());
@@ -141,15 +145,15 @@ export function EditAlbumForm({
 
         <FormField
           control={form.control}
-          name="users"
+          name="clients"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clients</FormLabel>
               <div className="space-y-4">
                 <Combobox
-                  options={clients.map((user) => ({
-                    value: user.id,
-                    label: user.name ?? "",
+                  options={studioClients.map((studioClient) => ({
+                    value: studioClient.id,
+                    label: studioClient.user.name ?? "",
                   }))}
                   placeholder="Select clients..."
                   value={field.value}
@@ -166,35 +170,41 @@ export function EditAlbumForm({
                 <div className="flex flex-wrap gap-2">
                   {field.value
                     .toSorted((a, b) => {
-                      const userA = clients.find((u) => u.id === a)?.name ?? "";
-                      const userB = clients.find((u) => u.id === b)?.name ?? "";
+                      const userA =
+                        studioClients.find(
+                          (studioClient) => studioClient.id === a,
+                        )?.user.name ?? "";
+                      const userB =
+                        studioClients.find((u) => u.id === b)?.user.name ?? "";
 
                       return userA.localeCompare(userB);
                     })
                     .map((userId) => {
-                      const user = clients.find((u) => u.id === userId);
+                      const studioClient = studioClients.find(
+                        (u) => u.id === userId,
+                      );
 
                       return (
                         <div
                           key={userId}
                           className="flex items-center gap-x-2 rounded-full border bg-muted px-2 py-1.5 has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10"
                         >
-                          {user ? (
+                          {studioClient ? (
                             isAdmin(session.data?.user) ? (
                               <Link
-                                key={user.id}
-                                href={`/dashboard/a/users/${user.id}`}
+                                key={studioClient.id}
+                                href={`/dashboard/a/users/${studioClient.id}`}
                                 className="group h-8"
                               >
                                 <SelectedClient
-                                  image={user.image}
-                                  name={user.name}
+                                  image={studioClient.user.image}
+                                  name={studioClient.user.name}
                                 />
                               </Link>
                             ) : (
                               <SelectedClient
-                                image={user.image}
-                                name={user.name}
+                                image={studioClient.user.image}
+                                name={studioClient.user.name}
                               />
                             )
                           ) : null}
@@ -205,7 +215,7 @@ export function EditAlbumForm({
                             className="size-8 rounded-full hover:bg-destructive hover:text-destructive-foreground"
                             onClick={() => {
                               form.setValue(
-                                "users",
+                                "clients",
                                 field.value.filter((id) => id !== userId),
                                 { shouldDirty: true },
                               );

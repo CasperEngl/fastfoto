@@ -43,7 +43,7 @@ export default async function AlbumPage({
 
   const transformedAlbum = {
     ...album,
-    clients: album?.clients.map((client) => client.studioClient.user) ?? [],
+    clients: album.clients.map((client) => client.studioClient) ?? [],
   };
 
   const clients = await db.query.StudioClients.findMany({
@@ -53,15 +53,13 @@ export default async function AlbumPage({
     },
   });
 
-  const transformedClients = clients.map((client) => client.user);
-
   return (
     <div className="container mx-auto py-10">
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Edit Album</h1>
         <DeleteAlbumButton albumId={id} />
       </div>
-      <EditAlbumForm album={transformedAlbum} clients={transformedClients} />
+      <EditAlbumForm album={transformedAlbum} studioClients={clients} />
     </div>
   );
 }

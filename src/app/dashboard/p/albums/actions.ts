@@ -49,7 +49,7 @@ export async function deleteAlbum(albumId: string) {
 export async function updateAlbum(
   albumId: string,
   data: Omit<InferInsertModel<typeof schema.Albums>, "studioId"> & {
-    users: string[];
+    clients: string[];
   },
 ) {
   const session = await auth();
@@ -76,10 +76,7 @@ export async function updateAlbum(
   }
 
   const studioMember = await db.query.StudioMembers.findFirst({
-    where: and(
-      isStudio(album.studioId),
-      isStudioMember(album.studioId, session.user.id),
-    ),
+    where: isStudioMember(album.studioId, session.user.id),
     columns: {
       id: true,
     },
@@ -97,8 +94,23 @@ export async function updateAlbum(
         name: data.name,
         description: data.description,
       })
-      .where(eq(schema.Albums.id, albumId));
-  });
+      .where(isAlbum(albumId));
 
-  revalidatePath("/dashboard/p/albums");
+    // Delete existing user relationships
+    await tx
+      .delete(schema.AlbumClients)
+      .where(eq(schema.AlbumClients.albumId, albumId));
+
+    // Insert new user relationships
+    if (data.clients.length > 0) {
+      await tx.insert(schema.AlbumClients).values(
+        data.clients.map((clientId) => ({
+          studioClientId: clientId,
+          albumId,
+        })),
+      );
+    }
+
+    revalidatePath("/dashboard/p/albums");
+  });
 }
