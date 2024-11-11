@@ -1,6 +1,7 @@
 "use client";
 
 import { getCoreRowModel, useReactTable } from "@tanstack/react-table";
+import dayjs from "dayjs";
 import { InferSelectModel } from "drizzle-orm";
 import { Camera, ShieldCheck, User } from "lucide-react";
 import Link from "next/link";
@@ -105,6 +106,30 @@ export function UsersDataTable({
             <span className="capitalize">{row.getValue("userType")}</span>
           </div>
         ),
+      },
+      {
+        accessorKey: "createdAt",
+        header: "Added On",
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap tabular-nums">
+            {dayjs(row.original.createdAt).format("YYYY/MM/DD • HH:mm")}
+          </span>
+        ),
+        meta: {
+          align: "end",
+        },
+      },
+      {
+        accessorKey: "updatedAt",
+        header: "Updated On",
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap tabular-nums">
+            {dayjs(row.original.updatedAt).format("YYYY/MM/DD • HH:mm")}
+          </span>
+        ),
+        meta: {
+          align: "end",
+        },
       },
       {
         id: "actions",
