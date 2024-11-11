@@ -18,70 +18,64 @@ if (existingUsers.length > 0) {
 console.log("🌱 Starting database seeding...");
 
 // Create photographers (owners)
-const photographers = await Promise.all(
-  Array(3)
-    .fill(null)
-    .map(async () => {
+const photographers = await db
+  .insert(schema.Users)
+  .values(
+    Array.from({ length: 3 }, () => {
       const firstName = faker.person.firstName();
-      return await db
-        .insert(schema.Users)
-        .values({
-          name: firstName,
-          email: `photographer+${firstName.toLowerCase()}@casperengelmann.com`,
-          userType: "photographer",
-        })
-        .returning();
+      return {
+        name: firstName,
+        email: `photographer+${firstName.toLowerCase()}@casperengelmann.com`,
+        userType: "photographer" as const,
+      };
     }),
-);
+  )
+  .returning();
 
 // Create studio members (staff)
-const studioMembers = await Promise.all(
-  Array(6)
-    .fill(null)
-    .map(async () => {
+const studioMembers = await db
+  .insert(schema.Users)
+  .values(
+    Array.from({ length: 6 }, () => {
       const firstName = faker.person.firstName();
-      return await db
-        .insert(schema.Users)
-        .values({
-          name: firstName,
-          email: `staff+${firstName.toLowerCase()}@casperengelmann.com`,
-          userType: "photographer",
-        })
-        .returning();
+      return {
+        name: firstName,
+        email: `staff+${firstName.toLowerCase()}@casperengelmann.com`,
+        userType: "photographer" as const,
+      };
     }),
-);
+  )
+  .returning();
 
-// Create clients (separate from studio members)
-const clients = await Promise.all(
-  Array(10)
-    .fill(null)
-    .map(async () => {
+// Create clients
+const clients = await db
+  .insert(schema.Users)
+  .values(
+    Array.from({ length: 10 }, () => {
       const firstName = faker.person.firstName();
-      return await db
-        .insert(schema.Users)
-        .values({
-          name: firstName,
-          email: `client+${firstName.toLowerCase()}@casperengelmann.com`,
-          userType: "client",
-        })
-        .returning();
+      return {
+        name: firstName,
+        email: `client+${firstName.toLowerCase()}@casperengelmann.com`,
+        userType: "client" as const,
+      };
     }),
-);
+  )
+  .returning();
 
 // Create studios for photographers
 for (const photographer of photographers) {
-  const studio = await db
+  const [studio] = await db
     .insert(schema.Studios)
     .values({
-      name: `${photographer[0].name}'s Studio`,
-      createdById: photographer[0].id,
+      name: `${photographer.name}'s Studio`,
+      createdById: photographer.id,
     })
     .returning();
 
   // Add photographer as owner
   await db.insert(schema.StudioMembers).values({
-    userId: photographer[0].id,
-    studioId: studio[0].id,
+    userId: photographer.id,
+    studioId: studio.id,
     role: "owner",
   });
 
@@ -91,23 +85,27 @@ for (const photographer of photographers) {
     faker.number.int({ min: 1, max: 3 }),
   );
 
-  for (const member of randomStudioMembers) {
+  // Batch insert studio members
+  if (randomStudioMembers.length > 0) {
     await db
       .insert(schema.StudioMembers)
-      .values({
-        userId: member[0].id,
-        studioId: studio[0].id,
-        role: "member",
-      })
+      .values(
+        randomStudioMembers.map((member) => ({
+          userId: member.id,
+          studioId: studio.id,
+          role: "member" as const,
+        })),
+      )
       .onConflictDoNothing();
   }
 
   const numAlbums = faker.number.int({ min: 2, max: 5 });
 
-  for (let i = 0; i < numAlbums; i++) {
-    const album = await db
-      .insert(schema.Albums)
-      .values({
+  // Create albums for the studio
+  const albums = await db
+    .insert(schema.Albums)
+    .values(
+      Array.from({ length: numAlbums }, () => ({
         name: capitalize(
           faker.lorem.words({
             min: 2,
@@ -115,38 +113,46 @@ for (const photographer of photographers) {
           }),
         ),
         description: faker.lorem.paragraph(),
-        studioId: studio[0].id,
-      })
-      .returning();
+        studioId: studio.id,
+      })),
+    )
+    .returning();
 
-    // Add some random clients to each album
+  // Process each album
+  for (const album of albums) {
+    // Add random clients to each album
     const randomClients = faker.helpers.arrayElements(
       clients,
       faker.number.int({ min: 1, max: 3 }),
     );
 
-    for (const client of randomClients) {
-      // Create studio-client relationship
-      await db
-        .insert(schema.StudioClients)
-        .values({
-          studioId: studio[0].id,
-          userId: client[0].id,
-        })
-        .onConflictDoNothing();
+    // Batch insert studio clients
+    const studioClients = await db
+      .insert(schema.StudioClients)
+      .values(
+        randomClients.map((client) => ({
+          studioId: studio.id,
+          userId: client.id,
+        })),
+      )
+      .onConflictDoNothing()
+      .returning();
 
-      // Add client to album
-      await db.insert(schema.UsersToAlbums).values({
-        userId: client[0].id,
-        albumId: album[0].id,
-      });
+    // Batch insert album clients
+    if (studioClients.length > 0) {
+      await db.insert(schema.AlbumClients).values(
+        studioClients.map((studioClient) => ({
+          albumId: album.id,
+          studioClientId: studioClient.id,
+        })),
+      );
     }
 
-    // Rest of the photo creation code remains the same
+    // Batch insert photos
     const numPhotos = faker.number.int({ min: 5, max: 20 });
-    for (let j = 0; j < numPhotos; j++) {
-      await db.insert(schema.Photos).values({
-        albumId: album[0].id,
+    await db.insert(schema.Photos).values(
+      Array.from({ length: numPhotos }, (_, index) => ({
+        albumId: album.id,
         url: faker.image.urlPicsumPhotos({
           height: faker.number.int({ min: 400, max: 800 }),
           width: faker.number.int({ min: 400, max: 800 }),
@@ -154,9 +160,9 @@ for (const photographer of photographers) {
         }),
         key: faker.string.uuid(),
         caption: faker.lorem.sentence(),
-        order: j,
-      });
-    }
+        order: index,
+      })),
+    );
   }
 }
 
