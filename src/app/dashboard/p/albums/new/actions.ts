@@ -8,11 +8,11 @@ import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { isUserPhotographer } from "~/db/queries/users.queries";
-import { Albums, UsersToAlbums } from "~/db/schema";
+import * as schema from "~/db/schema";
 
 export async function createAlbum(
-  data: InferInsertModel<typeof Albums> & {
-    users: string[];
+  data: InferInsertModel<typeof schema.Albums> & {
+    clients: string[];
   },
 ) {
   const session = await auth();
@@ -36,7 +36,7 @@ export async function createAlbum(
     invariant(selectedStudioId, "Must select a studio");
 
     const [album] = await tx
-      .insert(Albums)
+      .insert(schema.Albums)
       .values({
         name: data.name,
         description: data.description,
@@ -45,10 +45,10 @@ export async function createAlbum(
       .returning();
 
     // Insert the user-album relationships
-    if (data.users.length > 0) {
-      await tx.insert(UsersToAlbums).values(
-        data.users.map((userId) => ({
-          userId,
+    if (data.clients.length > 0) {
+      await tx.insert(schema.AlbumClients).values(
+        data.clients.map((client) => ({
+          studioClientId: client,
           albumId: album.id,
         })),
       );

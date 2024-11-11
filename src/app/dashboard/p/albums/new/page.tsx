@@ -27,6 +27,8 @@ export default async function CreateAlbumPage() {
     },
   });
 
+  const transformedClients = clients.map((client) => client.user);
+
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
@@ -34,7 +36,7 @@ export default async function CreateAlbumPage() {
       </div>
       {selectedStudioId ? (
         <CreateAlbumForm
-          clients={clients}
+          clients={transformedClients}
           selectedStudioId={selectedStudioId}
         />
       ) : (

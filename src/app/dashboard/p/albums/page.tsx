@@ -76,20 +76,24 @@ export default async function AlbumsPage({
     orderBy: orderByClause,
     with: {
       photos: true,
-      usersToAlbums: {
+      clients: {
         with: {
-          user: true,
+          studioClient: {
+            with: {
+              user: true,
+            },
+          },
         },
       },
     },
     limit: ITEMS_PER_PAGE,
     offset,
-  }).then((albums) => {
-    return albums.map((album) => ({
-      ...album,
-      users: album.usersToAlbums.map(({ user }) => user),
-    }));
   });
+
+  const transformedAlbums = albums.map((album) => ({
+    ...album,
+    clients: album.clients.map((client) => client.studioClient.user),
+  }));
 
   const [{ count: totalCount }] = await db
     .select({ count: count() })
@@ -111,7 +115,7 @@ export default async function AlbumsPage({
       </div>
 
       <AlbumsDataTable
-        data={albums}
+        data={transformedAlbums}
         currentPage={page}
         totalPages={totalPages}
         totalResults={totalCount}

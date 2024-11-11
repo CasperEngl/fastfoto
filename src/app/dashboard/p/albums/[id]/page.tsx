@@ -5,6 +5,7 @@ import { DeleteAlbumButton } from "~/app/dashboard/p/albums/[id]/delete-album-bu
 import { EditAlbumForm } from "~/app/dashboard/p/albums/[id]/edit-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
+import { studioClients } from "~/db/queries/studio-clients.queries";
 import { Albums } from "~/db/schema";
 import { isPhotographer } from "~/role";
 
@@ -24,25 +25,35 @@ export default async function AlbumPage({
     where: eq(Albums.id, id),
     with: {
       photos: true,
-      usersToAlbums: {
+      clients: {
         with: {
-          user: true,
+          studioClient: {
+            with: {
+              user: true,
+            },
+          },
         },
       },
     },
-  }).then((album) => {
-    if (!album) {
-      return null;
-    }
-    return {
-      ...album,
-      users: album?.usersToAlbums.map((userToAlbum) => userToAlbum.user),
-    };
   });
+
   if (!album) {
     return notFound();
   }
-  const users = await db.query.Users.findMany();
+
+  const transformedAlbum = {
+    ...album,
+    clients: album?.clients.map((client) => client.studioClient.user) ?? [],
+  };
+
+  const clients = await db.query.StudioClients.findMany({
+    where: studioClients(album.studioId),
+    with: {
+      user: true,
+    },
+  });
+
+  const transformedClients = clients.map((client) => client.user);
 
   return (
     <div className="container mx-auto py-10">
@@ -50,7 +61,7 @@ export default async function AlbumPage({
         <h1 className="text-2xl font-bold tracking-tight">Edit Album</h1>
         <DeleteAlbumButton albumId={id} />
       </div>
-      <EditAlbumForm album={album} users={users} />
+      <EditAlbumForm album={transformedAlbum} clients={transformedClients} />
     </div>
   );
 }

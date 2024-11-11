@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { deletePhoto } from "~/app/dashboard/p/albums/[id]/actions";
 import { updateAlbum } from "~/app/dashboard/p/albums/actions";
-import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
+import { SelectedClient } from "~/app/dashboard/p/albums/selected-client";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
 import {
@@ -29,7 +29,7 @@ import {
 import { Input } from "~/components/ui/input";
 import { ScrollArea } from "~/components/ui/scroll-area";
 import { Textarea } from "~/components/ui/textarea";
-import { Albums, Photos, Users } from "~/db/schema";
+import * as schema from "~/db/schema";
 import { UploadDropzone } from "~/lib/uploadthing";
 import { cn } from "~/lib/utils";
 import { isAdmin } from "~/role";
@@ -44,19 +44,19 @@ const albumFormSchema = z.object({
 
 type AlbumFormValues = z.infer<typeof albumFormSchema>;
 
-interface OptimisticPhoto extends InferSelectModel<typeof Photos> {
+interface OptimisticPhoto extends InferSelectModel<typeof schema.Photos> {
   isRemoving?: boolean;
 }
 
 export function EditAlbumForm({
   album,
-  users,
+  clients,
 }: {
-  album: InferSelectModel<typeof Albums> & {
-    photos: InferSelectModel<typeof Photos>[];
-    users: InferSelectModel<typeof Users>[];
+  album: InferSelectModel<typeof schema.Albums> & {
+    photos: InferSelectModel<typeof schema.Photos>[];
+    clients: InferSelectModel<typeof schema.Users>[];
   };
-  users: InferSelectModel<typeof Users>[];
+  clients: InferSelectModel<typeof schema.Users>[];
 }) {
   const session = useSession();
   const router = useRouter();
@@ -78,7 +78,7 @@ export function EditAlbumForm({
     defaultValues: {
       name: album.name ?? "",
       description: album.description ?? "",
-      users: album.users.map((user) => user.id),
+      users: album.clients.map((user) => user.id),
     },
   });
 
@@ -147,7 +147,7 @@ export function EditAlbumForm({
               <FormLabel>Clients</FormLabel>
               <div className="space-y-4">
                 <Combobox
-                  options={users.map((user) => ({
+                  options={clients.map((user) => ({
                     value: user.id,
                     label: user.name ?? "",
                   }))}
@@ -166,13 +166,13 @@ export function EditAlbumForm({
                 <div className="flex flex-wrap gap-2">
                   {field.value
                     .toSorted((a, b) => {
-                      const userA = users.find((u) => u.id === a)?.name ?? "";
-                      const userB = users.find((u) => u.id === b)?.name ?? "";
+                      const userA = clients.find((u) => u.id === a)?.name ?? "";
+                      const userB = clients.find((u) => u.id === b)?.name ?? "";
 
                       return userA.localeCompare(userB);
                     })
                     .map((userId) => {
-                      const user = users.find((u) => u.id === userId);
+                      const user = clients.find((u) => u.id === userId);
 
                       return (
                         <div
@@ -186,13 +186,13 @@ export function EditAlbumForm({
                                 href={`/dashboard/a/users/${user.id}`}
                                 className="group h-8"
                               >
-                                <SelectedUser
+                                <SelectedClient
                                   image={user.image}
                                   name={user.name}
                                 />
                               </Link>
                             ) : (
-                              <SelectedUser
+                              <SelectedClient
                                 image={user.image}
                                 name={user.name}
                               />

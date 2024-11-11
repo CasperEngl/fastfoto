@@ -1,6 +1,6 @@
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 
-export function SelectedUser({
+export function SelectedClient({
   image,
   name,
 }: {

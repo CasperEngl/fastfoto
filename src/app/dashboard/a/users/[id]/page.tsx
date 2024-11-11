@@ -9,8 +9,8 @@ import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import { isUser } from "~/db/queries/users.queries";
-import { UsersToAlbums } from "~/db/schema";
 import { isAdmin } from "~/role";
+import * as schema from "~/db/schema";
 
 export default async function UserEditPage({
   params,
@@ -32,8 +32,8 @@ export default async function UserEditPage({
     return notFound();
   }
 
-  const albums = await db.query.UsersToAlbums.findMany({
-    where: eq(UsersToAlbums.userId, id),
+  const albums = await db.query.AlbumClients.findMany({
+    where: eq(schema.AlbumClients.studioClientId, id),
     with: {
       album: {
         with: {

@@ -6,12 +6,12 @@ import invariant from "invariant";
 import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
+import { SelectedClient } from "~/app/dashboard/p/albums/selected-client";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
 import {
@@ -31,7 +31,7 @@ import { createAlbum } from "./actions";
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  users: z.array(z.string()).default([]).catch([]),
+  clients: z.array(z.string()).default([]).catch([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -40,15 +40,10 @@ export function CreateAlbumForm({
   clients,
   selectedStudioId,
 }: {
-  clients: Array<
-    InferSelectModel<typeof schema.StudioClients> & {
-      user: InferSelectModel<typeof schema.Users>;
-    }
-  >;
+  clients: Array<InferSelectModel<typeof schema.Users>>;
   selectedStudioId: string;
 }) {
   const session = useSession();
-  const searchParams = useSearchParams();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
 
@@ -57,12 +52,12 @@ export function CreateAlbumForm({
     defaultValues: {
       name: "",
       description: "",
-      users: searchParams.get("userId") ? [searchParams.get("userId")!] : [],
+      clients: [],
     },
   });
 
-  function findUserName(userId: string) {
-    return clients.find((client) => client.user.id === userId)?.user.name ?? "";
+  function findClientName(clientId: string) {
+    return clients.find((client) => client.id === clientId)?.name ?? "";
   }
 
   return (
@@ -93,15 +88,15 @@ export function CreateAlbumForm({
       >
         <FormField
           control={form.control}
-          name="users"
+          name="clients"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Users</FormLabel>
+              <FormLabel>Clients</FormLabel>
               <div>
                 <Combobox
                   options={clients.map((client) => ({
-                    value: client.user.id,
-                    label: client.user.name ?? "",
+                    value: client.id,
+                    label: client.name ?? "",
                   }))}
                   value={field.value}
                   onValueChange={field.onChange}
@@ -113,37 +108,37 @@ export function CreateAlbumForm({
                 <div className="flex flex-wrap gap-2">
                   {field.value
                     .toSorted((a, b) => {
-                      const userA = findUserName(a);
-                      const userB = findUserName(b);
+                      const clientA = findClientName(a);
+                      const clientB = findClientName(b);
 
-                      return userA.localeCompare(userB);
+                      return clientA.localeCompare(clientB);
                     })
-                    .map((userId) => {
-                      const user = clients.find(
-                        (client) => client.user.id === userId,
-                      )?.user;
+                    .map((clientId) => {
+                      const client = clients.find(
+                        (client) => client.id === clientId,
+                      );
 
                       return (
                         <div
-                          key={userId}
+                          key={clientId}
                           className="flex items-center gap-x-2 rounded-full border bg-muted px-2 py-1.5 has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10"
                         >
-                          {user ? (
+                          {client ? (
                             isAdmin(session.data?.user) ? (
                               <Link
-                                key={user.id}
-                                href={`/dashboard/a/users/${user.id}`}
+                                key={client.id}
+                                href={`/dashboard/a/users/${client.id}`}
                                 className="group h-8"
                               >
-                                <SelectedUser
-                                  image={user.image}
-                                  name={user.name}
+                                <SelectedClient
+                                  image={client.image}
+                                  name={client.name}
                                 />
                               </Link>
                             ) : (
-                              <SelectedUser
-                                image={user.image}
-                                name={user.name}
+                              <SelectedClient
+                                image={client.image}
+                                name={client.name}
                               />
                             )
                           ) : null}
@@ -154,13 +149,13 @@ export function CreateAlbumForm({
                             className="size-8 rounded-full hover:bg-destructive hover:text-destructive-foreground"
                             onClick={() => {
                               form.setValue(
-                                "users",
-                                field.value.filter((id) => id !== userId),
+                                "clients",
+                                field.value.filter((id) => id !== clientId),
                                 { shouldDirty: true },
                               );
                             }}
                           >
-                            <span className="sr-only">Remove user</span>
+                            <span className="sr-only">Remove client</span>
                             <X className="size-4" />
                           </Button>
                         </div>

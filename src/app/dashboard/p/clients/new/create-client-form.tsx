@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { SelectedUser } from "~/app/dashboard/p/albums/selected-user";
+import { SelectedClient } from "~/app/dashboard/p/albums/selected-client";
 import { createClient } from "~/app/dashboard/p/clients/new/actions";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
@@ -106,13 +106,13 @@ export function CreateClientForm({
                                 href={`/dashboard/a/users/${user.id}`}
                                 className="group h-8"
                               >
-                                <SelectedUser
+                                <SelectedClient
                                   image={user.image}
                                   name={user.name}
                                 />
                               </Link>
                             ) : (
-                              <SelectedUser
+                              <SelectedClient
                                 image={user.image}
                                 name={user.name}
                               />
