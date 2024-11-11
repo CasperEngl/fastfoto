@@ -34,12 +34,12 @@ export async function createClient(data: { emails: string[] }) {
       where: inArray(schema.Users.email, data.emails),
     });
 
-    for (const user of users) {
-      await tx.insert(schema.StudioClients).values({
+    await tx.insert(schema.StudioClients).values(
+      users.map((user) => ({
         studioId: selectedStudioId,
         userId: user.id,
-      });
-    }
+      })),
+    );
 
     revalidatePath("/dashboard/p/clients");
   });
