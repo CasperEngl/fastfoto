@@ -8,7 +8,8 @@ import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
-import { Users, UsersToAlbums } from "~/db/schema";
+import { isUser } from "~/db/queries/users.queries";
+import { UsersToAlbums } from "~/db/schema";
 import { isAdmin } from "~/role";
 
 export default async function UserEditPage({
@@ -23,9 +24,8 @@ export default async function UserEditPage({
     return notFound();
   }
 
-  // Get user and their albums
   const user = await db.query.Users.findFirst({
-    where: eq(Users.id, id),
+    where: isUser(id),
   });
 
   if (!user) {
