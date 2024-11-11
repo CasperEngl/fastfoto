@@ -25,7 +25,7 @@ export default async function AlbumPage({
     where: eq(Albums.id, id),
     with: {
       photos: true,
-      clients: {
+      albumClients: {
         with: {
           studioClient: {
             with: {
@@ -43,7 +43,8 @@ export default async function AlbumPage({
 
   const transformedAlbum = {
     ...album,
-    clients: album.clients.map((client) => client.studioClient) ?? [],
+    clients:
+      album.albumClients.map((albumClient) => albumClient.studioClient) ?? [],
   };
 
   const clients = await db.query.StudioClients.findMany({

@@ -56,7 +56,7 @@ export function StudioSettingsForm({
     resolver: zodResolver(studioFormSchema),
     defaultValues: {
       name: studio.name,
-      members: studio.members.map((member) => member.id),
+      members: studio.users.map((member) => member.id),
     },
   });
   const canManageStudio = userManagableStudios.includes(studio.id);
@@ -143,7 +143,7 @@ export function StudioSettingsForm({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {studio.members.map((member) => (
+                {studio.users.map((member) => (
                   <TableRow key={member.id}>
                     <TableCell className="flex items-center gap-2">
                       <Avatar className="size-8">

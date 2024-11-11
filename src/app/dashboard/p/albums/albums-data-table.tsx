@@ -22,7 +22,7 @@ import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
 export type AlbumColumn = InferSelectModel<typeof schema.Albums> & {
-  clients: InferSelectModel<typeof schema.Users>[];
+  users: InferSelectModel<typeof schema.Users>[];
   photos: InferSelectModel<typeof schema.Photos>[];
 };
 
@@ -99,7 +99,7 @@ export function AlbumsDataTable({
 
           return (
             <div className="flex flex-col items-start gap-y-1">
-              {row.original.clients.slice(0, previewCount).map((user) =>
+              {row.original.users.slice(0, previewCount).map((user) =>
                 isAdmin(session.data?.user) ? (
                   <Link
                     key={user.id}
@@ -114,7 +114,7 @@ export function AlbumsDataTable({
                   </span>
                 ),
               )}
-              {row.original.clients.length > previewCount && (
+              {row.original.users.length > previewCount && (
                 <Popover open={open} onOpenChange={setOpen}>
                   <PopoverTrigger asChild>
                     <button
@@ -122,7 +122,7 @@ export function AlbumsDataTable({
                       onMouseEnter={() => setOpen(true)}
                       onMouseLeave={() => setOpen(false)}
                     >
-                      +{row.original.clients.length - previewCount} more
+                      +{row.original.users.length - previewCount} more
                     </button>
                   </PopoverTrigger>
                   <PopoverContent
@@ -131,7 +131,7 @@ export function AlbumsDataTable({
                     onMouseLeave={() => setOpen(false)}
                   >
                     <div className="flex flex-col gap-y-1">
-                      {row.original.clients.slice(previewCount).map((user) =>
+                      {row.original.users.slice(previewCount).map((user) =>
                         isAdmin(session.data?.user) ? (
                           <Link
                             key={user.id}

@@ -6,6 +6,7 @@ import { ChevronRight } from "lucide-react";
 import { parseAsString, useQueryState } from "nuqs";
 import { StudioSettingsForm } from "~/app/dashboard/t/settings/studio-settings-form";
 import { useContentBreakpoint } from "~/app/hooks/use-content-breakpoint";
+import { Alert, AlertDescription } from "~/components/ui/alert";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   Select,
@@ -25,7 +26,7 @@ import type * as schema from "~/db/schema";
 import { pluralize } from "~/lib/plural-rules";
 
 export type ManagedStudio = InferSelectModel<typeof schema.Studios> & {
-  members: Array<
+  users: Array<
     InferSelectModel<typeof schema.Users> & {
       role: InferSelectModel<typeof schema.StudioMembers>["role"];
     }
@@ -41,7 +42,7 @@ export function StudiosManager({
 }) {
   const [studioId, setStudioId] = useQueryState(
     "studio",
-    parseAsString.withDefault(studios[0].id),
+    parseAsString.withDefault(studios[0]?.id ?? ""),
   );
   const selectedStudio =
     studios.find((studio) => studio.id === studioId) ?? studios[0];
@@ -64,9 +65,9 @@ export function StudiosManager({
                 <div>
                   <div>{studio.name}</div>
                   <div className="text-xs text-muted-foreground">
-                    {pluralize.select(studio.members.length) === "one"
-                      ? `${studio.members.length} member`
-                      : `${studio.members.length} members`}
+                    {pluralize.select(studio.users.length) === "one"
+                      ? `${studio.users.length} member`
+                      : `${studio.users.length} members`}
                   </div>
                 </div>
               </SelectItem>
@@ -104,9 +105,9 @@ export function StudiosManager({
                             {studio.name}
                           </div>
                           <div className="text-xs text-muted-foreground">
-                            {pluralize.select(studio.members.length) === "one"
-                              ? `${studio.members.length} member`
-                              : `${studio.members.length} members`}
+                            {pluralize.select(studio.users.length) === "one"
+                              ? `${studio.users.length} member`
+                              : `${studio.users.length} members`}
                           </div>
                         </div>
 
@@ -129,11 +130,19 @@ export function StudiosManager({
           </div>
 
           <div className="flex-1 p-8">
-            <StudioSettingsForm
-              key={selectedStudio.id}
-              studio={selectedStudio}
-              userManagableStudios={userManagableStudios}
-            />
+            {selectedStudio ? (
+              <StudioSettingsForm
+                key={selectedStudio.id}
+                studio={selectedStudio}
+                userManagableStudios={userManagableStudios}
+              />
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  <p>Please select a studio to manage its settings</p>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
       )}
@@ -141,11 +150,19 @@ export function StudiosManager({
       {isMobile && (
         <div className="w-full rounded-md border">
           <div className="p-4">
-            <StudioSettingsForm
-              key={selectedStudio.id}
-              studio={selectedStudio}
-              userManagableStudios={userManagableStudios}
-            />
+            {selectedStudio ? (
+              <StudioSettingsForm
+                key={selectedStudio.id}
+                studio={selectedStudio}
+                userManagableStudios={userManagableStudios}
+              />
+            ) : (
+              <Alert>
+                <AlertDescription>
+                  <p>Please select a studio to manage its settings</p>
+                </AlertDescription>
+              </Alert>
+            )}
           </div>
         </div>
       )}

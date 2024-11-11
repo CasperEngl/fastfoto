@@ -31,17 +31,18 @@ export default async function DashboardLayout({
   const user = await db.query.Users.findFirst({
     where: eq(schema.Users.id, session.user.id),
     with: {
-      studios: {
+      studioMembers: {
         with: {
           studio: true,
         },
       },
     },
   });
-  const personalStudio = user?.studios.find(
-    (studio) => studio.role === "owner",
+  const personalStudio = user?.studioMembers.find(
+    (studioMember) => studioMember.role === "owner",
   )?.studio;
-  const userStudios = user?.studios.map((studio) => studio.studio) ?? [];
+  const userStudios =
+    user?.studioMembers.map((studioMembers) => studioMembers.studio) ?? [];
   const activeStudio = userStudios.find(
     (studio) => studio.id === cookieStore.get(STUDIO_COOKIE_NAME)?.value,
   );
