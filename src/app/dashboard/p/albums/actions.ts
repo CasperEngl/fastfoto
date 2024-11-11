@@ -1,43 +1,54 @@
 "use server";
 
-import { eq, InferInsertModel } from "drizzle-orm";
+import { and, eq, InferInsertModel } from "drizzle-orm";
+import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { Albums, UsersToAlbums } from "~/db/schema";
-import { hasPhotographerUserType } from "~/role";
+import { isAlbum } from "~/db/queries/albums.queries";
+import { isStudioMember } from "~/db/queries/studio-member.queries";
+import { isStudio } from "~/db/queries/studio.queries";
+import * as schema from "~/db/schema";
 
 export async function deleteAlbum(albumId: string) {
   const session = await auth();
-  const cookieStore = await cookies();
-  const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  if (!hasPhotographerUserType(session?.user)) {
-    throw new Error("Unauthorized");
-  }
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Unauthorized");
 
-  const album = await db.query.Albums.findFirst({
-    where: eq(Albums.id, albumId),
+    const album = await tx.query.Albums.findFirst({
+      where: eq(schema.Albums.id, albumId),
+    });
+
+    if (!album) {
+      throw new Error("Album not found");
+    }
+
+    const studioMember = await tx.query.StudioMembers.findFirst({
+      where: and(
+        isStudio(album.studioId),
+        isStudioMember(album.studioId, session.user.id),
+      ),
+      columns: {
+        id: true,
+      },
+    });
+
+    if (!studioMember) {
+      throw new Error("Unauthorized");
+    }
+
+    await tx.delete(schema.Albums).where(eq(schema.Albums.id, albumId));
+
+    revalidatePath("/dashboard/p/albums");
   });
-
-  if (!album) {
-    throw new Error("Album not found");
-  }
-
-  // Verify user belongs to the album's studio
-  if (album.studioId !== selectedStudioId) {
-    throw new Error("Unauthorized - Album belongs to different studio");
-  }
-
-  await db.delete(Albums).where(eq(Albums.id, albumId));
-  revalidatePath("/p/albums");
 }
 
 export async function updateAlbum(
   albumId: string,
-  data: Omit<InferInsertModel<typeof Albums>, "studioId"> & {
+  data: Omit<InferInsertModel<typeof schema.Albums>, "studioId"> & {
     users: string[];
   },
 ) {
@@ -45,46 +56,49 @@ export async function updateAlbum(
   const cookieStore = await cookies();
   const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  if (!hasPhotographerUserType(session?.user)) {
-    throw new Error("Unauthorized");
-  }
+  invariant(session?.user?.id, "Unauthorized");
+  invariant(selectedStudioId, "Unauthorized");
 
   const album = await db.query.Albums.findFirst({
-    where: eq(Albums.id, albumId),
+    where: isAlbum(albumId),
+    with: {
+      studio: true,
+    },
   });
 
   if (!album) {
     throw new Error("Album not found");
   }
 
-  // Verify user belongs to the album's studio
+  // Add this check to ensure the album belongs to the selected studio
   if (album.studioId !== selectedStudioId) {
-    throw new Error("Unauthorized - Album belongs to different studio");
+    throw new Error("Unauthorized");
+  }
+
+  const studioMember = await db.query.StudioMembers.findFirst({
+    where: and(
+      isStudio(album.studioId),
+      isStudioMember(album.studioId, session.user.id),
+    ),
+    columns: {
+      id: true,
+    },
+  });
+
+  if (!studioMember) {
+    throw new Error("Unauthorized");
   }
 
   await db.transaction(async (tx) => {
     // Update album details
     await tx
-      .update(Albums)
+      .update(schema.Albums)
       .set({
         name: data.name,
         description: data.description,
       })
-      .where(eq(Albums.id, albumId));
-
-    // Delete existing user relationships
-    await tx.delete(UsersToAlbums).where(eq(UsersToAlbums.albumId, albumId));
-
-    // Insert new user relationships
-    if (data.users.length > 0) {
-      await tx.insert(UsersToAlbums).values(
-        data.users.map((userId) => ({
-          userId,
-          albumId,
-        })),
-      );
-    }
+      .where(eq(schema.Albums.id, albumId));
   });
 
-  revalidatePath("/p/albums");
+  revalidatePath("/dashboard/p/albums");
 }

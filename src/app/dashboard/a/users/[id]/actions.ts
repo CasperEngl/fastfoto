@@ -1,12 +1,13 @@
 "use server";
 
 import { eq, InferInsertModel } from "drizzle-orm";
+import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
+import { isUserAdmin } from "~/db/queries/users.queries";
 import { Users } from "~/db/schema";
 import { validateAllowedProperties } from "~/lib/validate-allowed-properties";
-import { isAdmin } from "~/role";
 
 export async function updateUser(
   options: Partial<InferInsertModel<typeof Users>> & {
@@ -15,26 +16,37 @@ export async function updateUser(
 ) {
   const session = await auth();
 
-  if (!isAdmin(session?.user)) {
-    throw new Error("Unauthorized");
-  }
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Unauthorized");
 
-  if (
-    session?.user.id === options.id &&
-    options.userType !== session.user.userType
-  ) {
-    throw new Error("You cannot modify your own user type");
-  }
+    const adminUser = await tx.query.Users.findFirst({
+      where: isUserAdmin(session.user.id),
+      columns: {
+        id: true,
+      },
+    });
 
-  const updateData = {
-    email: options.email,
-    name: options.name,
-    userType: options.userType,
-  } satisfies Partial<InferInsertModel<typeof Users>>;
+    if (!adminUser) {
+      throw new Error("Unauthorized");
+    }
 
-  validateAllowedProperties(options, updateData, ["id"]);
+    if (
+      options.id === session?.user.id &&
+      options.userType !== session.user.userType
+    ) {
+      throw new Error("You cannot modify your own user type");
+    }
 
-  await db.update(Users).set(updateData).where(eq(Users.id, options.id));
+    const updateData = {
+      email: options.email,
+      name: options.name,
+      userType: options.userType,
+    } satisfies Partial<InferInsertModel<typeof Users>>;
 
-  revalidatePath("/a/users");
+    validateAllowedProperties(options, updateData, ["id"]);
+
+    await tx.update(Users).set(updateData).where(eq(Users.id, options.id));
+
+    revalidatePath("/dashboard/a/users");
+  });
 }

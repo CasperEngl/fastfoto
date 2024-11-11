@@ -1,23 +1,36 @@
 "use server";
 
 import { eq } from "drizzle-orm";
+import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
+import { isUserAdmin } from "~/db/queries/users.queries";
 import { Users } from "~/db/schema";
-import { isAdmin } from "~/role";
 
 export async function deleteUser(userId: string) {
   const session = await auth();
 
-  if (!isAdmin(session?.user)) {
-    throw new Error("Unauthorized");
-  }
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Unauthorized");
 
-  if (userId === session.user.id) {
-    throw new Error("Cannot delete your own account");
-  }
+    const adminUser = await tx.query.Users.findFirst({
+      where: isUserAdmin(session.user.id),
+      columns: {
+        id: true,
+      },
+    });
 
-  await db.delete(Users).where(eq(Users.id, userId));
-  revalidatePath("/a/users");
+    if (!adminUser) {
+      throw new Error("Unauthorized");
+    }
+
+    if (userId === session.user.id) {
+      throw new Error("Cannot delete your own account");
+    }
+
+    await tx.delete(Users).where(eq(Users.id, userId));
+
+    revalidatePath("/dashboard/a/users");
+  });
 }

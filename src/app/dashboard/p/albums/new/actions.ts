@@ -7,8 +7,8 @@ import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
+import { isUserPhotographer } from "~/db/queries/users.queries";
 import { Albums, UsersToAlbums } from "~/db/schema";
-import { hasPhotographerUserType } from "~/role";
 
 export async function createAlbum(
   data: InferInsertModel<typeof Albums> & {
@@ -19,14 +19,23 @@ export async function createAlbum(
   const cookieStore = await cookies();
   const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
 
-  if (!hasPhotographerUserType(session?.user)) {
-    throw new Error("Unauthorized");
-  }
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Unauthorized");
 
-  const [album] = await db.transaction(async (tx) => {
-    invariant(selectedStudioId, "User must select a studio");
+    const photographerUser = await tx.query.Users.findFirst({
+      where: isUserPhotographer(session.user.id),
+      columns: {
+        id: true,
+      },
+    });
 
-    const [newAlbum] = await tx
+    if (!photographerUser) {
+      throw new Error("Unauthorized");
+    }
+
+    invariant(selectedStudioId, "Must select a studio");
+
+    const [album] = await tx
       .insert(Albums)
       .values({
         name: data.name,
@@ -40,14 +49,13 @@ export async function createAlbum(
       await tx.insert(UsersToAlbums).values(
         data.users.map((userId) => ({
           userId,
-          albumId: newAlbum.id,
+          albumId: album.id,
         })),
       );
     }
 
-    return [newAlbum];
-  });
+    revalidatePath("/dashboard/p/albums");
 
-  revalidatePath("/p/albums");
-  return album;
+    return album;
+  });
 }

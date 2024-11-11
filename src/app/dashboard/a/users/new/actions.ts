@@ -6,24 +6,38 @@ import { db } from "~/db/client";
 import { Users } from "~/db/schema";
 import { isAdmin } from "~/role";
 import { createUserSchema, type CreateUserFormValues } from "./schema";
+import { isUserAdmin } from "~/db/queries/users.queries";
+import invariant from "invariant";
 
 export async function createUser(data: CreateUserFormValues) {
   const session = await auth();
 
-  if (!isAdmin(session?.user)) {
-    throw new Error("Unauthorized");
-  }
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Unauthorized");
 
-  const validated = createUserSchema.parse(data);
-
-  try {
-    await db.insert(Users).values({
-      name: validated.name,
-      email: validated.email,
+    const adminUser = await tx.query.Users.findFirst({
+      where: isUserAdmin(session.user.id),
+      columns: {
+        id: true,
+      },
     });
 
-    revalidatePath("/a/users");
-  } catch (error) {
-    throw new Error("Failed to create user");
-  }
+    if (!adminUser) {
+      throw new Error("Unauthorized");
+    }
+
+    const validated = createUserSchema.parse(data);
+
+    const [user] = await tx
+      .insert(Users)
+      .values({
+        name: validated.name,
+        email: validated.email,
+      })
+      .returning();
+
+    revalidatePath("/dashboard/a/users");
+
+    return user;
+  });
 }
