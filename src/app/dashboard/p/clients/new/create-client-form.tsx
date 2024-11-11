@@ -1,40 +1,33 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { InferSelectModel } from "drizzle-orm";
 import invariant from "invariant";
-import { X } from "lucide-react";
 import { useSession } from "next-auth/react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { SelectedClient } from "~/app/dashboard/p/albums/selected-client";
 import { createClient } from "~/app/dashboard/p/clients/new/actions";
 import { Button } from "~/components/ui/button";
-import { Combobox } from "~/components/ui/combobox";
 import {
   Form,
+  FormControl,
   FormField,
   FormItem,
   FormLabel,
-  FormMessage,
 } from "~/components/ui/form";
-import { Users } from "~/db/schema";
-import { isAdmin } from "~/role";
+import { Textarea } from "~/components/ui/textarea";
 
 const formSchema = z.object({
-  emails: z.array(z.string()).default([]).catch([]),
+  emails: z
+    .array(z.string().email("Invalid email address"))
+    .default([])
+    .catch([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
-export function CreateClientForm({
-  users,
-}: {
-  users: InferSelectModel<typeof Users>[];
-}) {
+export function CreateClientForm() {
   const session = useSession();
   const router = useRouter();
 
@@ -52,13 +45,19 @@ export function CreateClientForm({
           invariant(session.data?.user?.id, "User ID is required");
 
           try {
-            await createClient(values);
+            const emailsArray = values.emails
+              .join(",")
+              .split(",")
+              .map((email) => email.trim())
+              .filter(Boolean);
+
+            await createClient({ ...values, emails: emailsArray });
             form.reset();
-            router.refresh();
-            toast.success("Client created successfully");
+            router.push("/dashboard/p/clients");
+            toast.success("Clients added successfully");
           } catch (error) {
-            toast.error("Failed to create client");
-            console.error("Error creating client:", error);
+            toast.error("Failed to add clients");
+            console.error("Error creating clients:", error);
           }
         })}
         className="space-y-8"
@@ -68,86 +67,27 @@ export function CreateClientForm({
           name="emails"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Associated Users</FormLabel>
-              <div>
-                <Combobox
-                  options={users.map((user) => ({
-                    value: user.email,
-                    label: user.name ?? "",
-                  }))}
-                  value={field.value}
-                  onValueChange={field.onChange}
-                  multiple
+              <FormLabel>Client Emails</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="Enter email addresses (comma-separated)..."
+                  className="min-h-[100px]"
+                  onChange={(e) => {
+                    const emails = e.target.value
+                      .split(",")
+                      .map((email) => email.trim())
+                      .filter(Boolean);
+                    field.onChange(emails);
+                  }}
+                  value={field.value.join(", ")}
                 />
-              </div>
-
-              {field.value.length > 0 ? (
-                <div className="flex flex-wrap gap-2">
-                  {field.value
-                    .toSorted((a, b) => {
-                      const userA =
-                        users.find((u) => u.email === a)?.name ?? "";
-                      const userB =
-                        users.find((u) => u.email === b)?.name ?? "";
-                      return userA.localeCompare(userB);
-                    })
-                    .map((selectedEmail) => {
-                      const user = users.find((u) => u.email === selectedEmail);
-
-                      return (
-                        <div
-                          key={selectedEmail}
-                          className="flex items-center gap-x-2 rounded-full border bg-muted px-2 py-1.5 has-[button:hover]:border-destructive has-[button:hover]:bg-destructive/10"
-                        >
-                          {user ? (
-                            isAdmin(session.data?.user) ? (
-                              <Link
-                                key={user.id}
-                                href={`/dashboard/a/users/${user.id}`}
-                                className="group h-8"
-                              >
-                                <SelectedClient
-                                  image={user.image}
-                                  name={user.name}
-                                />
-                              </Link>
-                            ) : (
-                              <SelectedClient
-                                image={user.image}
-                                name={user.name}
-                              />
-                            )
-                          ) : null}
-
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="size-8 rounded-full hover:bg-destructive hover:text-destructive-foreground"
-                            onClick={() => {
-                              form.setValue(
-                                "emails",
-                                field.value.filter(
-                                  (id) => id !== selectedEmail,
-                                ),
-                                { shouldDirty: true },
-                              );
-                            }}
-                          >
-                            <span className="sr-only">Remove user</span>
-                            <X className="size-4" />
-                          </Button>
-                        </div>
-                      );
-                    })}
-                </div>
-              ) : null}
-              <FormMessage />
+              </FormControl>
             </FormItem>
           )}
         />
 
         <Button type="submit" disabled={form.formState.isSubmitting}>
-          {form.formState.isSubmitting ? "Creating..." : "Create Client"}
+          {form.formState.isSubmitting ? "Adding..." : "Add Clients"}
         </Button>
       </form>
     </Form>
