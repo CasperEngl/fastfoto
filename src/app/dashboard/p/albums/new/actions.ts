@@ -44,6 +44,8 @@ export async function createAlbum(
       })
       .returning();
 
+    invariant(album, "Album is required");
+
     // Insert the user-album relationships
     if (data.clients.length > 0) {
       await tx.insert(schema.AlbumClients).values(

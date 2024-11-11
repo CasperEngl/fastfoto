@@ -87,6 +87,8 @@ export async function createStudio(data: { name: string }) {
       })
       .returning();
 
+    invariant(studio?.id, "Studio ID is required");
+
     // Add the creator as the studio owner
     await tx.insert(schema.StudioMembers).values({
       studioId: studio.id,

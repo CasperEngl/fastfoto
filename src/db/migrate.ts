@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
+import invariant from "invariant";
 import { capitalize } from "lodash-es";
 import { db, pool } from "~/db/client";
 import * as schema from "~/db/schema";
@@ -74,6 +75,8 @@ for (const photographer of photographers) {
       createdById: photographer.id,
     })
     .returning();
+
+  invariant(studio?.id, "Studio ID is required");
 
   // Add photographer as owner
   await db.insert(schema.StudioMembers).values({

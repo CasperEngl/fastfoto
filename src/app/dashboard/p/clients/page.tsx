@@ -51,7 +51,7 @@ export default async function ClientsPage({
     offset,
   });
 
-  const [{ count: totalCount }] = await db
+  const [result] = await db
     .select({ count: count() })
     .from(schema.StudioClients)
     .where(
@@ -59,6 +59,8 @@ export default async function ClientsPage({
         ? sql`false`
         : eq(schema.StudioClients.studioId, userStudioId),
     );
+
+  const totalCount = result?.count ?? 0;
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 

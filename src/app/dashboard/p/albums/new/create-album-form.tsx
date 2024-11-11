@@ -75,6 +75,7 @@ export function CreateAlbumForm({
                 ...values,
                 studioId: selectedStudioId,
               });
+              invariant(album, "Album is required");
               toast.success("Album created successfully");
               router.push(`/dashboard/p/albums/${album.id}`);
               router.refresh();

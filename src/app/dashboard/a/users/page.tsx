@@ -68,10 +68,12 @@ export default async function UsersPage({
     offset,
   });
 
-  const [{ count: totalCount }] = await db
+  const [result] = await db
     .select({ count: count() })
     .from(schema.Users)
     .where(whereClause);
+
+  const totalCount = result?.count ?? 0;
 
   const totalPages = Math.ceil(totalCount / ITEMS_PER_PAGE);
 
