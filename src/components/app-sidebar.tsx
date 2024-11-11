@@ -23,7 +23,7 @@ import {
   useSidebar,
 } from "~/components/ui/sidebar";
 import type * as schema from "~/db/schema";
-import { isAdmin, isClient, hasPhotographerUserType } from "~/role";
+import { hasPhotographerUserType, isAdmin, isClient } from "~/role";
 
 interface AppSidebarProps {
   studios: InferSelectModel<typeof schema.Studios>[];
@@ -63,6 +63,7 @@ export function AppSidebar({ studios, activeStudio }: AppSidebarProps) {
               ) : null}
             </AnimatePresence>
             <SidebarGroupLabel>Studio</SidebarGroupLabel>
+
             {activeStudio ? (
               <StudioSwitcher studios={studios} activeStudio={activeStudio} />
             ) : null}
