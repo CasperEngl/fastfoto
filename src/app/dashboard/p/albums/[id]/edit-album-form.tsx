@@ -27,7 +27,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { ScrollArea } from "~/components/ui/scroll-area";
 import { Textarea } from "~/components/ui/textarea";
 import * as schema from "~/db/schema";
 import { UploadDropzone } from "~/lib/uploadthing";
@@ -258,7 +257,7 @@ export function EditAlbumForm({
         <div>
           <FormLabel>Photos</FormLabel>
 
-          <div className="grid grid-cols-2">
+          <div className="space-y-6">
             <UploadDropzone
               endpoint="albumPhotos"
               input={{
@@ -289,61 +288,60 @@ export function EditAlbumForm({
                 toast.error(`Upload failed: ${error.message}`);
               }}
             />
-            <ScrollArea className="mt-2 h-[400px]">
-              <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-                {optimisticPhotos.map((photo, index) => (
-                  <div
-                    key={photo.url}
-                    className="relative aspect-square"
-                    style={{ opacity: photo.isRemoving ? 0.5 : 1 }}
+
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4 xl:grid-cols-6">
+              {optimisticPhotos.map((photo, index) => (
+                <div
+                  key={photo.url}
+                  className="relative aspect-square"
+                  style={{ opacity: photo.isRemoving ? 0.5 : 1 }}
+                >
+                  <Image
+                    src={photo.url}
+                    alt={`Photo ${index + 1}`}
+                    fill
+                    className="rounded-md object-cover"
+                  />
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    size="sm"
+                    className="absolute right-2 top-2"
+                    disabled={photo.isRemoving}
+                    onClick={() => {
+                      startRemoveTransition(async () => {
+                        try {
+                          // Mark the photo as removing
+                          const updatedPhotos = optimisticPhotos.map((p) =>
+                            p.key === photo.key
+                              ? { ...p, isRemoving: true }
+                              : p,
+                          );
+                          setOptimisticPhotos(updatedPhotos);
+
+                          await deletePhoto(album.id, photo.key);
+
+                          toast.success("Photo deleted successfully");
+                          router.refresh();
+                        } catch (error) {
+                          // Revert the removing state on error
+                          const revertedPhotos = optimisticPhotos.map((p) =>
+                            p.key === photo.key
+                              ? { ...p, isRemoving: false }
+                              : p,
+                          );
+                          setOptimisticPhotos(revertedPhotos);
+                          toast.error("Failed to delete photo");
+                        }
+                      });
+                    }}
                   >
-                    <Image
-                      src={photo.url}
-                      alt={`Photo ${index + 1}`}
-                      fill
-                      className="rounded-lg object-cover"
-                    />
-                    <Button
-                      type="button"
-                      variant="destructive"
-                      size="sm"
-                      className="absolute right-2 top-2"
-                      disabled={photo.isRemoving}
-                      onClick={() => {
-                        startRemoveTransition(async () => {
-                          try {
-                            // Mark the photo as removing
-                            const updatedPhotos = optimisticPhotos.map((p) =>
-                              p.key === photo.key
-                                ? { ...p, isRemoving: true }
-                                : p,
-                            );
-                            setOptimisticPhotos(updatedPhotos);
-
-                            await deletePhoto(album.id, photo.key);
-
-                            toast.success("Photo deleted successfully");
-                            router.refresh();
-                          } catch (error) {
-                            // Revert the removing state on error
-                            const revertedPhotos = optimisticPhotos.map((p) =>
-                              p.key === photo.key
-                                ? { ...p, isRemoving: false }
-                                : p,
-                            );
-                            setOptimisticPhotos(revertedPhotos);
-                            toast.error("Failed to delete photo");
-                          }
-                        });
-                      }}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete photo</span>
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
+                    <Trash2 className="h-4 w-4" />
+                    <span className="sr-only">Delete photo</span>
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </form>
