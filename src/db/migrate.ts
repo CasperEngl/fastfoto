@@ -23,8 +23,9 @@ const photographers = await db
   .values(
     Array.from({ length: 3 }, () => {
       const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
       return {
-        name: firstName,
+        name: `${firstName} ${lastName}`,
         email: `photographer+${firstName.toLowerCase()}@casperengelmann.com`,
         userType: "photographer" as const,
       };
@@ -38,8 +39,9 @@ const studioMembers = await db
   .values(
     Array.from({ length: 6 }, () => {
       const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
       return {
-        name: firstName,
+        name: `${firstName} ${lastName}`,
         email: `staff+${firstName.toLowerCase()}@casperengelmann.com`,
         userType: "photographer" as const,
       };
@@ -53,8 +55,9 @@ const clients = await db
   .values(
     Array.from({ length: 10 }, () => {
       const firstName = faker.person.firstName();
+      const lastName = faker.person.lastName();
       return {
-        name: firstName,
+        name: `${firstName} ${lastName}`,
         email: `client+${firstName.toLowerCase()}@casperengelmann.com`,
         userType: "client" as const,
       };
