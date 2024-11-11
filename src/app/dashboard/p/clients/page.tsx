@@ -69,7 +69,7 @@ export default async function ClientsPage({
         <Button asChild>
           <Link href="/dashboard/p/clients/new">
             <Plus className="size-4" />
-            Add Client
+            Add Clients
           </Link>
         </Button>
       </div>
