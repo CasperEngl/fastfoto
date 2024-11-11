@@ -228,14 +228,23 @@ export const AlbumClients = pgTable(
 );
 
 export const UsersRelations = relations(Users, ({ many }) => ({
-  studios: many(StudioMembers),
+  adminAuditLogs: many(AdminAuditLogs),
+  sessions: many(Sessions),
+  studioMembers: many(StudioMembers),
+  studios: many(Studios),
   studioClients: many(StudioClients),
+  authenticators: many(Authenticators),
+  accounts: many(Accounts),
 }));
 
-export const StudiosRelations = relations(Studios, ({ many }) => ({
-  members: many(StudioMembers),
+export const StudiosRelations = relations(Studios, ({ one, many }) => ({
   albums: many(Albums),
-  clients: many(StudioClients),
+  studioMembers: many(StudioMembers),
+  user: one(Users, {
+    fields: [Studios.createdById],
+    references: [Users.id],
+  }),
+  studioClients: many(StudioClients),
 }));
 
 export const StudioMembersRelations = relations(StudioMembers, ({ one }) => ({
@@ -249,13 +258,13 @@ export const StudioMembersRelations = relations(StudioMembers, ({ one }) => ({
   }),
 }));
 
-export const AlbumsRelations = relations(Albums, ({ many, one }) => ({
-  photos: many(Photos),
-  clients: many(AlbumClients),
+export const AlbumsRelations = relations(Albums, ({ one, many }) => ({
+  albumClients: many(AlbumClients),
   studio: one(Studios, {
     fields: [Albums.studioId],
     references: [Studios.id],
   }),
+  photos: many(Photos),
 }));
 
 export const AlbumClientsRelations = relations(AlbumClients, ({ one }) => ({
@@ -269,20 +278,24 @@ export const AlbumClientsRelations = relations(AlbumClients, ({ one }) => ({
   }),
 }));
 
+export const StudioClientsRelations = relations(
+  StudioClients,
+  ({ one, many }) => ({
+    albumClients: many(AlbumClients),
+    studio: one(Studios, {
+      fields: [StudioClients.studioId],
+      references: [Studios.id],
+    }),
+    user: one(Users, {
+      fields: [StudioClients.userId],
+      references: [Users.id],
+    }),
+  }),
+);
+
 export const PhotosRelations = relations(Photos, ({ one }) => ({
   album: one(Albums, {
     fields: [Photos.albumId],
     references: [Albums.id],
-  }),
-}));
-
-export const StudioClientsRelations = relations(StudioClients, ({ one }) => ({
-  studio: one(Studios, {
-    fields: [StudioClients.studioId],
-    references: [Studios.id],
-  }),
-  user: one(Users, {
-    fields: [StudioClients.userId],
-    references: [Users.id],
   }),
 }));
