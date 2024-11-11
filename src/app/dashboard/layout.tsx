@@ -45,6 +45,36 @@ export default async function DashboardLayout({
     (studio) => studio.id === cookieStore.get(STUDIO_COOKIE_NAME)?.value,
   );
 
+  if (user?.userType === "photographer") {
+    try {
+      const cookieStore = await cookies();
+      const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
+
+      if (selectedStudioId) {
+        return session;
+      }
+
+      const userStudios = await db.query.StudioMembers.findMany({
+        where: eq(schema.StudioMembers.userId, user.id),
+        with: {
+          studio: true,
+        },
+      });
+
+      const userPersonalStudio = userStudios?.find(
+        (studio) => studio.role === "owner",
+      );
+
+      if (!userPersonalStudio) {
+        return session;
+      }
+
+      cookieStore.set(STUDIO_COOKIE_NAME, userPersonalStudio?.studioId);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
       <AppSidebar
