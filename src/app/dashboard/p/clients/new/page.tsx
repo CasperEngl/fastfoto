@@ -15,9 +15,9 @@ export default async function CreateClientPage() {
   return (
     <div className="container mx-auto py-10">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold">Create New Client</h1>
+        <h1 className="text-2xl font-bold">Add clients</h1>
       </div>
-      <CreateClientForm users={users} />
+      <CreateClientForm />
     </div>
   );
 }
