@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { Toaster } from "sonner";
+import { DefaultStudioCookie } from "~/app/dashboard/default-studio-cookie";
 import { SIDEBAR_COOKIE_NAME, STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { AppSidebar } from "~/components/app-sidebar";
@@ -45,38 +46,13 @@ export default async function DashboardLayout({
     (studio) => studio.id === cookieStore.get(STUDIO_COOKIE_NAME)?.value,
   );
 
-  if (user?.userType === "photographer") {
-    try {
-      const cookieStore = await cookies();
-      const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
-
-      if (selectedStudioId) {
-        return session;
-      }
-
-      const userStudios = await db.query.StudioMembers.findMany({
-        where: eq(schema.StudioMembers.userId, user.id),
-        with: {
-          studio: true,
-        },
-      });
-
-      const userPersonalStudio = userStudios?.find(
-        (studio) => studio.role === "owner",
-      );
-
-      if (!userPersonalStudio) {
-        return session;
-      }
-
-      cookieStore.set(STUDIO_COOKIE_NAME, userPersonalStudio?.studioId);
-    } catch (error) {
-      throw error;
-    }
-  }
+  console.log("userStudios", userStudios);
+  console.log("activeStudio", activeStudio);
 
   return (
     <SidebarProvider defaultOpen={defaultOpen}>
+      <DefaultStudioCookie studios={userStudios} activeStudio={activeStudio} />
+
       <AppSidebar
         studios={userStudios}
         activeStudio={activeStudio ?? personalStudio}
