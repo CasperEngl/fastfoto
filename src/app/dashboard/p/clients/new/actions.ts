@@ -30,16 +30,40 @@ export async function createClient(data: { emails: string[] }) {
       throw new Error("Unauthorized");
     }
 
-    const users = await tx.query.Users.findMany({
+    // Find existing users
+    const existingUsers = await tx.query.Users.findMany({
       where: inArray(schema.Users.email, data.emails),
     });
 
-    await tx.insert(schema.StudioClients).values(
-      users.map((user) => ({
-        studioId: selectedStudioId,
-        userId: user.id,
-      })),
+    const existingEmails = new Set(existingUsers.map((user) => user.email));
+
+    // Create new users for emails that don't exist
+    const newUserEmails = data.emails.filter(
+      (email) => !existingEmails.has(email),
     );
+    const newUsers = await tx
+      .insert(schema.Users)
+      .values(
+        newUserEmails.map((email) => ({
+          email,
+          emailVerified: null,
+        })),
+      )
+      .returning();
+
+    // Combine existing and new users
+    const allUsers = [...existingUsers, ...newUsers];
+
+    // Create studio clients for all users
+    await tx
+      .insert(schema.StudioClients)
+      .values(
+        allUsers.map((user) => ({
+          studioId: selectedStudioId,
+          userId: user.id,
+        })),
+      )
+      .onConflictDoNothing();
 
     revalidatePath("/dashboard/p/clients");
   });
