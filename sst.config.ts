@@ -1,5 +1,4 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-import { Postgres } from "./.sst/platform/src/components/aws/postgres-v1";
 export default $config({
   app(input) {
     return {
@@ -23,7 +22,7 @@ export default $config({
     const resendKey = new sst.Secret("ResendKey");
     const uploadThingToken = new sst.Secret("UploadThingToken");
     let vpc: sst.aws.Vpc;
-    let rds: Postgres;
+    let rds: sst.aws.Postgres;
     let local: sst.Linkable<{
       host: string;
       port: number;
@@ -68,7 +67,7 @@ export default $config({
       });
     } else {
       vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "ec2" });
-      rds = new sst.aws.Postgres.v1("MyPostgres", { vpc });
+      rds = new sst.aws.Postgres("MyPostgres", { vpc });
     }
     new sst.aws.Nextjs("MyWeb", {
       link: [
