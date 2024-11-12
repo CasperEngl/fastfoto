@@ -1,12 +1,10 @@
 /// <reference path="./.sst/platform/config.d.ts" />
-
 import { Postgres } from "./.sst/platform/src/components/aws/postgres-v1";
-
 export default $config({
   app(input) {
     return {
       name: "fastfoto",
-      removal: input.stage === "production" ? "remove" : "remove",
+      removal: input.stage === "production" ? "retain" : "remove",
       home: "aws",
       providers: {
         aws: {
@@ -15,6 +13,7 @@ export default $config({
         cloudflare: {
           version: "5.42.0",
         },
+        "@pulumi/docker": "4.5.7",
       },
     };
   },
@@ -23,7 +22,6 @@ export default $config({
     const axiomToken = new sst.Secret("AxiomToken");
     const resendKey = new sst.Secret("ResendKey");
     const uploadThingToken = new sst.Secret("UploadThingToken");
-
     let vpc: sst.aws.Vpc;
     let rds: Postgres;
     let local: sst.Linkable<{
@@ -33,7 +31,6 @@ export default $config({
       password: string;
       database: string;
     }>;
-
     if ($dev) {
       const localProperties = {
         host: "localhost",
@@ -42,7 +39,6 @@ export default $config({
         password: "postgres",
         database: "postgres",
       };
-
       new docker.Container("LocalPostgres", {
         // Unique container name
         name: `postgres-${$app.name}`,
@@ -74,7 +70,6 @@ export default $config({
       vpc = new sst.aws.Vpc("MyVpc", { bastion: true, nat: "ec2" });
       rds = new sst.aws.Postgres.v1("MyPostgres", { vpc });
     }
-
     new sst.aws.Nextjs("MyWeb", {
       link: [
         $dev ? local : rds,
