@@ -82,6 +82,10 @@ export default $config({
         uploadThingToken,
       ],
       vpc: $dev ? undefined : vpc,
+      domain: {
+        name: "fastfoto.casperengelmann.com",
+        dns: sst.cloudflare.dns(),
+      },
     });
   },
 });
