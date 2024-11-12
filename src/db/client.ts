@@ -15,12 +15,14 @@ class QueryLogger implements Logger {
   }
 }
 
-export const pool = postgres(
-  process.env.NODE_ENV === "production"
-    ? env.DATABASE_URL
-    : env.DATABASE_URL_EXTERNAL,
-  { max: 1 },
-);
+export const pool = postgres({
+  host: env.POSTGRES_HOST,
+  port: 5432,
+  user: env.POSTGRES_USER,
+  password: env.POSTGRES_PASSWORD,
+  database: env.POSTGRES_DB,
+  max: 1,
+});
 
 export const db = drizzle(pool, {
   schema,
