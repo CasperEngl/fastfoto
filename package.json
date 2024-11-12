@@ -6,7 +6,7 @@
   "scripts": {
     "build": "next build",
     "db:seed": "tsx src/db/migrate.ts",
-    "dev": "sst dev next dev",
+    "dev": "next dev",
     "email:build": "email build",
     "email:dev": "email dev",
     "email:export": "email export",
