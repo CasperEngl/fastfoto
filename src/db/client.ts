@@ -21,7 +21,7 @@ export const dbCredentials = {
   user: env.POSTGRES_USER,
   password: env.POSTGRES_PASSWORD,
   database: env.POSTGRES_DB,
-  ssl: process.env.NODE_ENV === "production",
+  ssl: false,
 } as const;
 
 export const pool = postgres({
