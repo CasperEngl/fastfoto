@@ -9,9 +9,11 @@ export default $config({
       removal: input.stage === "production" ? "remove" : "remove",
       home: "aws",
       providers: {
-        docker: "4.5.7",
         aws: {
           region: "eu-central-1",
+        },
+        cloudflare: {
+          version: "5.42.0",
         },
       },
     };
@@ -84,7 +86,9 @@ export default $config({
       vpc: $dev ? undefined : vpc,
       domain: {
         name: "fastfoto.casperengelmann.com",
-        dns: sst.cloudflare.dns(),
+        dns: sst.cloudflare.dns({
+          zone: "6a521705d65dcf31822ab4b3053269c7",
+        }),
       },
     });
   },
