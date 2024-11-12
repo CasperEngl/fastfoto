@@ -15,6 +15,11 @@ const nextConfig: NextConfig = {
         hostname: "utfs.io",
         pathname: "/f/**",
       },
+      {
+        protocol: "https",
+        hostname: "dzzjw65olhyti.cloudfront.net",
+        pathname: "/**",
+      },
       ...(process.env.NODE_ENV !== "production"
         ? [
             {
