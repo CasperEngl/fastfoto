@@ -16,6 +16,17 @@ class QueryLogger implements Logger {
   }
 }
 
+console.log(
+  "Resource.MyPostgres",
+  JSON.stringify(
+    Resource.MyPostgres,
+    (key, value) => {
+      return key.toLowerCase().includes("pass") ? "[redacted]" : value;
+    },
+    2,
+  ),
+);
+
 export const pool = postgres({
   ...Resource.MyPostgres,
   max: 1,
