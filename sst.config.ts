@@ -42,7 +42,7 @@ export default $config({
         // Unique container name
         name: `postgres-${$app.name}`,
         restart: "always",
-        image: "postgres:17.0",
+        image: "postgres:16.4",
         ports: [
           {
             internal: 5432,
