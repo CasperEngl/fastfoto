@@ -10,7 +10,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
-import { randomUUID } from "node:crypto";
+import { randomUUID } from "crypto";
 
 export const userType = pgEnum("user_type", [
   "admin",
