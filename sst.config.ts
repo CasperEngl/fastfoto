@@ -84,6 +84,9 @@ export default $config({
           zone: "6a521705d65dcf31822ab4b3053269c7",
         }),
       },
+      environment: {
+        AUTH_TRUST_HOST: "true",
+      },
     });
   },
 });
