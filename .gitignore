@@ -44,3 +44,10 @@ db_data
 
 # react email
 .react-email
+
+# sst
+.sst
+sst-env.d.ts
+
+# open-next
+.open-next

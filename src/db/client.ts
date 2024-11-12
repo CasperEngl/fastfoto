@@ -1,6 +1,7 @@
 import { Logger } from "drizzle-orm";
 import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
+import { Resource } from "sst";
 import * as schema from "~/db/schema";
 import { env } from "~/env";
 
@@ -15,12 +16,10 @@ class QueryLogger implements Logger {
   }
 }
 
-export const pool = postgres(
-  process.env.NODE_ENV === "production"
-    ? env.DATABASE_URL
-    : env.DATABASE_URL_EXTERNAL,
-  { max: 1 },
-);
+export const pool = postgres({
+  ...Resource.MyPostgres,
+  max: 1,
+});
 
 export const db = drizzle(pool, {
   schema,
