@@ -36,7 +36,7 @@ export const env = createEnv({
   },
   runtimeEnv: {
     APP_DEBUG: process.env.APP_DEBUG,
-    APP_URL: Resource.MyWeb.url,
+    APP_URL: "https://fastfoto.casperengelmann.com",
     AUTH_SECRET: Resource.AuthSecret.value,
     AXIOM_DATASET:
       process.env.NODE_ENV === "production" ? "fastfoto-prod" : "fastfoto-dev",
