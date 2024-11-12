@@ -8,6 +8,7 @@ import { isAdmin } from "~/role";
 import { createUserSchema, type CreateUserFormValues } from "./schema";
 import { isUserAdmin } from "~/db/queries/users.queries";
 import invariant from "invariant";
+import { auditLog } from "~/db/audit-log";
 
 export async function createUser(data: CreateUserFormValues) {
   const session = await auth();
@@ -35,6 +36,15 @@ export async function createUser(data: CreateUserFormValues) {
         email: validated.email,
       })
       .returning();
+
+    if (user) {
+      await auditLog({
+        action: "CREATE",
+        entityType: "Users",
+        entityId: user.id,
+        details: `Created user with ID ${user.id}`,
+      });
+    }
 
     revalidatePath("/dashboard/a/users");
 

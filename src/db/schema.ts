@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   boolean,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   primaryKey,
@@ -178,6 +179,7 @@ export const AdminAuditLogs = pgTable("admin_audit_logs", {
   entityType: text("entity_type").notNull(),
   entityId: text("entity_id").notNull(),
   details: text("details"),
+  extra: jsonb("extra"),
   performedAt: timestamp("performed_at", { mode: "date" })
     .notNull()
     .defaultNow(),
