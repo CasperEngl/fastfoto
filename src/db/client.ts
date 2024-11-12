@@ -15,12 +15,17 @@ class QueryLogger implements Logger {
   }
 }
 
-export const pool = postgres({
+export const dbCredentials = {
   host: env.POSTGRES_HOST,
   port: 5432,
   user: env.POSTGRES_USER,
   password: env.POSTGRES_PASSWORD,
   database: env.POSTGRES_DB,
+  ssl: process.env.NODE_ENV === "production",
+} as const;
+
+export const pool = postgres({
+  ...dbCredentials,
   max: 1,
 });
 
