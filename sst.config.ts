@@ -104,6 +104,12 @@ export default $config({
         uploadThingToken,
       ],
       url: true,
+      copyFiles: [
+        {
+          from: "./drizzle",
+          to: "./drizzle",
+        },
+      ],
     });
   },
 });
