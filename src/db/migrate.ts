@@ -2,10 +2,13 @@ import { faker } from "@faker-js/faker";
 import { migrate } from "drizzle-orm/postgres-js/migrator";
 import invariant from "invariant";
 import { capitalize } from "lodash-es";
+import { join, resolve } from "node:path";
 import { db, pool } from "~/db/client";
 import * as schema from "~/db/schema";
 
-await migrate(db, { migrationsFolder: "./drizzle" });
+await migrate(db, {
+  migrationsFolder: resolve(join(__dirname, "../../drizzle")),
+});
 
 // Check if we already have users in the database
 const existingUsers = await db.select().from(schema.Users).limit(1);
