@@ -89,5 +89,20 @@ export default $config({
         AUTH_SECRET: authSecret.value,
       },
     });
+
+    new sst.aws.Function("Migration", {
+      handler: "src/db/migrate.handler",
+      runtime: "nodejs18.x",
+      memory: "1024 MB",
+      timeout: "30 seconds",
+      vpc: $dev ? undefined : vpc,
+      link: [
+        $dev ? local : rds,
+        authSecret,
+        resendKey,
+        axiomToken,
+        uploadThingToken,
+      ],
+    });
   },
 });
