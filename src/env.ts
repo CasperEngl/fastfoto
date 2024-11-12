@@ -32,7 +32,6 @@ export const env = createEnv({
     AXIOM_DATASET: z.string().min(1),
     AXIOM_TOKEN: z.string().min(1),
     RESEND_KEY: z.string().min(1),
-    UPLOADTHING_TOKEN: z.string().min(1),
   },
   runtimeEnv: {
     APP_DEBUG: process.env.APP_DEBUG,
@@ -45,6 +44,5 @@ export const env = createEnv({
       process.env.NODE_ENV === "production" ? "fastfoto-prod" : "fastfoto-dev",
     AXIOM_TOKEN: Resource.AxiomToken.value,
     RESEND_KEY: Resource.ResendKey.value,
-    UPLOADTHING_TOKEN: Resource.UploadThingToken.value,
   },
 });

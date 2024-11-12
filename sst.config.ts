@@ -85,8 +85,9 @@ export default $config({
         }),
       },
       environment: {
-        AUTH_TRUST_HOST: "true",
         AUTH_SECRET: authSecret.value,
+        AUTH_TRUST_HOST: "true",
+        UPLOADTHING_TOKEN: uploadThingToken.value,
       },
     });
 
