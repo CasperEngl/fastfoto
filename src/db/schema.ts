@@ -10,6 +10,7 @@ import {
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
+import { randomUUID } from "node:crypto";
 
 export const userType = pgEnum("user_type", [
   "admin",
@@ -22,7 +23,7 @@ export const studioRole = pgEnum("studio_role", ["owner", "admin", "member"]);
 export const Users = pgTable("users", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => randomUUID()),
   name: text("name"),
   email: text("email").unique().notNull(),
   emailVerified: timestamp("email_verified", { mode: "date" }),
@@ -108,7 +109,7 @@ export const Authenticators = pgTable(
 export const Studios = pgTable("studios", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
   logo: text("logo"),
   createdById: text("created_by_id")
@@ -121,7 +122,7 @@ export const Studios = pgTable("studios", {
 export const StudioMembers = pgTable("studio_members", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => randomUUID()),
   studioId: text("studio_id")
     .references(() => Studios.id, { onDelete: "cascade" })
     .notNull(),
@@ -138,7 +139,7 @@ export const StudioMembers = pgTable("studio_members", {
 export const Albums = pgTable("albums", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => randomUUID()),
   name: text("name").notNull(),
   description: text("description"),
   studioId: text("studio_id")
@@ -153,7 +154,7 @@ export const Albums = pgTable("albums", {
 export const Photos = pgTable("photos", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => randomUUID()),
   albumId: text("album_id")
     .notNull()
     .references(() => Albums.id, { onDelete: "cascade" }),
@@ -170,7 +171,7 @@ export const Photos = pgTable("photos", {
 export const AdminAuditLogs = pgTable("admin_audit_logs", {
   id: text("id")
     .primaryKey()
-    .$defaultFn(() => crypto.randomUUID()),
+    .$defaultFn(() => randomUUID()),
   adminId: text("admin_id")
     .notNull()
     .references(() => Users.id, { onDelete: "cascade" }),
@@ -188,7 +189,7 @@ export const StudioClients = pgTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => randomUUID()),
     studioId: text("studio_id")
       .notNull()
       .references(() => Studios.id, { onDelete: "cascade" }),
@@ -210,7 +211,7 @@ export const AlbumClients = pgTable(
   {
     id: text("id")
       .primaryKey()
-      .$defaultFn(() => crypto.randomUUID()),
+      .$defaultFn(() => randomUUID()),
     albumId: text("album_id")
       .notNull()
       .references(() => Albums.id, { onDelete: "cascade" }),
