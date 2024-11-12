@@ -103,6 +103,7 @@ export default $config({
         axiomToken,
         uploadThingToken,
       ],
+      url: true,
     });
   },
 });
