@@ -11,7 +11,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { SelectedClient } from "~/app/dashboard/photographer/albums/selected-client";
+import { SelectedClient } from "~/app/dashboard/studio/albums/selected-client";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
 import {
@@ -77,7 +77,7 @@ export function CreateAlbumForm({
               });
               invariant(album, "Album is required");
               toast.success("Album created successfully");
-              router.push(`/dashboard/photographer/albums/${album.id}`);
+              router.push(`/dashboard/studio/albums/${album.id}`);
               router.refresh();
             } catch (error) {
               toast.error("Failed to create album");

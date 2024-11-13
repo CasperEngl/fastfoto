@@ -2,9 +2,9 @@
 
 import { InferSelectModel } from "drizzle-orm";
 import { MoreHorizontal } from "lucide-react";
-import Link from "next/link";
-import { useActionState } from "react";
+import { useTransition } from "react";
 import { toast } from "sonner";
+import { deleteClient } from "~/app/dashboard/studio/clients/actions";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -14,29 +14,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
-import { Albums } from "~/db/schema";
-import { deleteAlbum } from "./actions";
+import * as schema from "~/db/schema";
 
-export function AlbumActions({
-  album,
+export function ClientActions({
+  client,
 }: {
-  album: InferSelectModel<typeof Albums>;
+  client: InferSelectModel<typeof schema.StudioClients>;
 }) {
-  const [, deleteAction, isPending] = useActionState(
-    async (prev: null, albumId: string) => {
-      if (!confirm("Are you sure you want to delete this album?")) return null;
-
-      try {
-        await deleteAlbum(albumId);
-        toast.success("Album deleted successfully");
-        return null;
-      } catch (error) {
-        toast.error("Failed to delete album");
-        return null;
-      }
-    },
-    null,
-  );
+  const [isPending, startTransition] = useTransition();
 
   return (
     <DropdownMenu>
@@ -50,24 +35,31 @@ export function AlbumActions({
         <DropdownMenuLabel>Actions</DropdownMenuLabel>
         <DropdownMenuItem
           onClick={() => {
-            navigator.clipboard.writeText(album.id);
-            toast.success("Album ID copied to clipboard");
+            navigator.clipboard.writeText(client.userId);
+            toast.success("Client ID copied to clipboard");
           }}
         >
-          Copy album ID
-        </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <Link href={`/dashboard/photographer/albums/${album.id}`}>
-            Edit album
-          </Link>
+          Copy client ID
         </DropdownMenuItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem
           className="text-red-600 focus:text-red-600"
-          onClick={() => deleteAction(album.id)}
+          onClick={() => {
+            if (!confirm("Are you sure you want to delete this client?"))
+              return;
+
+            startTransition(async () => {
+              try {
+                await deleteClient(client.userId);
+                toast.success("Client deleted successfully");
+              } catch (error) {
+                toast.error("Failed to delete client");
+              }
+            });
+          }}
           disabled={isPending}
         >
-          {isPending ? "Deleting..." : "Delete album"}
+          {isPending ? "Deleting..." : "Delete client"}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

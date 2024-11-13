@@ -48,6 +48,6 @@ export async function deleteClient(clientId: string) {
       .delete(schema.StudioClients)
       .where(eq(schema.StudioClients.userId, clientId));
 
-    revalidatePath("/dashboard/photographer/clients");
+    revalidatePath("/dashboard/studio/clients");
   });
 }

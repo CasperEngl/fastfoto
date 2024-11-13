@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
-import { createClient } from "~/app/dashboard/photographer/clients/new/actions";
+import { createClient } from "~/app/dashboard/studio/clients/new/actions";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -53,7 +53,7 @@ export function CreateClientForm() {
 
             await createClient({ ...values, emails: emailsArray });
             form.reset();
-            router.push("/dashboard/photographer/clients");
+            router.push("/dashboard/studio/clients");
             toast.success("Clients added successfully");
           } catch (error) {
             toast.error("Failed to add clients");

@@ -12,9 +12,9 @@ import { useOptimistic, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { deletePhoto } from "~/app/dashboard/photographer/albums/[id]/actions";
-import { updateAlbum } from "~/app/dashboard/photographer/albums/actions";
-import { SelectedClient } from "~/app/dashboard/photographer/albums/selected-client";
+import { deletePhoto } from "~/app/dashboard/studio/albums/[id]/actions";
+import { updateAlbum } from "~/app/dashboard/studio/albums/actions";
+import { SelectedClient } from "~/app/dashboard/studio/albums/selected-client";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
 import {

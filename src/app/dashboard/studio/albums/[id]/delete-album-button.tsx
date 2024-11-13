@@ -4,7 +4,7 @@ import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useActionState, useState } from "react";
 import { toast } from "sonner";
-import { deleteAlbum } from "~/app/dashboard/photographer/albums/actions";
+import { deleteAlbum } from "~/app/dashboard/studio/albums/actions";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,7 +29,7 @@ export function DeleteAlbumButton({ albumId }: { albumId: string }) {
         await deleteAlbum(albumId);
         toast.success("Album deleted successfully");
         setOpen(false);
-        router.push("/dashboard/photographer/albums");
+        router.push("/dashboard/studio/albums");
 
         return null;
       } catch (error) {

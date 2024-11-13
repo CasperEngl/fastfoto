@@ -5,8 +5,8 @@ import { cookies } from "next/headers";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchParams } from "nuqs/server";
-import { AlbumsDataTable } from "~/app/dashboard/photographer/albums/albums-data-table";
-import { ITEMS_PER_PAGE } from "~/app/dashboard/photographer/albums/config";
+import { AlbumsDataTable } from "~/app/dashboard/studio/albums/albums-data-table";
+import { ITEMS_PER_PAGE } from "~/app/dashboard/studio/albums/config";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { dataTableCache } from "~/components/data-table";
@@ -111,7 +111,7 @@ export default async function AlbumsPage({
       <div className="mb-4 flex items-center justify-between">
         <h1 className="text-2xl font-bold tracking-tight">Albums</h1>
         <Button asChild>
-          <Link href="/dashboard/photographer/albums/new">
+          <Link href="/dashboard/studio/albums/new">
             <Plus className="size-4" />
             Create Album
           </Link>

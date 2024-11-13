@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
 import { z } from "zod";
-import { DeleteAlbumButton } from "~/app/dashboard/photographer/albums/[id]/delete-album-button";
-import { EditAlbumForm } from "~/app/dashboard/photographer/albums/[id]/edit-album-form";
+import { DeleteAlbumButton } from "~/app/dashboard/studio/albums/[id]/delete-album-button";
+import { EditAlbumForm } from "~/app/dashboard/studio/albums/[id]/edit-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { studioClients } from "~/db/queries/studio-clients.queries";

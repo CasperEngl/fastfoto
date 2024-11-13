@@ -65,6 +65,6 @@ export async function createClient(data: { emails: string[] }) {
       )
       .onConflictDoNothing();
 
-    revalidatePath("/dashboard/photographer/clients");
+    revalidatePath("/dashboard/studio/clients");
   });
 }

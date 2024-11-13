@@ -7,8 +7,8 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useQueryStates } from "nuqs";
 import { useState } from "react";
-import { AlbumActions } from "~/app/dashboard/photographer/albums/album-actions";
-import { ITEMS_PER_PAGE } from "~/app/dashboard/photographer/albums/config";
+import { AlbumActions } from "~/app/dashboard/studio/albums/album-actions";
+import { ITEMS_PER_PAGE } from "~/app/dashboard/studio/albums/config";
 import { DataTable, dataTableParsers } from "~/components/data-table";
 import { Pagination } from "~/components/pagination";
 import { Checkbox } from "~/components/ui/checkbox";
@@ -72,7 +72,7 @@ export function AlbumsDataTable({
         header: "Name",
         cell: ({ row }) => (
           <Link
-            href={`/dashboard/photographer/albums/${row.original.id}`}
+            href={`/dashboard/studio/albums/${row.original.id}`}
             className="hover:underline"
           >
             {row.getValue("name")}

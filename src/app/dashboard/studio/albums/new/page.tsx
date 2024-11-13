@@ -1,7 +1,7 @@
 import invariant from "invariant";
 import { cookies } from "next/headers";
 import { notFound } from "next/navigation";
-import { CreateAlbumForm } from "~/app/dashboard/photographer/albums/new/create-album-form";
+import { CreateAlbumForm } from "~/app/dashboard/studio/albums/new/create-album-form";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { Alert } from "~/components/ui/alert";

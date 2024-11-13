@@ -56,7 +56,7 @@ export default async function UserEditPage({
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-xl font-semibold">User Albums</h2>
           <Button asChild>
-            <Link href={`/dashboard/photographer/albums/new?userId=${id}`}>
+            <Link href={`/dashboard/studio/albums/new?userId=${id}`}>
               Create Album
             </Link>
           </Button>

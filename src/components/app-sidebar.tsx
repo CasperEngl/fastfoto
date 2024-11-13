@@ -118,7 +118,7 @@ export function AppSidebar({ studios, activeStudio }: AppSidebarProps) {
                   isActive={pathname?.startsWith("/p/albums")}
                   tooltip="Albums"
                 >
-                  <Link href="/dashboard/photographer/albums">
+                  <Link href="/dashboard/studio/albums">
                     <Images />
                     Albums
                   </Link>
@@ -130,7 +130,7 @@ export function AppSidebar({ studios, activeStudio }: AppSidebarProps) {
                   isActive={pathname?.startsWith("/p/clients")}
                   tooltip="Clients"
                 >
-                  <Link href="/dashboard/photographer/clients">
+                  <Link href="/dashboard/studio/clients">
                     <Users />
                     Clients
                   </Link>

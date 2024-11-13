@@ -42,7 +42,7 @@ export async function deleteAlbum(albumId: string) {
 
     await tx.delete(schema.Albums).where(eq(schema.Albums.id, albumId));
 
-    revalidatePath("/dashboard/photographer/albums");
+    revalidatePath("/dashboard/studio/albums");
   });
 }
 
@@ -111,6 +111,6 @@ export async function updateAlbum(
       );
     }
 
-    revalidatePath("/dashboard/photographer/albums");
+    revalidatePath("/dashboard/studio/albums");
   });
 }

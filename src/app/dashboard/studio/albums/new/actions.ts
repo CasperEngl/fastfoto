@@ -56,7 +56,7 @@ export async function createAlbum(
       );
     }
 
-    revalidatePath("/dashboard/photographer/albums");
+    revalidatePath("/dashboard/studio/albums");
 
     return album;
   });

@@ -13,7 +13,7 @@ interface AlbumCardProps {
 export function AlbumCard({ album }: AlbumCardProps) {
   return (
     <Link
-      href={`/dashboard/photographer/albums/${album.id}`}
+      href={`/dashboard/studio/albums/${album.id}`}
       className="flex flex-col rounded-lg border p-4 hover:bg-muted"
     >
       <div className="flex flex-1 flex-col gap-4">
