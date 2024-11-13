@@ -105,7 +105,7 @@ export function StudioSwitcher({
                   className="size-8 [&_svg]:size-4"
                 >
                   <Link
-                    href={`/dashboard/t/settings?teamId=${studio.id}`}
+                    href={`/dashboard/studio/settings?teamId=${studio.id}`}
                     title="Studio settings"
                   >
                     <Settings />

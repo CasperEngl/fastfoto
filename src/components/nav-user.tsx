@@ -85,14 +85,14 @@ export function NavUser({ user }: { user: User }) {
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
               <DropdownMenuItem asChild>
-                <Link href="/dashboard/u/settings">
+                <Link href="/dashboard/account/settings">
                   <CircleUser />
                   Account
                 </Link>
               </DropdownMenuItem>
               {isPhotographer(user) ? (
                 <DropdownMenuItem asChild>
-                  <Link href="/dashboard/t/settings">
+                  <Link href="/dashboard/studio/settings">
                     <GalleryVerticalEnd />
                     Studios
                   </Link>
