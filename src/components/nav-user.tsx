@@ -10,7 +10,6 @@ import {
 import { User } from "next-auth";
 import { signOut } from "next-auth/react";
 import Link from "next/link";
-
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import {
   DropdownMenu,
@@ -27,6 +26,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "~/components/ui/sidebar";
+import { isPhotographer } from "~/role";
 
 export function NavUser({ user }: { user: User }) {
   const { isMobile } = useSidebar();
@@ -90,12 +90,14 @@ export function NavUser({ user }: { user: User }) {
                   Account
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link href="/dashboard/t/settings">
-                  <GalleryVerticalEnd />
-                  Studios
-                </Link>
-              </DropdownMenuItem>
+              {isPhotographer(user) ? (
+                <DropdownMenuItem asChild>
+                  <Link href="/dashboard/t/settings">
+                    <GalleryVerticalEnd />
+                    Studios
+                  </Link>
+                </DropdownMenuItem>
+              ) : null}
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => signOut()}>
