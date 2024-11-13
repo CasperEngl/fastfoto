@@ -12,7 +12,7 @@ import * as z from "zod";
 import {
   removeMember,
   updateStudio,
-} from "~/app/dashboard/account/settings/actions";
+} from "~/app/dashboard/studio/settings/actions";
 import { ManagedStudio } from "~/app/dashboard/studio/settings/studios-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
