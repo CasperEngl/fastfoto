@@ -4,14 +4,13 @@ import { eq, InferInsertModel } from "drizzle-orm";
 import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
-import { auditLog } from "~/db/audit-log";
 import { db } from "~/db/client";
 import { isUserAdmin } from "~/db/queries/users.queries";
-import { Users } from "~/db/schema";
+import * as schema from "~/db/schema";
 import { validateAllowedProperties } from "~/lib/validate-allowed-properties";
 
 export async function updateUser(
-  options: Partial<InferInsertModel<typeof Users>> & {
+  options: Partial<InferInsertModel<typeof schema.Users>> & {
     id: string;
   },
 ) {
@@ -42,19 +41,14 @@ export async function updateUser(
       email: options.email,
       name: options.name,
       userType: options.userType,
-    } satisfies Partial<InferInsertModel<typeof Users>>;
+    } satisfies Partial<InferInsertModel<typeof schema.Users>>;
 
     validateAllowedProperties(options, updateData, ["id"]);
 
-    await tx.update(Users).set(updateData).where(eq(Users.id, options.id));
-
-    await auditLog({
-      action: "UPDATE",
-      entityType: "Users",
-      entityId: options.id,
-      details: `Updated user with ID ${options.id}`,
-      extra: updateData,
-    });
+    await tx
+      .update(schema.Users)
+      .set(updateData)
+      .where(eq(schema.Users.id, options.id));
 
     revalidatePath("/dashboard/a/users");
   });
