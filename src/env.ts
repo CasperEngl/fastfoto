@@ -30,7 +30,7 @@ export const env = createEnv({
     RESEND_KEY: z.string().min(1),
     AXIOM_DATASET: z.string().min(1),
     AXIOM_TOKEN: z.string().min(1),
-    APP_DEBUG: z.coerce.boolean().default(false),
+    APP_DEBUG: z.boolean().default(false),
     POSTGRES_PASSWORD: z.string().min(1),
     POSTGRES_USER: z.string().min(1),
     POSTGRES_DB: z.string().min(1),
