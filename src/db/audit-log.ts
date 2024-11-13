@@ -40,30 +40,33 @@ export async function auditLog<T extends keyof typeof schema>(
   params: AuditLogParams<T> | Array<AuditLogParams<T>>,
 ) {
   const session = await auth();
-  invariant(session?.user?.id, "Unauthorized");
 
-  const adminUser = await db.query.Users.findFirst({
-    where: isUserAdmin(session.user.id),
-    with: {
-      adminAuditLogs: true,
-    },
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Unauthorized");
+
+    const adminUser = await tx.query.Users.findFirst({
+      where: isUserAdmin(session.user.id),
+      with: {
+        adminAuditLogs: true,
+      },
+    });
+
+    if (!adminUser) {
+      throw new Error("Unauthorized");
+    }
+
+    // Convert single param to array for unified processing
+    const paramsArray = Array.isArray(params) ? params : [params];
+
+    await tx.insert(schema.AdminAuditLogs).values(
+      paramsArray.map((param) => {
+        invariant(session.user?.id, "Unauthorized");
+
+        return {
+          ...param,
+          adminId: session.user.id,
+        };
+      }),
+    );
   });
-
-  if (!adminUser) {
-    throw new Error("Unauthorized");
-  }
-
-  // Convert single param to array for unified processing
-  const paramsArray = Array.isArray(params) ? params : [params];
-
-  await db.insert(schema.AdminAuditLogs).values(
-    paramsArray.map((param) => {
-      invariant(session.user?.id, "Unauthorized");
-
-      return {
-        ...param,
-        adminId: session.user.id,
-      };
-    }),
-  );
 }
