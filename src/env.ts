@@ -41,7 +41,7 @@ export const env = createEnv({
     POSTGRES_HOST: process.env.POSTGRES_HOST,
     POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
     POSTGRES_USER: process.env.POSTGRES_USER,
-    APP_DEBUG: process.env.APP_DEBUG,
+    APP_DEBUG: process.env.APP_DEBUG === "true",
     APP_URL:
       process.env.NODE_ENV === "production"
         ? "https://fastfoto.casperengelmann.com"
