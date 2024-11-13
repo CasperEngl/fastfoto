@@ -57,16 +57,16 @@ export function EditUserForm({
     },
   });
 
-  invariant(params.id?.toString(), "User ID is required");
-
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(async (data) => {
+          invariant(params.id, "User ID is required");
+
           try {
             await updateUser({
               ...data,
-              id: params.id!.toString(),
+              id: params.id.toString(),
             });
             router.refresh();
             toast.success("User updated successfully");
