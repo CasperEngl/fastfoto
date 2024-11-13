@@ -22,9 +22,11 @@ export function useContentBreakpoint(
     ...options,
     offset: sidebar.isMobile
       ? 0
-      : convertRemToPixels(
-          sidebar.state === "collapsed" ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
-        ),
+      : typeof window !== "undefined"
+        ? convertRemToPixels(
+            sidebar.state === "collapsed" ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
+          )
+        : 0,
   });
 
   return matches && !sidebar.isMobile;
