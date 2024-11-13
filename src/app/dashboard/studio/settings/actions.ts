@@ -1,3 +1,5 @@
+"use server";
+
 import { and, eq, InferInsertModel } from "drizzle-orm";
 import invariant from "invariant";
 import { auth } from "~/auth";
