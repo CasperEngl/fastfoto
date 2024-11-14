@@ -6,7 +6,11 @@ import {
   useBreakpoint,
 } from "~/hooks/use-breakpoint";
 
-function convertRemToPixels(rem: string) {
+function convertRemToPixels(rem: string, fallback = 0) {
+  if (typeof window === "undefined") {
+    return fallback;
+  }
+
   return (
     parseFloat(rem) *
     parseFloat(getComputedStyle(document.documentElement).fontSize)
@@ -22,11 +26,9 @@ export function useContentBreakpoint(
     ...options,
     offset: sidebar.isMobile
       ? 0
-      : typeof window !== "undefined"
-        ? convertRemToPixels(
-            sidebar.state === "collapsed" ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
-          )
-        : 0,
+      : convertRemToPixels(
+          sidebar.state === "collapsed" ? SIDEBAR_WIDTH_ICON : SIDEBAR_WIDTH,
+        ),
   });
 
   return matches && !sidebar.isMobile;
