@@ -1,16 +1,15 @@
 "use server";
 
-import { OnboardingData } from "./types";
+import { PricingTier } from "~/app/onboarding/types";
 
-export async function saveOnboardingData(data: OnboardingData) {
-  console.log("Saving onboarding data:", data);
+export async function selectPlan(plan: PricingTier) {
+  console.log(`Attempting to select plan: ${plan.name}`);
+
   try {
-    // TODO: Save the onboarding data to your database
-    // This is where you would store the studio preferences
-
+    console.log(`Successfully selected plan: ${plan.name}`);
     return { success: true };
   } catch (error) {
-    console.error("Failed to save onboarding data:", error);
-    return { success: false, error: "Failed to save studio preferences" };
+    console.error(`Failed to select plan: ${plan.name}`, error);
+    return { success: false, error: `Failed to select plan: ${plan.name}` };
   }
 }
