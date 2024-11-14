@@ -31,16 +31,20 @@ import { createAlbum } from "./actions";
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  clients: z.array(z.string()).default([]).catch([]),
+  studioClientIds: z.array(z.string()).default([]).catch([]),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export function CreateAlbumForm({
-  clients,
+  studioClients,
   selectedStudioId,
 }: {
-  clients: Array<InferSelectModel<typeof schema.Users>>;
+  studioClients: Array<
+    InferSelectModel<typeof schema.StudioClients> & {
+      user: InferSelectModel<typeof schema.Users>;
+    }
+  >;
   selectedStudioId: string;
 }) {
   const session = useSession();
@@ -52,12 +56,14 @@ export function CreateAlbumForm({
     defaultValues: {
       name: "",
       description: "",
-      clients: [],
+      studioClientIds: [],
     },
   });
 
   function findClientName(clientId: string) {
-    return clients.find((client) => client.id === clientId)?.name ?? "";
+    return (
+      studioClients.find((client) => client.id === clientId)?.user.name ?? ""
+    );
   }
 
   return (
@@ -89,15 +95,15 @@ export function CreateAlbumForm({
       >
         <FormField
           control={form.control}
-          name="clients"
+          name="studioClientIds"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clients</FormLabel>
               <div>
                 <Combobox
-                  options={clients.map((client) => ({
+                  options={studioClients.map((client) => ({
                     value: client.id,
-                    label: client.name ?? "",
+                    label: client.user.name ?? "",
                   }))}
                   value={field.value}
                   onValueChange={field.onChange}
@@ -115,7 +121,7 @@ export function CreateAlbumForm({
                       return clientA.localeCompare(clientB);
                     })
                     .map((clientId) => {
-                      const client = clients.find(
+                      const client = studioClients.find(
                         (client) => client.id === clientId,
                       );
 
@@ -132,14 +138,14 @@ export function CreateAlbumForm({
                                 className="group h-8"
                               >
                                 <SelectedClient
-                                  image={client.image}
-                                  name={client.name}
+                                  image={client.user.image}
+                                  name={client.user.name}
                                 />
                               </Link>
                             ) : (
                               <SelectedClient
-                                image={client.image}
-                                name={client.name}
+                                image={client.user.image}
+                                name={client.user.name}
                               />
                             )
                           ) : null}
@@ -150,7 +156,7 @@ export function CreateAlbumForm({
                             className="size-8 rounded-full hover:bg-destructive hover:text-destructive-foreground"
                             onClick={() => {
                               form.setValue(
-                                "clients",
+                                "studioClientIds",
                                 field.value.filter((id) => id !== clientId),
                                 { shouldDirty: true },
                               );

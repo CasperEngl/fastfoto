@@ -38,7 +38,7 @@ const albumFormSchema = z.object({
     message: "Name must be at least 2 characters.",
   }),
   description: z.string().optional(),
-  clients: z.array(z.string()).default([]).catch([]),
+  studioClientIds: z.array(z.string()).default([]).catch([]),
 });
 
 type AlbumFormValues = z.infer<typeof albumFormSchema>;
@@ -53,7 +53,7 @@ export function EditAlbumForm({
 }: {
   album: InferSelectModel<typeof schema.Albums> & {
     photos: InferSelectModel<typeof schema.Photos>[];
-    clients: InferSelectModel<typeof schema.StudioClients>[];
+    studioClients: InferSelectModel<typeof schema.StudioClients>[];
   };
   studioClients: Array<
     InferSelectModel<typeof schema.StudioClients> & {
@@ -81,7 +81,7 @@ export function EditAlbumForm({
     defaultValues: {
       name: album.name ?? "",
       description: album.description ?? "",
-      clients: album.clients.map((client) => client.id),
+      studioClientIds: album.studioClients.map((client) => client.id),
     },
   });
 
@@ -96,7 +96,7 @@ export function EditAlbumForm({
               await updateAlbum(params.id.toString(), {
                 name: values.name,
                 description: values.description || null,
-                clients: values.clients || [],
+                studioClientIds: values.studioClientIds || [],
               });
               toast.success("Album updated successfully");
               form.reset(form.getValues());
@@ -144,7 +144,7 @@ export function EditAlbumForm({
 
         <FormField
           control={form.control}
-          name="clients"
+          name="studioClientIds"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Clients</FormLabel>
@@ -214,7 +214,7 @@ export function EditAlbumForm({
                             className="size-8 rounded-full hover:bg-destructive hover:text-destructive-foreground"
                             onClick={() => {
                               form.setValue(
-                                "clients",
+                                "studioClientIds",
                                 field.value.filter((id) => id !== userId),
                                 { shouldDirty: true },
                               );
