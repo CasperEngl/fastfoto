@@ -18,32 +18,43 @@ import {
   User,
   Users,
 } from "lucide-react";
-import { useState } from "react";
+import {
+  parseAsJson,
+  parseAsString,
+  parseAsStringEnum,
+  useQueryState,
+} from "nuqs";
+import { useEffect, useState } from "react";
 import { match } from "ts-pattern";
+import { z } from "zod";
+import { selectPlan } from "~/app/onboarding/actions";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
-import { saveOnboardingData } from "./actions";
-import { ONBOARDING_STEPS, OnboardingData, StudioSize } from "./types";
+import {
+  ONBOARDING_STEPS,
+  OnboardingData,
+  OnboardingStep,
+  PricingTier,
+  Specialization,
+  studioSizeEnum,
+} from "./types";
 
 const MotionButton = motion(Button);
-
-type PricingTier = {
-  name: string;
-  price: number;
-  description: string;
-  features: string[];
-  recommended?: boolean;
-};
 
 const { Scoped, useStepper } = defineStepper(
   {
     id: ONBOARDING_STEPS.STUDIO_SIZE,
     title: "Studio Size",
     description: "How many photographers work in your studio?",
+    initialStep:
+      typeof window !== "undefined"
+        ? new URLSearchParams(window.location.search).get("step") ||
+          ONBOARDING_STEPS.STUDIO_SIZE
+        : ONBOARDING_STEPS.STUDIO_SIZE,
   },
   {
     id: ONBOARDING_STEPS.SPECIALIZATIONS,
@@ -52,8 +63,9 @@ const { Scoped, useStepper } = defineStepper(
   },
   {
     id: ONBOARDING_STEPS.REVIEW,
-    title: "Review",
-    description: "Review your selections before completing",
+    title: "Recommended Plans",
+    description:
+      "Based on your studio size and specializations, we recommend the following plans:",
   },
 );
 
@@ -62,13 +74,15 @@ function StudioSizeStep({
   onUpdate,
 }: {
   data: OnboardingData;
-  onUpdate: (size: StudioSize) => void;
+  onUpdate: (size: z.infer<typeof studioSizeEnum>) => void;
 }) {
   return (
     <div className="space-y-4">
       <RadioGroup
         defaultValue={data.studioSize}
-        onValueChange={(value) => onUpdate(value as StudioSize)}
+        onValueChange={(value) =>
+          onUpdate(value as z.infer<typeof studioSizeEnum>)
+        }
         className="grid grid-cols-4 gap-4"
       >
         {[
@@ -399,9 +413,11 @@ function getRecommendationReason(
     case "Starter":
       if (tier.recommended) {
         return `Perfect for your solo/small studio${
-          specializations ? ` with ${specializations} specialization${
-            specializations !== 1 ? "s" : ""
-          }` : ""
+          specializations
+            ? ` with ${specializations} specialization${
+                specializations !== 1 ? "s" : ""
+              }`
+            : ""
         }. Includes all the essential features you need to get started.`;
       }
       return "Best for solo photographers with basic needs";
@@ -409,9 +425,11 @@ function getRecommendationReason(
     case "Professional":
       if (tier.recommended) {
         return `Ideal for your team of ${photographerCount}${
-          specializations ? ` and ${specializations} specialization${
-            specializations !== 1 ? "s" : ""
-          }` : ""
+          specializations
+            ? ` and ${specializations} specialization${
+                specializations !== 1 ? "s" : ""
+              }`
+            : ""
         }. Includes advanced features for growing studios.`;
       }
       return "Suitable for growing studios needing more features";
@@ -419,9 +437,11 @@ function getRecommendationReason(
     case "Enterprise":
       if (tier.recommended) {
         return `Optimized for your large studio with ${photographerCount}${
-          specializations ? ` and ${specializations} specialization${
-            specializations !== 1 ? "s" : ""
-          }` : ""
+          specializations
+            ? ` and ${specializations} specialization${
+                specializations !== 1 ? "s" : ""
+              }`
+            : ""
         }. Includes unlimited resources and premium support.`;
       }
       return "For large studios with complex requirements";
@@ -436,172 +456,130 @@ function ReviewStep({
   onSubmit,
 }: {
   data: OnboardingData;
-  onSubmit: (selectedPlan: string) => Promise<void>;
+  onSubmit: (selectedPlan: PricingTier) => Promise<void>;
 }) {
   const pricingTiers = getPricingRecommendation(data);
-  const [selectedPlan, setSelectedPlan] = useState<string>("");
+  const [selectedPlan, setSelectedPlan] = useState<PricingTier | null>(null);
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-4">
-        <div>
-          <h3 className="text-lg font-semibold">Studio Size</h3>
-          <p className="text-muted-foreground">
-            {match(data.studioSize)
-              .with("SOLO", () => "1 photographer")
-              .with("SMALL_STUDIO", () => "2-5 photographers")
-              .with("MEDIUM_STUDIO", () => "5-20 photographers")
-              .with("LARGE_STUDIO", () => "20+ photographers")
-              .exhaustive()}
-          </p>
-        </div>
-
-        <div>
-          <h3 className="text-lg font-semibold">Specializations</h3>
-          <div className="grid grid-cols-2 gap-4">
-            {Object.entries(data.specializations).map(([category, specs]) => (
-              <div key={category}>
-                <h4 className="font-medium capitalize">{category}</h4>
-                <ul className="list-inside list-disc">
-                  {Object.entries(specs || {}).map(
-                    ([key, value]) =>
-                      value && (
-                        <li key={key} className="capitalize">
-                          {key.replace(/([A-Z])/g, " $1").trim()}
-                        </li>
-                      ),
-                  )}
-                </ul>
+    <div className="mt-8">
+      <div className="grid grid-cols-3 gap-6">
+        {pricingTiers.map((tier) => (
+          <Card
+            key={tier.name}
+            className={cn(
+              "relative overflow-hidden hover:border-primary hover:bg-accent/50",
+              {
+                "border-primary": tier.recommended,
+              },
+            )}
+          >
+            {tier.recommended && (
+              <div className="absolute right-0 top-0 rounded-bl-lg bg-primary px-3 py-1 text-sm text-primary-foreground">
+                Recommended
               </div>
-            ))}
-          </div>
-        </div>
+            )}
+            <div className="p-6">
+              <h4 className="text-xl font-semibold">{tier.name}</h4>
+              <div className="mt-2">
+                <span className="text-3xl font-bold">${tier.price}</span>
+                <span className="text-muted-foreground">/month</span>
+              </div>
+              <p className="mt-2 text-sm text-muted-foreground">
+                {tier.description}
+              </p>
 
-        <div className="mt-8">
-          <h3 className="text-lg font-semibold">Recommended Plans</h3>
-          <p className="mb-6 text-muted-foreground">
-            Based on your studio size and specializations, we recommend the
-            following plans:
-          </p>
-          <div className="grid grid-cols-3 gap-6">
-            {pricingTiers.map((tier) => (
-              <Card
-                key={tier.name}
+              <div
                 className={cn(
-                  "relative overflow-hidden hover:border-primary hover:bg-accent/50",
-                  {
-                    "border-primary": tier.recommended,
-                  },
+                  "mt-4 rounded-md p-3 text-sm",
+                  tier.recommended
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-muted text-muted-foreground",
                 )}
               >
-                {tier.recommended && (
-                  <div className="absolute right-0 top-0 rounded-bl-lg bg-primary px-3 py-1 text-sm text-primary-foreground">
-                    Recommended
-                  </div>
-                )}
-                <div className="p-6">
-                  <h4 className="text-xl font-semibold">{tier.name}</h4>
-                  <div className="mt-2">
-                    <span className="text-3xl font-bold">${tier.price}</span>
-                    <span className="text-muted-foreground">/month</span>
-                  </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    {tier.description}
-                  </p>
+                {getRecommendationReason(data, tier)}
+              </div>
 
-                  <div
-                    className={cn(
-                      "mt-4 rounded-md p-3 text-sm",
-                      tier.recommended
-                        ? "bg-primary/10 text-primary"
-                        : "bg-muted text-muted-foreground",
-                    )}
-                  >
-                    {getRecommendationReason(data, tier)}
-                  </div>
+              <ul className="mt-6 space-y-2">
+                {tier.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
+                    <Check className="h-4 w-4 text-primary" />
+                    <span className="text-sm">{feature}</span>
+                  </li>
+                ))}
+              </ul>
 
-                  <ul className="mt-6 space-y-2">
-                    {tier.features.map((feature) => (
-                      <li key={feature} className="flex items-center gap-2">
-                        <Check className="h-4 w-4 text-primary" />
-                        <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                  </ul>
-
-                  <div className="mt-6">
-                    <MotionButton
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      transition={{ duration: 0.2 }}
-                      className="w-full hover:bg-primary hover:text-primary-foreground"
-                      variant={
-                        selectedPlan === tier.name ? "default" : "secondary"
-                      }
-                      onClick={() => {
-                        setSelectedPlan(tier.name);
-                        onSubmit(tier.name);
-                      }}
-                    >
-                      Select Plan
-                    </MotionButton>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
+              <div className="mt-6">
+                <MotionButton
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  transition={{ duration: 0.2 }}
+                  className="w-full hover:bg-primary hover:text-primary-foreground"
+                  variant={
+                    selectedPlan?.name === tier.name ? "default" : "secondary"
+                  }
+                  onClick={() => {
+                    setSelectedPlan(tier);
+                    onSubmit(tier);
+                  }}
+                >
+                  Select Plan
+                </MotionButton>
+              </div>
+            </div>
+          </Card>
+        ))}
       </div>
     </div>
   );
 }
 
 export default function OnboardingForm() {
-  const [data, setData] = useState<OnboardingData>({
-    studioSize: "SOLO",
-    specializations: {},
-    selectedPlan: "",
-  });
+  const [step, setStep] = useQueryState(
+    "step",
+    parseAsStringEnum(Object.values(ONBOARDING_STEPS)).withDefault(
+      ONBOARDING_STEPS.STUDIO_SIZE,
+    ),
+  );
+  const [studioSize, setStudioSize] = useQueryState(
+    "studio_size",
+    parseAsStringEnum(studioSizeEnum.options).withDefault("SOLO"),
+  );
+  const [specializations, setSpecializations] = useQueryState(
+    "specializations",
+    parseAsJson<Specialization>((value) => {
+      console.log("parsing specializations", JSON.stringify(value, null, 2));
 
-  const handleSizeSelection = (size: StudioSize) => {
-    setData((prev) => ({ ...prev, studioSize: size }));
-  };
+      if (typeof value !== "object" || value === null) return {};
 
-  const handleSpecializationChange = (
-    category: "portrait" | "events",
-    subCategory: string,
-    checked: boolean,
-  ) => {
-    setData((prev) => ({
-      ...prev,
-      specializations: {
-        ...prev.specializations,
-        [category]: {
-          ...prev.specializations[category],
-          [subCategory]: checked,
-        },
-      },
-    }));
-  };
-
-  const handleSubmit = async (selectedPlan: string) => {
-    const result = await saveOnboardingData({
-      ...data,
-      selectedPlan,
-    });
-    if (result.success) {
-      // Redirect to dashboard or show success message
-    }
-  };
+      return value;
+    }).withDefault({}),
+  );
+  const [selectedPlan, setSelectedPlan] = useQueryState(
+    "selected_plan",
+    parseAsString.withDefault(""),
+  );
 
   return (
-    <div className="container mx-auto max-w-3xl py-8">
-      <Scoped>
+    <div className="container max-w-3xl py-8">
+      <Scoped initialStep={step}>
         <StepperContent
-          data={data}
-          onSizeUpdate={handleSizeSelection}
-          onSpecializationUpdate={handleSpecializationChange}
-          onSubmit={handleSubmit}
+          data={{ studioSize, specializations, selectedPlan }}
+          onSizeUpdate={(studioSize) => setStudioSize(studioSize)}
+          onSpecializationUpdate={(category, subCategory, checked) =>
+            setSpecializations((prev) => ({
+              ...prev,
+              [category]: {
+                ...prev[category],
+                [subCategory]: checked,
+              },
+            }))
+          }
+          onStepUpdate={(step) => setStep(step)}
+          onSubmit={async (selectedPlan) => {
+            setSelectedPlan(selectedPlan.name);
+            await selectPlan(selectedPlan);
+          }}
         />
       </Scoped>
     </div>
@@ -613,17 +591,23 @@ function StepperContent({
   onSizeUpdate,
   onSpecializationUpdate,
   onSubmit,
+  onStepUpdate,
 }: {
   data: OnboardingData;
-  onSizeUpdate: (size: StudioSize) => void;
+  onSizeUpdate: (size: z.infer<typeof studioSizeEnum>) => void;
   onSpecializationUpdate: (
     category: "portrait" | "events",
     subCategory: string,
     checked: boolean,
   ) => void;
-  onSubmit: (selectedPlan: string) => Promise<void>;
+  onSubmit: (selectedPlan: PricingTier) => Promise<void>;
+  onStepUpdate: (step: OnboardingStep) => void;
 }) {
   const stepper = useStepper();
+
+  useEffect(() => {
+    onStepUpdate(stepper.current.id);
+  }, [stepper.current.id]);
 
   return (
     <div className="relative">
