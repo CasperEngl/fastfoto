@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { useBreakpoint } from "~/hooks/use-breakpoint";
 import { cn } from "~/lib/utils";
 
 export const dataTableParsers = {
@@ -37,24 +38,36 @@ export const dataTableParsers = {
 export const dataTableCache = createSearchParamsCache(dataTableParsers);
 
 function MobileRow<TData>({ row }: { row: Row<TData> }) {
+  const isMobile = useBreakpoint("sm");
+
   return (
     <TableRow className="flex flex-col border-b p-4 last:border-b-0 hover:bg-inherit sm:table-row sm:p-0">
       {row.getVisibleCells().map((cell) => {
         const header = cell.column.columnDef.header;
+        const align = !isMobile ? cell.column.columnDef.meta?.align : null;
 
         return (
           <TableCell
             key={cell.id}
-            className={cn(
-              "flex flex-col gap-1 border-b-0 py-2 sm:table-cell sm:py-4",
-            )}
+            className="border-b-0 py-2 sm:table-cell sm:py-4"
           >
-            <span className="font-medium text-muted-foreground sm:hidden">
-              {typeof header === "string" ? header : <header />}
-            </span>
-            <span className="break-all sm:break-normal">
-              {flexRender(cell.column.columnDef.cell, cell.getContext())}
-            </span>
+            <div
+              className={cn(
+                "flex flex-col gap-1",
+                match(align)
+                  .with("start", () => "items-start")
+                  .with("center", () => "items-center")
+                  .with("end", () => "items-end")
+                  .otherwise(() => ""),
+              )}
+            >
+              <span className="font-medium text-muted-foreground sm:hidden">
+                {typeof header === "string" ? header : <header />}
+              </span>
+              <span className="break-all sm:break-normal">
+                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+              </span>
+            </div>
           </TableCell>
         );
       })}
