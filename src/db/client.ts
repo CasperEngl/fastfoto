@@ -24,10 +24,16 @@ export const dbCredentials = {
   ssl: false,
 } as const;
 
-export const pool = postgres({
+namespace globalThis {
+  export let pool: postgres.Sql;
+}
+
+globalThis.pool ??= postgres({
   ...dbCredentials,
   max: 1,
 });
+
+export const pool = globalThis.pool;
 
 export const db = drizzle(pool, {
   schema,
