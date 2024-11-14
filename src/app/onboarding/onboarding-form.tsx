@@ -1,6 +1,7 @@
 "use client";
 
 import { defineStepper } from "@stepperize/react";
+import { AnimatePresence, motion } from "framer-motion";
 import {
   Baby,
   Boxes,
@@ -27,6 +28,8 @@ import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
 import { saveOnboardingData } from "./actions";
 import { ONBOARDING_STEPS, OnboardingData, StudioSize } from "./types";
+
+const MotionButton = motion(Button);
 
 type PricingTier = {
   name: string;
@@ -97,15 +100,27 @@ function StudioSizeStep({
           <div key={value} className="relative">
             <RadioGroupItem value={value} id={value} className="sr-only" />
             <Label htmlFor={value}>
-              <Card
-                className={cn(
-                  "flex h-32 flex-col items-center justify-center gap-y-2 p-4 text-center transition-all hover:bg-accent",
-                  { "border-primary bg-accent": data.studioSize === value },
-                )}
+              <motion.div
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                transition={{ duration: 0.2 }}
               >
-                <div className="text-muted-foreground">{icon}</div>
-                <h3 className="text-lg text-foreground">{label}</h3>
-              </Card>
+                <Card
+                  className={cn(
+                    "flex h-32 flex-col items-center justify-center gap-y-2 p-4 text-center transition-all hover:bg-accent",
+                    { "border-primary bg-accent": data.studioSize === value },
+                  )}
+                >
+                  <motion.div
+                    className="text-muted-foreground"
+                    animate={{ scale: data.studioSize === value ? 1.1 : 1 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {icon}
+                  </motion.div>
+                  <h3 className="text-lg text-foreground">{label}</h3>
+                </Card>
+              </motion.div>
 
               <p className="mt-2 text-center text-sm text-muted-foreground">
                 {description}
@@ -185,25 +200,29 @@ function SpecializationsStep({
                   className="sr-only"
                 />
                 <Label htmlFor={`portrait-${value}`}>
-                  <Card
-                    className={cn(
-                      "flex h-32 flex-col items-center justify-center gap-y-2 p-4 text-center transition-all hover:bg-accent",
-                      {
-                        "border-primary bg-accent":
-                          data.specializations.portrait?.[
-                            value as keyof typeof data.specializations.portrait
-                          ],
-                      },
-                    )}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <div className="text-muted-foreground">{icon}</div>
-
-                    <h4 className="text-foreground">{label}</h4>
-                  </Card>
-
-                  <p className="mt-2 text-center text-sm text-muted-foreground">
-                    {description}
-                  </p>
+                    <Card
+                      className={cn(
+                        "flex h-32 flex-col items-center justify-center gap-y-2 p-4 text-center transition-all hover:bg-accent",
+                        {
+                          "border-primary bg-accent":
+                            data.specializations.portrait?.[
+                              value as keyof typeof data.specializations.portrait
+                            ],
+                        },
+                      )}
+                    >
+                      <div className="text-muted-foreground">{icon}</div>
+                      <h4 className="text-foreground">{label}</h4>
+                    </Card>
+                    <p className="mt-2 text-center text-sm text-muted-foreground">
+                      {description}
+                    </p>
+                  </motion.div>
                 </Label>
               </div>
             ))}
@@ -254,21 +273,27 @@ function SpecializationsStep({
                   className="sr-only"
                 />
                 <Label htmlFor={`events-${value}`}>
-                  <Card
-                    className={cn(
-                      "flex h-32 flex-col items-center justify-center gap-y-2 p-4 text-center transition-all hover:bg-accent",
-                      {
-                        "border-primary bg-accent":
-                          data.specializations.events?.[
-                            value as keyof typeof data.specializations.events
-                          ],
-                      },
-                    )}
+                  <motion.div
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
                   >
-                    <div className="text-muted-foreground">{icon}</div>
+                    <Card
+                      className={cn(
+                        "flex h-32 flex-col items-center justify-center gap-y-2 p-4 text-center transition-all hover:bg-accent",
+                        {
+                          "border-primary bg-accent":
+                            data.specializations.events?.[
+                              value as keyof typeof data.specializations.events
+                            ],
+                        },
+                      )}
+                    >
+                      <div className="text-muted-foreground">{icon}</div>
 
-                    <h4 className="text-foreground">{label}</h4>
-                  </Card>
+                      <h4 className="text-foreground">{label}</h4>
+                    </Card>
+                  </motion.div>
                 </Label>
               </div>
             ))}
@@ -373,24 +398,30 @@ function getRecommendationReason(
   switch (tier.name) {
     case "Starter":
       if (tier.recommended) {
-        return `Perfect for your solo/small studio with ${specializations} specialization${
-          specializations !== 1 ? "s" : ""
+        return `Perfect for your solo/small studio${
+          specializations ? ` with ${specializations} specialization${
+            specializations !== 1 ? "s" : ""
+          }` : ""
         }. Includes all the essential features you need to get started.`;
       }
       return "Best for solo photographers with basic needs";
 
     case "Professional":
       if (tier.recommended) {
-        return `Ideal for your team of ${photographerCount} and ${specializations} specialization${
-          specializations !== 1 ? "s" : ""
+        return `Ideal for your team of ${photographerCount}${
+          specializations ? ` and ${specializations} specialization${
+            specializations !== 1 ? "s" : ""
+          }` : ""
         }. Includes advanced features for growing studios.`;
       }
       return "Suitable for growing studios needing more features";
 
     case "Enterprise":
       if (tier.recommended) {
-        return `Optimized for your large studio with ${photographerCount} and ${specializations} specialization${
-          specializations !== 1 ? "s" : ""
+        return `Optimized for your large studio with ${photographerCount}${
+          specializations ? ` and ${specializations} specialization${
+            specializations !== 1 ? "s" : ""
+          }` : ""
         }. Includes unlimited resources and premium support.`;
       }
       return "For large studios with complex requirements";
@@ -408,9 +439,7 @@ function ReviewStep({
   onSubmit: (selectedPlan: string) => Promise<void>;
 }) {
   const pricingTiers = getPricingRecommendation(data);
-  const [selectedPlan, setSelectedPlan] = useState<string>(
-    pricingTiers.find((tier) => tier.recommended)?.name || "",
-  );
+  const [selectedPlan, setSelectedPlan] = useState<string>("");
 
   return (
     <div className="space-y-8">
@@ -501,7 +530,10 @@ function ReviewStep({
                   </ul>
 
                   <div className="mt-6">
-                    <Button
+                    <MotionButton
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      transition={{ duration: 0.2 }}
                       className="w-full hover:bg-primary hover:text-primary-foreground"
                       variant={
                         selectedPlan === tier.name ? "default" : "secondary"
@@ -511,8 +543,8 @@ function ReviewStep({
                         onSubmit(tier.name);
                       }}
                     >
-                      {selectedPlan === tier.name ? "Selected" : "Select Plan"}
-                    </Button>
+                      Select Plan
+                    </MotionButton>
                   </div>
                 </div>
               </Card>
@@ -594,36 +626,70 @@ function StepperContent({
   const stepper = useStepper();
 
   return (
-    <div>
-      <div className="mb-8">
-        <h2 className="text-2xl font-bold">{stepper.current.title}</h2>
-        <p className="text-muted-foreground">{stepper.current.description}</p>
-      </div>
+    <div className="relative">
+      <AnimatePresence mode="popLayout">
+        <motion.div
+          key={stepper.current.id}
+          initial={{ opacity: 0, x: 50 }}
+          animate={{
+            opacity: 1,
+            x: 0,
+            transition: { duration: 0.5, delay: 0.3 },
+          }}
+          exit={{ opacity: 0, x: -50, position: "absolute" as const }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="text-2xl font-bold">{stepper.current.title}</h2>
+          <p className="text-muted-foreground">{stepper.current.description}</p>
 
-      {stepper.switch({
-        [ONBOARDING_STEPS.STUDIO_SIZE]: () => (
-          <StudioSizeStep data={data} onUpdate={onSizeUpdate} />
-        ),
-        [ONBOARDING_STEPS.SPECIALIZATIONS]: () => (
-          <SpecializationsStep data={data} onUpdate={onSpecializationUpdate} />
-        ),
-        [ONBOARDING_STEPS.REVIEW]: () => (
-          <ReviewStep data={data} onSubmit={onSubmit} />
-        ),
-      })}
+          <div className="mt-8">
+            {stepper.switch({
+              [ONBOARDING_STEPS.STUDIO_SIZE]: () => (
+                <StudioSizeStep data={data} onUpdate={onSizeUpdate} />
+              ),
+              [ONBOARDING_STEPS.SPECIALIZATIONS]: () => (
+                <SpecializationsStep
+                  data={data}
+                  onUpdate={onSpecializationUpdate}
+                />
+              ),
+              [ONBOARDING_STEPS.REVIEW]: () => (
+                <ReviewStep data={data} onSubmit={onSubmit} />
+              ),
+            })}
+          </div>
+        </motion.div>
+      </AnimatePresence>
 
-      <div className="mt-8 flex justify-between">
+      <motion.div
+        className="mt-8 flex justify-between"
+        layoutId="buttons"
+        transition={{ duration: 0.3 }}
+      >
         {!stepper.isFirst && (
-          <Button variant="outline" onClick={stepper.prev}>
-            Back
-          </Button>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Button variant="outline" onClick={stepper.prev}>
+              Back
+            </Button>
+          </motion.div>
         )}
         {!stepper.isLast && (
-          <div className="ml-auto">
+          <motion.div
+            className="ml-auto"
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            transition={{ duration: 0.2 }}
+          >
             <Button onClick={stepper.next}>Next</Button>
-          </div>
+          </motion.div>
         )}
-      </div>
+      </motion.div>
     </div>
   );
 }
