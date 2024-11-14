@@ -28,20 +28,20 @@ import { useEffect, useState } from "react";
 import { match } from "ts-pattern";
 import { z } from "zod";
 import { selectPlan } from "~/app/onboarding/actions";
+import {
+  ONBOARDING_STEPS,
+  studioSizeEnum,
+  OnboardingData,
+  PricingTier,
+  Specialization,
+  OnboardingStep,
+} from "~/app/onboarding/types";
 import { Button } from "~/components/ui/button";
 import { Card } from "~/components/ui/card";
 import { Checkbox } from "~/components/ui/checkbox";
 import { Label } from "~/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "~/components/ui/radio-group";
 import { cn } from "~/lib/utils";
-import {
-  ONBOARDING_STEPS,
-  OnboardingData,
-  OnboardingStep,
-  PricingTier,
-  Specialization,
-  studioSizeEnum,
-} from "./types";
 
 const MotionButton = motion(Button);
 
@@ -462,8 +462,8 @@ function ReviewStep({
   const [selectedPlan, setSelectedPlan] = useState<PricingTier | null>(null);
 
   return (
-    <div className="mt-8">
-      <div className="grid grid-cols-3 gap-6">
+    <div className="@container -mx-8 mt-8">
+      <div className="@3xl:grid-cols-3 @3xl:max-w-none mx-auto grid max-w-prose grid-cols-1 gap-6">
         {pricingTiers.map((tier) => (
           <Card
             key={tier.name}
@@ -491,7 +491,7 @@ function ReviewStep({
 
               <div
                 className={cn(
-                  "mt-4 rounded-md p-3 text-sm",
+                  "mt-4 text-pretty rounded-md p-3 text-sm",
                   tier.recommended
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-muted-foreground",
@@ -561,28 +561,26 @@ export default function OnboardingForm() {
   );
 
   return (
-    <div className="container max-w-3xl py-8">
-      <Scoped initialStep={step}>
-        <StepperContent
-          data={{ studioSize, specializations, selectedPlan }}
-          onSizeUpdate={(studioSize) => setStudioSize(studioSize)}
-          onSpecializationUpdate={(category, subCategory, checked) =>
-            setSpecializations((prev) => ({
-              ...prev,
-              [category]: {
-                ...prev[category],
-                [subCategory]: checked,
-              },
-            }))
-          }
-          onStepUpdate={(step) => setStep(step)}
-          onSubmit={async (selectedPlan) => {
-            setSelectedPlan(selectedPlan.name);
-            await selectPlan(selectedPlan);
-          }}
-        />
-      </Scoped>
-    </div>
+    <Scoped initialStep={step}>
+      <StepperContent
+        data={{ studioSize, specializations, selectedPlan }}
+        onSizeUpdate={(studioSize) => setStudioSize(studioSize)}
+        onSpecializationUpdate={(category, subCategory, checked) =>
+          setSpecializations((prev) => ({
+            ...prev,
+            [category]: {
+              ...prev[category],
+              [subCategory]: checked,
+            },
+          }))
+        }
+        onStepUpdate={(step) => setStep(step)}
+        onSubmit={async (selectedPlan) => {
+          setSelectedPlan(selectedPlan.name);
+          await selectPlan(selectedPlan);
+        }}
+      />
+    </Scoped>
   );
 }
 
@@ -610,7 +608,7 @@ function StepperContent({
   }, [stepper.current.id]);
 
   return (
-    <div className="relative">
+    <div className="relative px-8">
       <AnimatePresence mode="popLayout">
         <motion.div
           key={stepper.current.id}
