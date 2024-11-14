@@ -6,9 +6,9 @@ import {
   useBreakpoint,
 } from "~/hooks/use-breakpoint";
 
-function convertRemToPixels(rem: string, fallback = 0) {
+function convertRemToPixels(rem: string, serverFallback = 0) {
   if (typeof window === "undefined") {
-    return fallback;
+    return serverFallback;
   }
 
   return (
