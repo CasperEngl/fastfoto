@@ -99,7 +99,7 @@ export function Header() {
               </div>
             ) : null}
             <Button asChild>
-              <Link href={session.data?.user ? "/dashboard" : "/login"}>
+              <Link href={session.data?.user ? "/dashboard" : "/onboarding"}>
                 <span>
                   {session.data?.user ? (
                     "Dashboard"
