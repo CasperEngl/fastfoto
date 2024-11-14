@@ -13,6 +13,7 @@ import {
   removeMember,
   updateStudio,
 } from "~/app/dashboard/studio/settings/actions";
+import { useStudioSettings } from "~/app/dashboard/studio/settings/studio-settings-context";
 import { ManagedStudio } from "~/app/dashboard/studio/settings/studios-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -45,15 +46,10 @@ const studioFormSchema = z.object({
   members: z.array(z.string()).default([]),
 });
 
-export function StudioSettingsForm({
-  studio,
-  userManagableStudios,
-}: {
-  studio: ManagedStudio;
-  userManagableStudios: Array<string>;
-}) {
+export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
   const router = useRouter();
   const [isRemoving, startTransition] = useTransition();
+  const { userManagableStudios } = useStudioSettings();
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const form = useForm<z.infer<typeof studioFormSchema>>({
     resolver: zodResolver(studioFormSchema),

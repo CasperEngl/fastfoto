@@ -33,13 +33,7 @@ export type ManagedStudio = InferSelectModel<typeof schema.Studios> & {
   >;
 };
 
-export function StudiosManager({
-  studios,
-  userManagableStudios,
-}: {
-  studios: Array<ManagedStudio>;
-  userManagableStudios: Array<string>;
-}) {
+export function StudiosManager({ studios }: { studios: Array<ManagedStudio> }) {
   const [studioId, setStudioId] = useQueryState(
     "studio",
     parseAsString.withDefault(studios[0]?.id ?? ""),
@@ -134,7 +128,6 @@ export function StudiosManager({
               <StudioSettingsForm
                 key={selectedStudio.id}
                 studio={selectedStudio}
-                userManagableStudios={userManagableStudios}
               />
             ) : (
               <Alert>
@@ -154,7 +147,6 @@ export function StudiosManager({
               <StudioSettingsForm
                 key={selectedStudio.id}
                 studio={selectedStudio}
-                userManagableStudios={userManagableStudios}
               />
             ) : (
               <Alert>

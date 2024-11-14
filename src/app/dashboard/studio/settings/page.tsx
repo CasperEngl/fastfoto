@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import invariant from "invariant";
 import { notFound } from "next/navigation";
+import { StudioSettingsProvider } from "~/app/dashboard/studio/settings/studio-settings-context";
 import { StudiosManager } from "~/app/dashboard/studio/settings/studios-manager";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
@@ -53,10 +54,9 @@ export default async function StudioSettingsPage() {
           Manage your studio memberships and permissions.
         </p>
       </div>
-      <StudiosManager
-        studios={studios}
-        userManagableStudios={userManagableStudios}
-      />
+      <StudioSettingsProvider userManagableStudios={userManagableStudios}>
+        <StudiosManager studios={studios} />
+      </StudioSettingsProvider>
     </div>
   );
 }
