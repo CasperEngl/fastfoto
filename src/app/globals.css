@@ -71,6 +71,11 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+body,
+button {
+  cursor: default;
+}
+
 @layer base {
   * {
     border-color: theme("colors.border");

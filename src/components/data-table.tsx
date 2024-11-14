@@ -83,7 +83,7 @@ export function DataTable<TData>({ table }: { table: ReactTable<TData> }) {
                         .with("center", () => "text-center")
                         .with("end", () => "text-end")
                         .otherwise(() => ""),
-                      isSortable && "cursor-pointer select-none",
+                      isSortable && "select-none",
                     )}
                     onClick={header.column.getToggleSortingHandler()}
                   >
