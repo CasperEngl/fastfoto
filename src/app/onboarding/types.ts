@@ -1,8 +1,11 @@
-export type StudioSize =
-  | "SOLO" // 1 photographer
-  | "SMALL_STUDIO" // 2-5 photographers
-  | "MEDIUM_STUDIO" // 5-20 photographers
-  | "LARGE_STUDIO"; // 20+ photographers
+import { z } from "zod";
+
+export const studioSizeEnum = z.enum([
+  "SOLO", // 1 photographer
+  "SMALL_STUDIO", // 2-5 photographers
+  "MEDIUM_STUDIO", // 5-20 photographers
+  "LARGE_STUDIO", // 20+ photographers
+]);
 
 export type Specialization = {
   portrait?: {
@@ -22,7 +25,7 @@ export type Specialization = {
 };
 
 export interface OnboardingData {
-  studioSize: StudioSize;
+  studioSize: z.infer<typeof studioSizeEnum>;
   specializations: Specialization;
   selectedPlan: string;
 }
@@ -35,3 +38,11 @@ export const ONBOARDING_STEPS = {
 
 export type OnboardingStep =
   (typeof ONBOARDING_STEPS)[keyof typeof ONBOARDING_STEPS];
+
+export type PricingTier = {
+  name: string;
+  price: number;
+  description: string;
+  features: string[];
+  recommended?: boolean;
+};
