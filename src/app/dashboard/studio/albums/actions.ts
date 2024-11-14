@@ -1,15 +1,14 @@
 "use server";
 
-import { and, eq, InferInsertModel } from "drizzle-orm";
+import { eq, InferInsertModel } from "drizzle-orm";
 import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isAlbum } from "~/db/queries/albums.queries";
-import { isStudioMember } from "~/db/queries/studio-member.queries";
-import { isStudio } from "~/db/queries/studio.queries";
+import * as albumsQuery from "~/db/queries/albums.query";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
 
 export async function deleteAlbum(albumId: string) {
@@ -27,10 +26,7 @@ export async function deleteAlbum(albumId: string) {
     }
 
     const studioMember = await tx.query.StudioMembers.findFirst({
-      where: and(
-        isStudio(album.studioId),
-        isStudioMember(album.studioId, session.user.id),
-      ),
+      where: studioMembersQuery.isStudioMember(album.studioId, session.user.id),
       columns: {
         id: true,
       },
@@ -49,7 +45,7 @@ export async function deleteAlbum(albumId: string) {
 export async function updateAlbum(
   albumId: string,
   data: Omit<InferInsertModel<typeof schema.Albums>, "studioId"> & {
-    clients: string[];
+    studioClientIds: string[];
   },
 ) {
   const session = await auth();
@@ -60,7 +56,7 @@ export async function updateAlbum(
   invariant(selectedStudioId, "Unauthorized");
 
   const album = await db.query.Albums.findFirst({
-    where: isAlbum(albumId),
+    where: albumsQuery.isAlbum(albumId),
     with: {
       studio: true,
     },
@@ -76,7 +72,7 @@ export async function updateAlbum(
   }
 
   const studioMember = await db.query.StudioMembers.findFirst({
-    where: isStudioMember(album.studioId, session.user.id),
+    where: studioMembersQuery.isStudioMember(album.studioId, session.user.id),
     columns: {
       id: true,
     },
@@ -94,7 +90,7 @@ export async function updateAlbum(
         name: data.name,
         description: data.description,
       })
-      .where(isAlbum(albumId));
+      .where(albumsQuery.isAlbum(albumId));
 
     // Delete existing user relationships
     await tx
@@ -102,9 +98,9 @@ export async function updateAlbum(
       .where(eq(schema.AlbumClients.albumId, albumId));
 
     // Insert new user relationships
-    if (data.clients.length > 0) {
+    if (data.studioClientIds.length > 0) {
       await tx.insert(schema.AlbumClients).values(
-        data.clients.map((clientId) => ({
+        data.studioClientIds.map((clientId) => ({
           studioClientId: clientId,
           albumId,
         })),

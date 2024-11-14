@@ -5,7 +5,7 @@ import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isUserAdmin } from "~/db/queries/users.queries";
+import * as usersQuery from "~/db/queries/users.query";
 import { Users } from "~/db/schema";
 
 export async function deleteUser(userId: string) {
@@ -15,7 +15,7 @@ export async function deleteUser(userId: string) {
     invariant(session?.user?.id, "Unauthorized");
 
     const adminUser = await tx.query.Users.findFirst({
-      where: isUserAdmin(session.user.id),
+      where: usersQuery.isUserAdmin(session.user.id),
       columns: {
         id: true,
       },

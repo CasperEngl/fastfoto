@@ -5,7 +5,7 @@ import { DeleteAlbumButton } from "~/app/dashboard/studio/albums/[id]/delete-alb
 import { EditAlbumForm } from "~/app/dashboard/studio/albums/[id]/edit-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { studioClients } from "~/db/queries/studio-clients.queries";
+import * as studioClientsQuery from "~/db/queries/studio-clients.query";
 import { Albums } from "~/db/schema";
 import { isPhotographer } from "~/role";
 
@@ -43,12 +43,12 @@ export default async function AlbumPage({
 
   const transformedAlbum = {
     ...album,
-    clients:
+    studioClients:
       album.albumClients.map((albumClient) => albumClient.studioClient) ?? [],
   };
 
-  const clients = await db.query.StudioClients.findMany({
-    where: studioClients(album.studioId),
+  const studioClients = await db.query.StudioClients.findMany({
+    where: studioClientsQuery.studioFilter(album.studioId),
     with: {
       user: true,
     },
@@ -60,7 +60,7 @@ export default async function AlbumPage({
         <h1 className="text-2xl font-bold tracking-tight">Edit Album</h1>
         <DeleteAlbumButton albumId={id} />
       </div>
-      <EditAlbumForm album={transformedAlbum} studioClients={clients} />
+      <EditAlbumForm album={transformedAlbum} studioClients={studioClients} />
     </div>
   );
 }

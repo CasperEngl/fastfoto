@@ -4,7 +4,7 @@ import { and, eq, InferInsertModel } from "drizzle-orm";
 import invariant from "invariant";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isStudioManager } from "~/db/queries/studio-member.queries";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
 
 export async function updateStudio(
@@ -18,7 +18,7 @@ export async function updateStudio(
     invariant(session?.user?.id, "Not authenticated");
 
     const studioManager = await tx.query.StudioMembers.findFirst({
-      where: isStudioManager(data.id, session.user.id),
+      where: studioMembersQuery.isStudioManager(data.id, session.user.id),
       columns: {
         id: true,
       },
@@ -48,7 +48,7 @@ export async function removeMember(studioId: string, memberId: string) {
     invariant(session?.user?.id, "Not authenticated");
 
     const studioManager = await tx.query.StudioMembers.findFirst({
-      where: isStudioManager(studioId, session.user.id),
+      where: studioMembersQuery.isStudioManager(studioId, session.user.id),
       columns: {
         id: true,
         role: true,

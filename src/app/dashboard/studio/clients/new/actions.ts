@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isStudioManager } from "~/db/queries/studio-member.queries";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
 
 export async function createClient(data: { emails: string[] }) {
@@ -20,7 +20,10 @@ export async function createClient(data: { emails: string[] }) {
     invariant(selectedStudioId, "Must select a studio");
 
     const studioAdmin = await tx.query.StudioMembers.findFirst({
-      where: isStudioManager(selectedStudioId, session.user.id),
+      where: studioMembersQuery.isStudioManager(
+        selectedStudioId,
+        session.user.id,
+      ),
       columns: {
         id: true,
       },

@@ -1,11 +1,10 @@
-import { eq } from "drizzle-orm";
 import invariant from "invariant";
 import { notFound } from "next/navigation";
 import { StudioSettingsProvider } from "~/app/dashboard/studio/settings/studio-settings-context";
 import { StudiosManager } from "~/app/dashboard/studio/settings/studios-manager";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as schema from "~/db/schema";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import { hasStudioManagerRole, isPhotographer } from "~/role";
 
 export default async function StudioSettingsPage() {
@@ -18,7 +17,7 @@ export default async function StudioSettingsPage() {
   invariant(session?.user?.id, "User is required");
 
   const userStudios = await db.query.StudioMembers.findMany({
-    where: eq(schema.StudioMembers.userId, session.user.id),
+    where: studioMembersQuery.userFilter(session.user.id),
     with: {
       studio: {
         with: {

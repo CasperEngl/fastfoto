@@ -4,9 +4,9 @@ import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isUserAdmin } from "~/db/queries/users.queries";
 import { Users } from "~/db/schema";
 import { createUserSchema, type CreateUserFormValues } from "./schema";
+import * as usersQuery from "~/db/queries/users.query";
 
 export async function createUser(data: CreateUserFormValues) {
   const session = await auth();
@@ -15,7 +15,7 @@ export async function createUser(data: CreateUserFormValues) {
     invariant(session?.user?.id, "Unauthorized");
 
     const adminUser = await tx.query.Users.findFirst({
-      where: isUserAdmin(session.user.id),
+      where: usersQuery.isUserAdmin(session.user.id),
       columns: {
         id: true,
       },

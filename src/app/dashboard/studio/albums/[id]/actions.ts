@@ -1,15 +1,14 @@
 "use server";
 
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import invariant from "invariant";
 import { cookies } from "next/headers";
 import { utapi } from "~/app/api/uploadthing/core";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isAlbum } from "~/db/queries/albums.queries";
-import { isStudioMember } from "~/db/queries/studio-member.queries";
-import { isStudio } from "~/db/queries/studio.queries";
+import * as albumsQuery from "~/db/queries/albums.query";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import { Photos } from "~/db/schema";
 
 export async function deletePhoto(albumId: string, key: string) {
@@ -21,7 +20,7 @@ export async function deletePhoto(albumId: string, key: string) {
     invariant(session?.user?.id, "Unauthorized");
 
     const album = await tx.query.Albums.findFirst({
-      where: isAlbum(albumId),
+      where: albumsQuery.isAlbum(albumId),
       with: {
         studio: true,
       },
@@ -36,10 +35,7 @@ export async function deletePhoto(albumId: string, key: string) {
     }
 
     const studioMember = await tx.query.StudioMembers.findFirst({
-      where: and(
-        isStudio(album.studioId),
-        isStudioMember(album.studioId, session.user.id),
-      ),
+      where: studioMembersQuery.isStudioMember(album.studioId, session.user.id),
       columns: {
         id: true,
       },

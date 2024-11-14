@@ -6,7 +6,7 @@ import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { Alert } from "~/components/ui/alert";
 import { db } from "~/db/client";
-import { studioClients } from "~/db/queries/studio-clients.queries";
+import * as studioClientQueries from "~/db/queries/studio-clients.query";
 import { isPhotographer } from "~/role";
 
 export default async function CreateAlbumPage() {
@@ -20,14 +20,12 @@ export default async function CreateAlbumPage() {
 
   invariant(selectedStudioId, "Studio is required");
 
-  const clients = await db.query.StudioClients.findMany({
-    where: studioClients(selectedStudioId),
+  const studioClients = await db.query.StudioClients.findMany({
+    where: studioClientQueries.studioFilter(selectedStudioId),
     with: {
       user: true,
     },
   });
-
-  const transformedClients = clients.map((client) => client.user);
 
   return (
     <div className="container mx-auto py-10">
@@ -36,7 +34,7 @@ export default async function CreateAlbumPage() {
       </div>
       {selectedStudioId ? (
         <CreateAlbumForm
-          clients={transformedClients}
+          studioClients={studioClients}
           selectedStudioId={selectedStudioId}
         />
       ) : (

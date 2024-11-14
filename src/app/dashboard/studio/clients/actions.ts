@@ -8,11 +8,11 @@ import "server-only";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { isStudioClient } from "~/db/queries/studio-clients.queries";
-import { isStudioManager } from "~/db/queries/studio-member.queries";
+import * as studioClientsQuery from "~/db/queries/studio-clients.query";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
 
-export async function deleteClient(clientId: string) {
+export async function deleteClient(userId: string) {
   const session = await auth();
   const cookieStore = await cookies();
   const selectedStudioId = cookieStore.get(STUDIO_COOKIE_NAME)?.value;
@@ -22,7 +22,10 @@ export async function deleteClient(clientId: string) {
     invariant(selectedStudioId, "Must select a studio");
 
     const studioAdmin = await tx.query.StudioMembers.findFirst({
-      where: isStudioManager(selectedStudioId, session.user.id),
+      where: studioMembersQuery.isStudioManager(
+        selectedStudioId,
+        session.user.id,
+      ),
       columns: {
         id: true,
       },
@@ -33,7 +36,7 @@ export async function deleteClient(clientId: string) {
     }
 
     const client = await tx.query.StudioClients.findFirst({
-      where: isStudioClient(selectedStudioId, clientId),
+      where: studioClientsQuery.isStudioClient(selectedStudioId, userId),
     });
 
     if (!client) {
@@ -46,7 +49,7 @@ export async function deleteClient(clientId: string) {
 
     await tx
       .delete(schema.StudioClients)
-      .where(eq(schema.StudioClients.userId, clientId));
+      .where(eq(schema.StudioClients.userId, userId));
 
     revalidatePath("/dashboard/studio/clients");
   });

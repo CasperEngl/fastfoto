@@ -7,7 +7,7 @@ import Passkey from "next-auth/providers/passkey";
 import Resend from "next-auth/providers/resend";
 import { revalidatePath } from "next/cache";
 import { db } from "~/db/client";
-import { hasStudioRole, userStudios } from "~/db/queries/studio-member.queries";
+import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
@@ -53,7 +53,10 @@ export const {
           if (isPhotographer(user)) {
             const existingPersonalStudio =
               await db.query.StudioMembers.findFirst({
-                where: and(userStudios(user.id), hasStudioRole("owner")),
+                where: and(
+                  studioMembersQuery.userFilter(user.id),
+                  studioMembersQuery.hasStudioRole("owner"),
+                ),
               });
 
             if (!existingPersonalStudio) {
