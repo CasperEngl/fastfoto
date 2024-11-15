@@ -1,0 +1,13 @@
+diff --git a/dist/_tsup-dts-rollup.d.ts b/dist/_tsup-dts-rollup.d.ts
+index ea24c5051e47e8863099188aa319785b3c1da1d6..aac248d88bdbc01c4ce439df14a391489b1dbb90 100644
+--- a/dist/_tsup-dts-rollup.d.ts
++++ b/dist/_tsup-dts-rollup.d.ts
+@@ -374,7 +374,7 @@ export { parseAsString as parseAsString_alias_2 }
+  *
+  * @param validValues The values you want to accept
+  */
+-declare function parseAsStringEnum<Enum extends string>(validValues: Enum[]): ParserBuilder<Enum>;
++declare function parseAsStringEnum<Enum extends string>(validValues: readonly Enum[]): ParserBuilder<Enum>;
+ export { parseAsStringEnum }
+ export { parseAsStringEnum as parseAsStringEnum_alias_1 }
+ export { parseAsStringEnum as parseAsStringEnum_alias_2 }
