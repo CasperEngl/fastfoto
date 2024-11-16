@@ -248,9 +248,9 @@ export function EditAlbumForm({
                 ⚠️ Unsaved changes detected. Please save your changes by
                 clicking "Save Changes".
               </span>
-            ) : (
+            ) : !isUpdating ? (
               <span>✓ All changes saved</span>
-            )}
+            ) : null}
           </p>
         </div>
 
