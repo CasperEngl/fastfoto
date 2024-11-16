@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { match } from "ts-pattern";
 import * as z from "zod";
 import {
+  addMember,
   removeMember,
   updateStudio,
 } from "~/app/dashboard/studio/settings/actions";
@@ -46,6 +47,10 @@ const studioFormSchema = z.object({
   members: z.array(z.string()).default([]),
 });
 
+const addMemberSchema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+});
+
 export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
   const router = useRouter();
   const [isRemoving, startTransition] = useTransition();
@@ -56,6 +61,12 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
     defaultValues: {
       name: studio.name,
       members: studio.users.map((member) => member.id),
+    },
+  });
+  const addMemberForm = useForm<z.infer<typeof addMemberSchema>>({
+    resolver: zodResolver(addMemberSchema),
+    defaultValues: {
+      email: "",
     },
   });
   const canManageStudio = userManagableStudios.includes(studio.id);
@@ -214,6 +225,61 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
           </Button>
         </form>
       </Form>
+
+      {canManageStudio ? (
+        <div>
+          <h3 className="text-lg font-medium">Add Member</h3>
+          <p className="mt-2 text-sm text-muted-foreground">
+            Add a member to this studio.
+          </p>
+
+          <Form {...addMemberForm}>
+            <form
+              onSubmit={addMemberForm.handleSubmit(async (values) => {
+                try {
+                  await addMember(studio.id, values.email);
+                  addMemberForm.reset();
+                  router.refresh();
+                  toast.success("Member added successfully");
+                } catch (error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : "Failed to add member",
+                  );
+                }
+              })}
+              className="mt-4 flex items-end gap-2"
+            >
+              <FormField
+                control={addMemberForm.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="flex-1">
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Enter member's email"
+                        type="email"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button
+                type="submit"
+                disabled={addMemberForm.formState.isSubmitting}
+              >
+                {addMemberForm.formState.isSubmitting
+                  ? "Adding..."
+                  : "Add Member"}
+              </Button>
+            </form>
+          </Form>
+        </div>
+      ) : null}
     </fieldset>
   );
 }

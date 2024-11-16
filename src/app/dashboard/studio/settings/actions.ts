@@ -6,6 +6,7 @@ import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
+import { Users } from "~/db/schema";
 
 export async function updateStudio(
   data: Omit<InferInsertModel<typeof schema.Studios>, "createdById"> & {
@@ -88,5 +89,67 @@ export async function removeMember(studioId: string, memberId: string) {
           eq(schema.StudioMembers.userId, memberId),
         ),
       );
+  });
+}
+
+export async function addMember(studioId: string, email: string) {
+  const session = await auth();
+
+  return await db.transaction(async (tx) => {
+    invariant(session?.user?.id, "Not authenticated");
+
+    // Check if user has permission to add members
+    const studioManager = await tx.query.StudioMembers.findFirst({
+      where: studioMembersQuery.isStudioManager(studioId, session.user.id),
+      columns: {
+        id: true,
+      },
+    });
+
+    if (!studioManager) {
+      throw new Error("Not authorized to add studio members");
+    }
+
+    // Find or create user
+    let user = await tx.query.Users.findFirst({
+      where: (users, { eq }) => eq(users.email, email.toLowerCase()),
+    });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      const [newUser] = await tx
+        .insert(Users)
+        .values({
+          name: email.split("@")[0],
+          email: email.toLowerCase(),
+          emailVerified: null,
+        })
+        .returning();
+      user = newUser;
+    }
+
+    invariant(user, "User not found");
+
+    // Check if user is already a member
+    const existingMember = await tx.query.StudioMembers.findFirst({
+      where: (members, { and, eq }) =>
+        and(eq(members.studioId, studioId), eq(members.userId, user.id)),
+    });
+
+    if (existingMember) {
+      throw new Error("User is already a member of this studio");
+    }
+
+    // Add user as a member
+    const [newMember] = await tx
+      .insert(schema.StudioMembers)
+      .values({
+        studioId,
+        userId: user.id,
+        role: "member",
+      })
+      .returning();
+
+    return newMember;
   });
 }
