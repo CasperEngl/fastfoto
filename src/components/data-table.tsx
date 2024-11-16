@@ -98,47 +98,48 @@ export function DataTable<TData>({ table }: { table: ReactTable<TData> }) {
           ))}
         </TableHeader>
         <TableBody className="sm:table-row-group">
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row) => {
-              return (
-                <TableRow className="flex flex-col border-b p-4 last:border-b-0 hover:bg-inherit sm:table-row sm:p-0">
-                  {row.getVisibleCells().map((cell) => {
-                    const header = cell.column.columnDef.header;
-                    const align = !isMobile
-                      ? cell.column.columnDef.meta?.align
-                      : null;
+          {table.getRowModel().rows?.length > 0 ? (
+            table.getRowModel().rows.map((row) => (
+              <TableRow
+                key={row.id}
+                className="flex flex-col border-b p-4 last:border-b-0 hover:bg-inherit sm:table-row sm:p-0"
+              >
+                {row.getVisibleCells().map((cell) => {
+                  const header = cell.column.columnDef.header;
+                  const align = !isMobile
+                    ? cell.column.columnDef.meta?.align
+                    : null;
 
-                    return (
-                      <TableCell
-                        key={cell.id}
-                        className="border-b-0 py-2 sm:table-cell sm:py-4"
+                  return (
+                    <TableCell
+                      key={cell.id}
+                      className="border-b-0 py-2 sm:table-cell sm:py-4"
+                    >
+                      <div
+                        className={cn(
+                          "flex flex-col gap-1",
+                          match(align)
+                            .with("start", () => "items-start")
+                            .with("center", () => "items-center")
+                            .with("end", () => "items-end")
+                            .otherwise(() => ""),
+                        )}
                       >
-                        <div
-                          className={cn(
-                            "flex flex-col gap-1",
-                            match(align)
-                              .with("start", () => "items-start")
-                              .with("center", () => "items-center")
-                              .with("end", () => "items-end")
-                              .otherwise(() => ""),
+                        <span className="font-medium text-muted-foreground sm:hidden">
+                          {typeof header === "string" ? header : <header />}
+                        </span>
+                        <span className="break-all sm:break-normal">
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext(),
                           )}
-                        >
-                          <span className="font-medium text-muted-foreground sm:hidden">
-                            {typeof header === "string" ? header : <header />}
-                          </span>
-                          <span className="break-all sm:break-normal">
-                            {flexRender(
-                              cell.column.columnDef.cell,
-                              cell.getContext(),
-                            )}
-                          </span>
-                        </div>
-                      </TableCell>
-                    );
-                  })}
-                </TableRow>
-              );
-            })
+                        </span>
+                      </div>
+                    </TableCell>
+                  );
+                })}
+              </TableRow>
+            ))
           ) : (
             <TableRow>
               <TableCell
