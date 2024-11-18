@@ -181,6 +181,16 @@ export async function addMember(studioId: string, email: string) {
       throw new Error("Not authorized to add studio members");
     }
 
+    // Check if existing user is a photographer
+    const existingUser = await tx.query.Users.findFirst({
+      where: eq(schema.Users.email, email.toLowerCase()),
+    });
+
+    if (existingUser && existingUser.userType !== "photographer") {
+      debug("Non-photographer user attempted to be added as member");
+      throw new Error("Only photographers can be added as studio members");
+    }
+
     // Check for existing pending invitation
     const existingInvitation = await tx.query.UserInvitations.findFirst({
       where: (invites, { and, eq }) =>
@@ -200,11 +210,6 @@ export async function addMember(studioId: string, email: string) {
       debug("Duplicate invitation attempt");
       throw new Error("An invitation is already pending for this email");
     }
-
-    // Check if user is already a member (if they exist)
-    const existingUser = await tx.query.Users.findFirst({
-      where: (users, { eq }) => eq(users.email, email.toLowerCase()),
-    });
 
     if (existingUser) {
       const existingMember = await tx.query.StudioMembers.findFirst({
@@ -231,6 +236,10 @@ export async function addMember(studioId: string, email: string) {
         invitedById: session.user.id,
         expiresAt: dayjs().add(7, "day").toDate(),
         status: "pending",
+        // Add metadata to ensure new users are created as photographers
+        metadata: {
+          userType: "photographer",
+        },
       })
       .returning();
 
@@ -238,7 +247,7 @@ export async function addMember(studioId: string, email: string) {
 
     // Create invitation URL - direct to register or accept based on user existence
     const baseUrl = existingUser
-      ? `${env.APP_URL}/api/accept-invitation`
+      ? `${env.APP_URL}/api/accept-invitation/studio-member`
       : `${env.APP_URL}/auth/register`;
     const inviteUrl = `${baseUrl}?invitation=${invitation.id}`;
 
