@@ -2,6 +2,7 @@
 
 import dayjs from "dayjs";
 import { inArray } from "drizzle-orm";
+import { StudioClientInvitationEmail } from "emails/studio-client-invitation-email";
 import invariant from "invariant";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
@@ -12,7 +13,6 @@ import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
 import { resend } from "~/email";
 import { env } from "~/env";
-import { StudioClientInvitationEmail } from "~/emails/studio-client-invitation-email";
 
 export async function createClient(data: { emails: string[] }) {
   const session = await auth();
