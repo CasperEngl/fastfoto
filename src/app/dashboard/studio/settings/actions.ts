@@ -238,7 +238,7 @@ export async function addMember(studioId: string, email: string) {
 
     // Create invitation URL - direct to register or accept based on user existence
     const baseUrl = existingUser
-      ? `${env.APP_URL}/dashboard/invitations/accept`
+      ? `${env.APP_URL}/api/accept-invitation`
       : `${env.APP_URL}/auth/register`;
     const inviteUrl = `${baseUrl}?invitation=${invitation.id}`;
 

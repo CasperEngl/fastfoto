@@ -20,7 +20,7 @@ export async function GET(request: NextRequest) {
   }
 
   if (!invitationId) {
-    return redirect("/dashboard?error=Invalid invitation");
+    return redirect(`/dashboard?error=Invalid+invitation`);
   }
 
   await db.transaction(async (tx) => {
@@ -72,5 +72,5 @@ export async function GET(request: NextRequest) {
       .where(eq(schema.UserInvitations.id, invitationId));
   });
 
-  redirect("/dashboard/studio");
+  return redirect("/dashboard/studio");
 }
