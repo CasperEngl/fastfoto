@@ -81,5 +81,6 @@ export async function register(data: z.infer<typeof RegisterFormSchema>) {
 
   return await signIn("resend", {
     email: data.email,
+    redirectTo: "/dashboard",
   });
 }
