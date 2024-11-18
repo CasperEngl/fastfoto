@@ -49,10 +49,10 @@ services:
       options:
         max-size: "10m"
 
-  scheduler:
+  cron:
     build:
       context: .
-      dockerfile: Dockerfile.scheduler
+      dockerfile: Dockerfile.cron
     env_file:
       - .env.local
     depends_on:
