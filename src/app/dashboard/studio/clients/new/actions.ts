@@ -11,8 +11,8 @@ import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
-import { resend } from "~/email";
 import { env } from "~/env";
+import { resend, resendFrom } from "~/resend";
 
 export async function createClient(data: { emails: string[] }) {
   const session = await auth();
@@ -92,7 +92,7 @@ export async function createClient(data: { emails: string[] }) {
           const inviteUrl = `${env.APP_URL}/auth/register?invitation=${invitation.id}`;
 
           await resend.emails.send({
-            from: "Fast Foto <noreply@casperengelmann.com>",
+            from: resendFrom,
             to: invitation.email,
             subject: `Join ${studioMember.studio.name} on Fast Foto`,
             react: StudioClientInvitationEmail({

@@ -9,8 +9,8 @@ import { revalidatePath } from "next/cache";
 import { db } from "~/db/client";
 import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
-import { resend } from "~/email";
 import { env } from "~/env";
+import { resend, resendFrom } from "~/resend";
 import { isPhotographer } from "~/role";
 
 declare module "next-auth" {
@@ -93,11 +93,11 @@ export const {
     Passkey,
     Resend({
       apiKey: env.RESEND_KEY,
-      from: '"Fast Foto" <noreply@casperengelmann.com>',
+      from: resendFrom,
       async sendVerificationRequest(params) {
         try {
           await resend.emails.send({
-            from: "Fast Foto <noreply@casperengelmann.com>",
+            from: resendFrom,
             to: params.identifier,
             subject: "Sign in to Fast Foto",
             react: (

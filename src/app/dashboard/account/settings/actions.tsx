@@ -10,8 +10,8 @@ import { db } from "~/db/client";
 import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as usersQuery from "~/db/queries/users.query";
 import * as schema from "~/db/schema";
-import { resend } from "~/email";
 import { env } from "~/env";
+import { resend, resendFrom } from "~/resend";
 
 export async function updateProfile(data: { name: string }) {
   const session = await auth();
@@ -47,7 +47,7 @@ export async function requestEmailChange(newEmail: string) {
     });
 
     await resend.emails.send({
-      from: "Fast Foto <noreply@casperengelmann.com>",
+      from: resendFrom,
       to: newEmail,
       subject: "Verify your email change",
       react: <VerifyEmailChangeEmail verificationLink={verificationLink} />,

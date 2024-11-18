@@ -8,8 +8,8 @@ import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import * as schema from "~/db/schema";
-import { resend } from "~/email";
 import { env } from "~/env";
+import { resend, resendFrom } from "~/resend";
 
 // Add debug logging
 const debug = (...args: any[]) => {
@@ -255,7 +255,7 @@ export async function addMember(studioId: string, email: string) {
 
     // Send invitation email
     await resend.emails.send({
-      from: "Fast Foto <noreply@fastfoto.com>",
+      from: resendFrom,
       to: email.toLowerCase(),
       subject: `${studioManager.user.name} invited you to join ${studio.name} on Fast Foto`,
       react: StudioMemberInvitationEmail({
