@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { createUser } from "~/app/dashboard/admin/users/new/actions";
+import {
+  CreateUserFormValues,
+  createUserSchema,
+} from "~/app/dashboard/admin/users/new/schema";
 import { Button } from "~/components/ui/button";
 import {
   Form,
@@ -16,7 +20,6 @@ import {
   FormMessage,
 } from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { CreateUserFormValues, createUserSchema } from "./schema";
 
 export function CreateUserForm() {
   const router = useRouter();

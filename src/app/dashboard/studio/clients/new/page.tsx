@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
+import { CreateClientForm } from "~/app/dashboard/studio/clients/new/create-client-form";
 import { auth } from "~/auth";
 import { isPhotographer } from "~/role";
-import { CreateClientForm } from "./create-client-form";
 
 export default async function CreateClientPage() {
   const session = await auth();

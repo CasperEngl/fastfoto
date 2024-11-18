@@ -6,6 +6,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SearchParams } from "nuqs/server";
 import { ITEMS_PER_PAGE } from "~/app/dashboard/studio/albums/config";
+import { ClientsDataTable } from "~/app/dashboard/studio/clients/clients-data-table";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { dataTableCache } from "~/components/data-table";
@@ -13,7 +14,6 @@ import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
 import * as schema from "~/db/schema";
 import { isPhotographer } from "~/role";
-import { ClientsDataTable } from "./clients-data-table";
 
 export default async function ClientsPage({
   searchParams,

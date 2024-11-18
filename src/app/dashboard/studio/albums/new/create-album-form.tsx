@@ -11,6 +11,7 @@ import { useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import * as z from "zod";
+import { createAlbum } from "~/app/dashboard/studio/albums/new/actions";
 import { SelectedClient } from "~/app/dashboard/studio/albums/selected-client";
 import { Button } from "~/components/ui/button";
 import { Combobox } from "~/components/ui/combobox";
@@ -26,7 +27,6 @@ import { Input } from "~/components/ui/input";
 import { Textarea } from "~/components/ui/textarea";
 import * as schema from "~/db/schema";
 import { isAdmin, isPhotographer } from "~/role";
-import { createAlbum } from "./actions";
 
 const formSchema = z.object({
   name: z.string().min(1, "Name is required"),

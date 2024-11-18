@@ -2,11 +2,14 @@
 
 import invariant from "invariant";
 import { revalidatePath } from "next/cache";
+import {
+  CreateUserFormValues,
+  createUserSchema,
+} from "~/app/dashboard/admin/users/new/schema";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import { Users } from "~/db/schema";
-import { createUserSchema, type CreateUserFormValues } from "./schema";
 import * as usersFilters from "~/db/filters/users";
+import { Users } from "~/db/schema";
 
 export async function createUser(data: CreateUserFormValues) {
   const session = await auth();

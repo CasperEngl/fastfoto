@@ -5,7 +5,7 @@ import invariant from "invariant";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as usersFilters from "~/db/filters/users";
-import * as schema from "./schema";
+import * as schema from "~/db/schema";
 
 type AuditAction = (
   | "CREATE"

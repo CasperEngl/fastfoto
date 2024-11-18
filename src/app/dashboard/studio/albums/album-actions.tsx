@@ -5,6 +5,7 @@ import { MoreHorizontal } from "lucide-react";
 import Link from "next/link";
 import { useActionState } from "react";
 import { toast } from "sonner";
+import { deleteAlbum } from "~/app/dashboard/studio/albums/actions";
 import { Button } from "~/components/ui/button";
 import {
   DropdownMenu,
@@ -15,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "~/components/ui/dropdown-menu";
 import { Albums } from "~/db/schema";
-import { deleteAlbum } from "./actions";
 
 export function AlbumActions({
   album,
