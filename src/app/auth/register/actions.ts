@@ -79,6 +79,12 @@ export async function register(data: z.infer<typeof RegisterFormSchema>) {
     }
   });
 
+  const theUser = await db.query.Users.findFirst({
+    where: eq(schema.Users.email, data.email),
+  });
+
+  console.log("theUser", theUser);
+
   return await signIn("resend", {
     email: data.email,
     redirectTo: "/dashboard",
