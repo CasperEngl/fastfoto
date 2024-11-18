@@ -4,7 +4,11 @@ import * as schema from "~/db/schema";
 
 const now = new Date();
 
-await db
+const log = (...args: any[]) => {
+  console.log(`[Expire Invitations] ${new Date().toISOString()}`, ...args);
+};
+
+const invitations = await db
   .update(schema.UserInvitations)
   .set({
     status: "expired",
@@ -14,6 +18,15 @@ await db
       eq(schema.UserInvitations.status, "pending"),
       lt(schema.UserInvitations.expiresAt, now),
     ),
-  );
+  )
+  .returning();
+
+log(`Expiring ${invitations.length} invitations`);
+
+for (const invitation of invitations) {
+  log(`Expiring invitation ${invitation.id} for ${invitation.email}`);
+}
+
+log("Job completed successfully");
 
 process.exit(0);
