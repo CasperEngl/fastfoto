@@ -54,6 +54,13 @@ export async function register(data: z.infer<typeof RegisterFormSchema>) {
         studioId: invitation.studioId,
         userId: user.id,
       });
+
+      await tx
+        .update(schema.Users)
+        .set({
+          userType: "client",
+        })
+        .where(eq(schema.Users.id, user.id));
     }
 
     if (invitation.type === "studio_member") {
@@ -62,6 +69,13 @@ export async function register(data: z.infer<typeof RegisterFormSchema>) {
         userId: user.id,
         role: invitation.role ?? "member",
       });
+
+      await tx
+        .update(schema.Users)
+        .set({
+          userType: "photographer",
+        })
+        .where(eq(schema.Users.id, user.id));
     }
   });
 
