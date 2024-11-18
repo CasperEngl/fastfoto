@@ -56,11 +56,3 @@ export async function updateInvitationStatus(
     .set({ status })
     .where(eq(schema.UserInvitations.id, invitationId));
 }
-
-export function validateSession(
-  session: Session | null,
-): asserts session is Session {
-  if (!session?.user?.id || !session?.user?.email) {
-    throw new Error("Unauthorized");
-  }
-}
