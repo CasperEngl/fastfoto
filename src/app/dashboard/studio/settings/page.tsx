@@ -36,14 +36,21 @@ export default async function StudioSettingsPage() {
     },
   });
 
-  const studios = userStudios.map((studio) => ({
-    ...studio.studio,
-    users: studio.studio.studioMembers.map((member) => ({
-      ...member.user,
-      role: member.role,
-    })),
-    pendingInvitations: studio.studio.userInvitations,
-  }));
+  const studios = userStudios
+    .map((studio) => ({
+      ...studio.studio,
+      users: studio.studio.studioMembers.map((member) => ({
+        ...member.user,
+        role: member.role,
+      })),
+      pendingInvitations: studio.studio.userInvitations,
+      userRole: studio.role,
+    }))
+    .sort((a, b) => {
+      if (a.userRole === "owner" && b.userRole !== "owner") return -1;
+      if (b.userRole === "owner" && a.userRole !== "owner") return 1;
+      return a.name.localeCompare(b.name);
+    });
 
   const userManagableStudios = studios
     .filter((studio) => {
