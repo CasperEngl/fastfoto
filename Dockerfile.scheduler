@@ -7,7 +7,6 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-# Copy only necessary files
 COPY package.json bun.lockb ./
 COPY src/db ./src/db
 COPY src/env.ts ./src/env.ts
@@ -15,16 +14,12 @@ COPY scripts/cron ./scripts/cron
 
 RUN bun install
 
-# Add crontab file
+RUN apt-get update && apt-get -y install cron
+
 COPY crontab /etc/cron.d/app-cron
 RUN chmod 0644 /etc/cron.d/app-cron
 RUN crontab /etc/cron.d/app-cron
 
-# Install cron
-RUN apt-get update && apt-get -y install cron
-
-# Create log file
 RUN touch /var/log/cron.log
 
-# Start cron and tail the logs
 CMD cron && tail -f /var/log/cron.log 
