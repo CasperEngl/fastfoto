@@ -11,24 +11,15 @@ import * as schema from "~/db/schema";
 import { env } from "~/env";
 import { resend, resendFrom } from "~/resend";
 
-// Add debug logging
-const debug = (...args: any[]) => {
-  if (process.env.NODE_ENV === "development") {
-    console.log("[studio-settings]", ...args);
-  }
-};
-
 export async function updateStudio(
   data: Omit<InferInsertModel<typeof schema.Studios>, "createdById"> & {
     id: string;
   },
 ) {
-  debug("updateStudio called", { studioId: data.id, name: data.name });
   const session = await auth();
 
   return await db.transaction(async (tx) => {
     invariant(session?.user?.id, "Not authenticated");
-    debug("Starting studio update transaction", { userId: session.user.id });
 
     const studioManager = await tx.query.StudioMembers.findFirst({
       where: studioMembersQuery.isStudioManager(data.id, session.user.id),
@@ -37,17 +28,10 @@ export async function updateStudio(
       },
     });
 
-    debug("Studio manager check", {
-      hasPermission: !!studioManager,
-      managerId: studioManager?.id,
-    });
-
     if (!studioManager) {
-      debug("Authorization failed for studio update");
       throw new Error("Not authorized to update studio");
     }
 
-    // Update the studio
     const [updatedStudio] = await tx
       .update(schema.Studios)
       .set({
@@ -56,22 +40,15 @@ export async function updateStudio(
       .where(eq(schema.Studios.id, data.id))
       .returning();
 
-    debug("Studio updated successfully", {
-      studioId: updatedStudio?.id,
-      newName: updatedStudio?.name,
-    });
-
     return updatedStudio;
   });
 }
 
 export async function removeMember(studioId: string, memberId: string) {
-  debug("removeMember called", { studioId, memberId });
   const session = await auth();
 
   return await db.transaction(async (tx) => {
     invariant(session?.user?.id, "Not authenticated");
-    debug("Starting remove member transaction", { userId: session.user.id });
 
     const studioManager = await tx.query.StudioMembers.findFirst({
       where: studioMembersQuery.isStudioManager(studioId, session.user.id),
@@ -81,45 +58,27 @@ export async function removeMember(studioId: string, memberId: string) {
       },
     });
 
-    debug("Studio manager check", {
-      hasPermission: !!studioManager,
-      managerRole: studioManager?.role,
-    });
-
     if (!studioManager) {
-      debug("Authorization failed for member removal");
       throw new Error("Not authorized to remove studio members");
     }
 
-    // Get the member to be removed
     const memberToRemove = await tx.query.StudioMembers.findFirst({
       where: (members, { and, eq }) =>
         and(eq(members.studioId, studioId), eq(members.userId, memberId)),
     });
 
-    debug("Member to remove", {
-      found: !!memberToRemove,
-      memberRole: memberToRemove?.role,
-    });
-
     if (!memberToRemove) {
-      debug("Member not found for removal");
       throw new Error("Member not found");
     }
 
-    // Prevent removing the studio owner
     if (memberToRemove.role === "owner") {
-      debug("Attempted to remove studio owner");
       throw new Error("Cannot remove the studio owner");
     }
 
-    // If user is admin, they can't remove other admins
     if (studioManager.role === "admin" && memberToRemove.role === "admin") {
-      debug("Admin attempted to remove another admin");
       throw new Error("Admins cannot remove other admins");
     }
 
-    // Remove the member
     await tx
       .delete(schema.StudioMembers)
       .where(
@@ -128,20 +87,15 @@ export async function removeMember(studioId: string, memberId: string) {
           eq(schema.StudioMembers.userId, memberId),
         ),
       );
-
-    debug("Member removed successfully", { studioId, memberId });
   });
 }
 
 export async function addMember(studioId: string, email: string) {
-  debug("addMember called", { studioId, email });
   const session = await auth();
 
   return await db.transaction(async (tx) => {
     invariant(session?.user?.id, "Not authenticated");
-    debug("Starting add member transaction", { userId: session.user.id });
 
-    // Get studio details for the email
     const studio = await tx.query.Studios.findFirst({
       where: (studios, { eq }) => eq(studios.id, studioId),
       columns: {
@@ -150,17 +104,10 @@ export async function addMember(studioId: string, email: string) {
       },
     });
 
-    debug("Studio check", {
-      found: !!studio,
-      studioName: studio?.name,
-    });
-
     if (!studio) {
-      debug("Studio not found");
       throw new Error("Studio not found");
     }
 
-    // Check if user has permission to add members
     const studioManager = await tx.query.StudioMembers.findFirst({
       where: studioMembersQuery.isStudioManager(studioId, session.user.id),
       columns: {
@@ -171,27 +118,18 @@ export async function addMember(studioId: string, email: string) {
       },
     });
 
-    debug("Studio manager check", {
-      hasPermission: !!studioManager,
-      managerName: studioManager?.user.name,
-    });
-
     if (!studioManager) {
-      debug("Authorization failed for adding member");
       throw new Error("Not authorized to add studio members");
     }
 
-    // Check if existing user is a photographer
     const existingUser = await tx.query.Users.findFirst({
       where: eq(schema.Users.email, email.toLowerCase()),
     });
 
     if (existingUser && existingUser.userType !== "photographer") {
-      debug("Non-photographer user attempted to be added as member");
       throw new Error("Only photographers can be added as studio members");
     }
 
-    // Check for existing pending invitation
     const existingInvitation = await tx.query.UserInvitations.findFirst({
       where: (invites, { and, eq }) =>
         and(
@@ -202,12 +140,7 @@ export async function addMember(studioId: string, email: string) {
         ),
     });
 
-    debug("Existing invitation check", {
-      hasPendingInvite: !!existingInvitation,
-    });
-
     if (existingInvitation) {
-      debug("Duplicate invitation attempt");
       throw new Error("An invitation is already pending for this email");
     }
 
@@ -225,7 +158,6 @@ export async function addMember(studioId: string, email: string) {
       }
     }
 
-    // Create invitation for all users (existing and non-existing)
     const [invitation] = await tx
       .insert(schema.UserInvitations)
       .values({
@@ -236,7 +168,6 @@ export async function addMember(studioId: string, email: string) {
         invitedById: session.user.id,
         expiresAt: dayjs().add(7, "day").toDate(),
         status: "pending",
-        // Add metadata to ensure new users are created as photographers
         metadata: {
           userType: "photographer",
         },
@@ -245,24 +176,11 @@ export async function addMember(studioId: string, email: string) {
 
     invariant(invitation, "Invitation not found");
 
-    // Create invitation URL - direct to register or accept based on user existence
     const baseUrl = existingUser
       ? `${env.APP_URL}/api/accept-invitation/studio-member`
       : `${env.APP_URL}/auth/register`;
     const inviteUrl = `${baseUrl}?invitation=${invitation.id}`;
 
-    debug("Invite URL", {
-      baseUrl,
-      inviteUrl,
-    });
-
-    debug("Sending invitation email", {
-      to: email.toLowerCase(),
-      studioName: studio.name,
-      inviterName: studioManager.user.name,
-    });
-
-    // Send invitation email
     await resend.emails.send({
       from: resendFrom,
       to: email.toLowerCase(),
@@ -275,25 +193,16 @@ export async function addMember(studioId: string, email: string) {
       }),
     });
 
-    debug("Invitation created and email sent successfully", {
-      invitationId: invitation.id,
-    });
-
     return invitation;
   });
 }
 
 export async function cancelInvitation(invitationId: string) {
-  debug("cancelInvitation called", { invitationId });
   const session = await auth();
 
   return await db.transaction(async (tx) => {
     invariant(session?.user?.id, "Not authenticated");
-    debug("Starting cancel invitation transaction", {
-      userId: session.user.id,
-    });
 
-    // Get the invitation with studio details
     const invitation = await tx.query.UserInvitations.findFirst({
       where: (invites, { eq }) => eq(invites.id, invitationId),
       with: {
@@ -307,17 +216,10 @@ export async function cancelInvitation(invitationId: string) {
       },
     });
 
-    debug("Invitation check", {
-      found: !!invitation,
-      studioId: invitation?.studioId,
-    });
-
     if (!invitation) {
-      debug("Invitation not found");
       throw new Error("Invitation not found");
     }
 
-    // Check if user has permission to cancel invitations
     const hasPermission = invitation.studio.studioMembers.some((member) => {
       invariant(session.user?.id, "Not authenticated");
 
@@ -328,14 +230,10 @@ export async function cancelInvitation(invitationId: string) {
       );
     });
 
-    debug("Permission check", { hasPermission });
-
     if (!hasPermission) {
-      debug("Authorization failed for canceling invitation");
       throw new Error("Not authorized to cancel invitations");
     }
 
-    // Cancel the invitation
     const [canceledInvitation] = await tx
       .update(schema.UserInvitations)
       .set({
@@ -343,8 +241,6 @@ export async function cancelInvitation(invitationId: string) {
       })
       .where(eq(schema.UserInvitations.id, invitationId))
       .returning();
-
-    debug("Invitation canceled successfully", { invitationId });
 
     return canceledInvitation;
   });
