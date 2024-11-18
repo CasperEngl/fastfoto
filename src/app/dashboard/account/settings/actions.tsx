@@ -7,8 +7,8 @@ import ms from "ms";
 import { nanoid } from "nanoid";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
-import * as usersQuery from "~/db/queries/users.query";
+import * as studioMembersFilters from "~/db/filters/studio-members";
+import * as usersFilters from "~/db/filters/users";
 import * as schema from "~/db/schema";
 import { env } from "~/env";
 import { resend, resendFrom } from "~/resend";
@@ -64,7 +64,7 @@ export async function createStudio(data: { name: string }) {
     invariant(session?.user?.id, "Not authenticated");
 
     const photographerUser = await tx.query.Users.findFirst({
-      where: usersQuery.isUserPhotographer(session.user.id),
+      where: usersFilters.isUserPhotographer(session.user.id),
       columns: {
         id: true,
       },
@@ -103,7 +103,7 @@ export async function deleteStudio(studioId: string) {
     invariant(session?.user?.id, "Not authenticated");
 
     const studioOwner = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioOwner(studioId, session.user.id),
+      where: studioMembersFilters.isStudioOwner(studioId, session.user.id),
       columns: {
         id: true,
       },
@@ -130,7 +130,7 @@ export async function leaveStudio(studioId: string) {
     invariant(session?.user?.id, "Not authenticated");
 
     const studioMember = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioMember(studioId, session.user.id),
+      where: studioMembersFilters.isStudioMember(studioId, session.user.id),
       columns: {
         id: true,
         role: true,

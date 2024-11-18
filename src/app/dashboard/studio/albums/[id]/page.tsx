@@ -5,7 +5,7 @@ import { DeleteAlbumButton } from "~/app/dashboard/studio/albums/[id]/delete-alb
 import { EditAlbumForm } from "~/app/dashboard/studio/albums/[id]/edit-album-form";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as studioClientsQuery from "~/db/queries/studio-clients.query";
+import * as studioClientsFilters from "~/db/filters/studio-clients";
 import { Albums } from "~/db/schema";
 import { isPhotographer } from "~/role";
 
@@ -48,7 +48,7 @@ export default async function AlbumPage({
   };
 
   const studioClients = await db.query.StudioClients.findMany({
-    where: studioClientsQuery.studioFilter(album.studioId),
+    where: studioClientsFilters.studioFilter(album.studioId),
     with: {
       user: true,
     },

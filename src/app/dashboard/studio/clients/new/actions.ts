@@ -9,7 +9,7 @@ import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
+import * as studioMembersFilters from "~/db/filters/studio-members";
 import * as schema from "~/db/schema";
 import { env } from "~/env";
 import { resend, resendFrom } from "~/resend";
@@ -24,7 +24,7 @@ export async function createClient(data: { emails: string[] }) {
     invariant(selectedStudioId, "Must select a studio");
 
     const studioMember = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioMember(
+      where: studioMembersFilters.isStudioMember(
         selectedStudioId,
         session.user.id,
       ),

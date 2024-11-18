@@ -7,8 +7,8 @@ import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as albumsQuery from "~/db/queries/albums.query";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
+import * as albumsFilters from "~/db/filters/albums";
+import * as studioMembersFilters from "~/db/filters/studio-members";
 import * as schema from "~/db/schema";
 
 export async function deleteAlbum(albumId: string) {
@@ -26,7 +26,10 @@ export async function deleteAlbum(albumId: string) {
     }
 
     const studioMember = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioMember(album.studioId, session.user.id),
+      where: studioMembersFilters.isStudioMember(
+        album.studioId,
+        session.user.id,
+      ),
       columns: {
         id: true,
       },
@@ -56,7 +59,7 @@ export async function updateAlbum(
   invariant(selectedStudioId, "Unauthorized");
 
   const album = await db.query.Albums.findFirst({
-    where: albumsQuery.isAlbum(albumId),
+    where: albumsFilters.isAlbum(albumId),
     with: {
       studio: true,
     },
@@ -72,7 +75,7 @@ export async function updateAlbum(
   }
 
   const studioMember = await db.query.StudioMembers.findFirst({
-    where: studioMembersQuery.isStudioMember(album.studioId, session.user.id),
+    where: studioMembersFilters.isStudioMember(album.studioId, session.user.id),
     columns: {
       id: true,
     },
@@ -90,7 +93,7 @@ export async function updateAlbum(
         name: data.name,
         description: data.description,
       })
-      .where(albumsQuery.isAlbum(albumId));
+      .where(albumsFilters.isAlbum(albumId));
 
     // Delete existing user relationships
     await tx

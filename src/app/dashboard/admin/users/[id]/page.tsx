@@ -8,7 +8,7 @@ import { auth } from "~/auth";
 import { AlbumCard } from "~/components/album-card";
 import { Button } from "~/components/ui/button";
 import { db } from "~/db/client";
-import * as usersQuery from "~/db/queries/users.query";
+import * as usersFilters from "~/db/filters/users";
 import * as schema from "~/db/schema";
 import { isAdmin } from "~/role";
 
@@ -25,7 +25,7 @@ export default async function UserEditPage({
   }
 
   const user = await db.query.Users.findFirst({
-    where: usersQuery.isUser(id),
+    where: usersFilters.isUser(id),
   });
 
   if (!user) {

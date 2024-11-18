@@ -7,7 +7,7 @@ import { cookies } from "next/headers";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as usersQuery from "~/db/queries/users.query";
+import * as usersFilters from "~/db/filters/users";
 import * as schema from "~/db/schema";
 
 export async function createAlbum(
@@ -23,7 +23,7 @@ export async function createAlbum(
     invariant(session?.user?.id, "Unauthorized");
 
     const photographerUser = await tx.query.Users.findFirst({
-      where: usersQuery.isUserPhotographer(session.user.id),
+      where: usersFilters.isUserPhotographer(session.user.id),
       columns: {
         id: true,
       },

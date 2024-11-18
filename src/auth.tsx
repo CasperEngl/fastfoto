@@ -7,7 +7,7 @@ import Passkey from "next-auth/providers/passkey";
 import Resend from "next-auth/providers/resend";
 import { revalidatePath } from "next/cache";
 import { db } from "~/db/client";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
+import * as studioMembersFilters from "~/db/filters/studio-members";
 import * as schema from "~/db/schema";
 import { env } from "~/env";
 import { resend, resendFrom } from "~/resend";
@@ -56,8 +56,8 @@ export const {
             const existingPersonalStudio =
               await db.query.StudioMembers.findFirst({
                 where: and(
-                  studioMembersQuery.userFilter(user.id),
-                  studioMembersQuery.hasStudioRole("owner"),
+                  studioMembersFilters.userFilter(user.id),
+                  studioMembersFilters.hasStudioRole("owner"),
                 ),
               });
 

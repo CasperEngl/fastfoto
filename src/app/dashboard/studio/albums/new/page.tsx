@@ -6,7 +6,7 @@ import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { Alert } from "~/components/ui/alert";
 import { db } from "~/db/client";
-import * as studioClientQueries from "~/db/queries/studio-clients.query";
+import * as studioClientQueries from "~/db/filters/studio-clients";
 import { isPhotographer } from "~/role";
 
 export default async function CreateAlbumPage() {

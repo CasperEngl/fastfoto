@@ -6,7 +6,7 @@ import { auth } from "~/auth";
 import { db } from "~/db/client";
 import { Users } from "~/db/schema";
 import { createUserSchema, type CreateUserFormValues } from "./schema";
-import * as usersQuery from "~/db/queries/users.query";
+import * as usersFilters from "~/db/filters/users";
 
 export async function createUser(data: CreateUserFormValues) {
   const session = await auth();
@@ -15,7 +15,7 @@ export async function createUser(data: CreateUserFormValues) {
     invariant(session?.user?.id, "Unauthorized");
 
     const adminUser = await tx.query.Users.findFirst({
-      where: usersQuery.isUserAdmin(session.user.id),
+      where: usersFilters.isUserAdmin(session.user.id),
       columns: {
         id: true,
       },

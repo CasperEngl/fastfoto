@@ -6,7 +6,7 @@ import { StudioMemberInvitationEmail } from "emails/studio-member-invitation-ema
 import invariant from "invariant";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
+import * as studioMembersFilters from "~/db/filters/studio-members";
 import * as schema from "~/db/schema";
 import { env } from "~/env";
 import { resend, resendFrom } from "~/resend";
@@ -22,7 +22,7 @@ export async function updateStudio(
     invariant(session?.user?.id, "Not authenticated");
 
     const studioManager = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioManager(data.id, session.user.id),
+      where: studioMembersFilters.isStudioManager(data.id, session.user.id),
       columns: {
         id: true,
       },
@@ -51,7 +51,7 @@ export async function removeMember(studioId: string, memberId: string) {
     invariant(session?.user?.id, "Not authenticated");
 
     const studioManager = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioManager(studioId, session.user.id),
+      where: studioMembersFilters.isStudioManager(studioId, session.user.id),
       columns: {
         id: true,
         role: true,
@@ -109,7 +109,7 @@ export async function addMember(studioId: string, email: string) {
     }
 
     const studioManager = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioManager(studioId, session.user.id),
+      where: studioMembersFilters.isStudioManager(studioId, session.user.id),
       columns: {
         id: true,
       },
@@ -209,7 +209,7 @@ export async function cancelInvitation(invitationId: string) {
         studio: {
           with: {
             studioMembers: {
-              where: studioMembersQuery.userFilter(session.user.id),
+              where: studioMembersFilters.userFilter(session.user.id),
             },
           },
         },

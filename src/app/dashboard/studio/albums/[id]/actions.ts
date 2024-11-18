@@ -7,8 +7,8 @@ import { utapi } from "~/app/api/uploadthing/core";
 import { STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as albumsQuery from "~/db/queries/albums.query";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
+import * as albumsFilters from "~/db/filters/albums";
+import * as studioMembersFilters from "~/db/filters/studio-members";
 import { Photos } from "~/db/schema";
 
 export async function deletePhoto(albumId: string, key: string) {
@@ -20,7 +20,7 @@ export async function deletePhoto(albumId: string, key: string) {
     invariant(session?.user?.id, "Unauthorized");
 
     const album = await tx.query.Albums.findFirst({
-      where: albumsQuery.isAlbum(albumId),
+      where: albumsFilters.isAlbum(albumId),
       with: {
         studio: true,
       },
@@ -35,7 +35,10 @@ export async function deletePhoto(albumId: string, key: string) {
     }
 
     const studioMember = await tx.query.StudioMembers.findFirst({
-      where: studioMembersQuery.isStudioMember(album.studioId, session.user.id),
+      where: studioMembersFilters.isStudioMember(
+        album.studioId,
+        session.user.id,
+      ),
       columns: {
         id: true,
       },

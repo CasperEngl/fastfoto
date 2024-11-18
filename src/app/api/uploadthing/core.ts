@@ -5,7 +5,7 @@ import { UploadThingError, UTApi } from "uploadthing/server";
 import { z } from "zod";
 import { auth } from "~/auth";
 import { db } from "~/db/client";
-import * as studioMembersQuery from "~/db/queries/studio-members.query";
+import * as studioMembersFilters from "~/db/filters/studio-members";
 import * as schema from "~/db/schema";
 
 const f = createUploadthing();
@@ -82,7 +82,7 @@ export const ourFileRouter = {
       }
 
       const studioManager = await db.query.StudioMembers.findFirst({
-        where: studioMembersQuery.isStudioManager(
+        where: studioMembersFilters.isStudioManager(
           input.studioId,
           session.user.id,
         ),
