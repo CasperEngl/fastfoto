@@ -22,7 +22,7 @@ export default async function DashboardLayout({
   const session = await auth();
 
   if (!session?.user?.id) {
-    return redirect("/login");
+    return redirect("/auth/login");
   }
 
   const cookieStore = await cookies();

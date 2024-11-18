@@ -40,7 +40,7 @@ export default async function AuthErrorPage({
 
           <div className="flex justify-center">
             <Button asChild>
-              <Link href="/login">Back to Sign In</Link>
+              <Link href="/auth/login">Back to Sign In</Link>
             </Button>
           </div>
         </CardContent>

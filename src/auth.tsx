@@ -28,6 +28,8 @@ export const {
   pages: {
     verifyRequest: "/auth/verify",
     error: "/auth/error",
+    signIn: "/auth/login",
+    newUser: "/register",
   },
   adapter: DrizzleAdapter(db, {
     usersTable: schema.Users,

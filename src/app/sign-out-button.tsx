@@ -9,7 +9,7 @@ export function SignOutButton() {
   const router = useRouter();
   const [, action, isPending] = useActionState(async () => {
     await signOut();
-    await router.push("/login");
+    await router.push("/auth/login");
   }, null);
 
   return (

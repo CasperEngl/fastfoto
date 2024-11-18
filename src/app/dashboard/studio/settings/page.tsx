@@ -6,6 +6,8 @@ import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as studioMembersQuery from "~/db/queries/studio-members.query";
 import { hasStudioManagerRole, isPhotographer } from "~/role";
+import { eq } from "drizzle-orm";
+import { UserInvitations } from "~/db/schema";
 
 export default async function StudioSettingsPage() {
   const session = await auth();
@@ -26,21 +28,26 @@ export default async function StudioSettingsPage() {
               user: true,
             },
           },
+          userInvitations: {
+            where: eq(UserInvitations.status, "pending"),
+          },
         },
       },
     },
   });
+
   const studios = userStudios.map((studio) => ({
     ...studio.studio,
     users: studio.studio.studioMembers.map((member) => ({
       ...member.user,
       role: member.role,
     })),
+    pendingInvitations: studio.studio.userInvitations,
   }));
+
   const userManagableStudios = studios
     .filter((studio) => {
       invariant(session.user, "User is required");
-
       return hasStudioManagerRole(session.user, studio);
     })
     .map((studio) => studio.id);

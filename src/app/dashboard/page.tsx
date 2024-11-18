@@ -13,7 +13,7 @@ export default async function DashboardHome() {
         <SignOutButton />
       ) : (
         <Button asChild>
-          <Link href="/login">Login</Link>
+          <Link href="/auth/login">Login</Link>
         </Button>
       )}
     </div>

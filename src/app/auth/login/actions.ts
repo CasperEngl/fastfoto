@@ -2,10 +2,13 @@
 
 import { signIn } from "~/auth";
 
-export async function loginMagicLink(options: { email: string }) {
+export async function loginMagicLink(options: {
+  email: string;
+  redirectTo?: string;
+}) {
   return await signIn("resend", {
     ...options,
-    redirectTo: "/dashboard",
+    redirectTo: options.redirectTo ?? "/dashboard",
   });
 }
 

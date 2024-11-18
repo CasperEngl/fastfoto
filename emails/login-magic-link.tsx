@@ -71,7 +71,7 @@ export function LoginMagicLinkEmail({
 }
 
 LoginMagicLinkEmail.PreviewProps = {
-  loginUrl: new URL("/login", env.APP_URL).toString(),
+  loginUrl: new URL("/auth/login", env.APP_URL).toString(),
   expiresAt: Date.now(),
 } as LoginMagicLinkEmailProps;
 

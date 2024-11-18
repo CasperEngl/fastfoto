@@ -31,6 +31,7 @@ export type ManagedStudio = InferSelectModel<typeof schema.Studios> & {
       role: InferSelectModel<typeof schema.StudioMembers>["role"];
     }
   >;
+  pendingInvitations: Array<InferSelectModel<typeof schema.UserInvitations>>;
 };
 
 export function StudiosManager({ studios }: { studios: Array<ManagedStudio> }) {

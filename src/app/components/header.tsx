@@ -69,7 +69,7 @@ function MobileNavigation() {
         <MobileNavLink href="#testimonials">Testimonials</MobileNavLink>
         <MobileNavLink href="#pricing">Pricing</MobileNavLink>
         <hr className="m-2 border-slate-300/40" />
-        <MobileNavLink href="/login">Sign in</MobileNavLink>
+        <MobileNavLink href="/auth/login">Sign in</MobileNavLink>
       </PopoverContent>
     </Popover>
   );
@@ -95,11 +95,11 @@ export function Header() {
           <div className="flex items-center gap-x-5 md:gap-x-8">
             {!session.data ? (
               <div className="hidden md:block">
-                <NavLink href="/login">Sign in</NavLink>
+                <NavLink href="/auth/login">Sign in</NavLink>
               </div>
             ) : null}
             <Button asChild>
-              <Link href={session.data?.user ? "/dashboard" : "/login"}>
+              <Link href={session.data?.user ? "/dashboard" : "/auth/login"}>
                 <span>
                   {session.data?.user ? (
                     "Dashboard"

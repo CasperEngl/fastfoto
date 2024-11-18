@@ -49,5 +49,21 @@ services:
       options:
         max-size: "10m"
 
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile.scheduler
+    env_file:
+      - .env.local
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   postgres_data:

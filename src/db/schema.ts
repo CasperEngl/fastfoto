@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
   boolean,
   integer,
@@ -19,6 +19,17 @@ export const userType = pgEnum("user_type", [
 ]);
 
 export const studioRole = pgEnum("studio_role", ["owner", "admin", "member"]);
+
+export const invitationType = pgEnum("invitation_type", [
+  "studio_member",
+  "studio_client",
+]);
+
+export const invitationStatus = pgEnum("invitation_status", [
+  "pending",
+  "accepted",
+  "expired",
+]);
 
 export const Users = pgTable("users", {
   id: text("id")
@@ -229,6 +240,36 @@ export const AlbumClients = pgTable(
   ],
 );
 
+export const UserInvitations = pgTable(
+  "user_invitations",
+  {
+    id: text("id")
+      .primaryKey()
+      .$defaultFn(() => crypto.randomUUID()),
+    studioId: text("studio_id")
+      .notNull()
+      .references(() => Studios.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    type: invitationType("type").notNull(),
+    status: invitationStatus("status").notNull().default("pending"),
+    role: studioRole("role"),
+    invitedById: text("invited_by_id")
+      .notNull()
+      .references(() => Users.id, { onDelete: "cascade" }),
+    expiresAt: timestamp("expires_at", { mode: "date" }).notNull(),
+    createdAt: timestamp("created_at", { mode: "date" }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { mode: "date" }).$onUpdateFn(
+      () => new Date(),
+    ),
+    metadata: jsonb("metadata"),
+  },
+  (t) => [
+    uniqueIndex("user_invitations_studio_email_type_unique")
+      .on(t.studioId, t.email, t.type)
+      .where(sql`status = 'pending'`),
+  ],
+);
+
 export const UsersRelations = relations(Users, ({ many }) => ({
   adminAuditLogs: many(AdminAuditLogs),
   sessions: many(Sessions),
@@ -247,6 +288,7 @@ export const StudiosRelations = relations(Studios, ({ one, many }) => ({
     references: [Users.id],
   }),
   studioClients: many(StudioClients),
+  userInvitations: many(UserInvitations),
 }));
 
 export const StudioMembersRelations = relations(StudioMembers, ({ one }) => ({
@@ -301,3 +343,17 @@ export const PhotosRelations = relations(Photos, ({ one }) => ({
     references: [Albums.id],
   }),
 }));
+
+export const UserInvitationsRelations = relations(
+  UserInvitations,
+  ({ one }) => ({
+    studio: one(Studios, {
+      fields: [UserInvitations.studioId],
+      references: [Studios.id],
+    }),
+    invitedBy: one(Users, {
+      fields: [UserInvitations.invitedById],
+      references: [Users.id],
+    }),
+  }),
+);

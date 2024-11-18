@@ -8,7 +8,7 @@ import { useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { loginMagicLink } from "~/app/login/actions";
+import { loginMagicLink } from "~/app/auth/login/actions";
 import { Button } from "~/components/ui/button";
 import {
   Card,
@@ -33,6 +33,8 @@ const formSchema = z.object({
 
 export function LoginForm() {
   const router = useRouter();
+  const url =
+    typeof window !== "undefined" ? new URL(window.location.href) : null;
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -48,11 +50,12 @@ export function LoginForm() {
     } catch (error) {
       toast("Failed to sign in with passkey");
     }
+
     return null;
   }, null);
 
   return (
-    <Card className="mx-auto max-w-sm">
+    <Card className="mx-auto w-full max-w-sm">
       <CardHeader>
         <CardTitle className="text-2xl">Login</CardTitle>
         <CardDescription>
@@ -64,7 +67,10 @@ export function LoginForm() {
           <Form {...form}>
             <form
               onSubmit={form.handleSubmit(async (values) => {
-                await loginMagicLink(values);
+                await loginMagicLink({
+                  email: values.email,
+                  redirectTo: url?.searchParams.get("redirect") ?? undefined,
+                });
               })}
               className="space-y-4"
             >
@@ -110,7 +116,7 @@ export function LoginForm() {
         </div>
         <div className="mt-4 text-center text-sm">
           Don&apos;t have an account?{" "}
-          <Link href="#" className="underline">
+          <Link href="/auth/register" className="underline">
             Sign up
           </Link>
         </div>

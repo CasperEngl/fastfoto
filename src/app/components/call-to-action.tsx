@@ -28,7 +28,7 @@ export function CallToAction() {
             work and delight their clients. Start your free trial today.
           </p>
           <Button asChild className="mt-10">
-            <Link href="/login">Start free trial</Link>
+            <Link href="/auth/login">Start free trial</Link>
           </Button>
         </div>
       </Container>

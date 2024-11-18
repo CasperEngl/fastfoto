@@ -13,6 +13,7 @@ import {
   addMember,
   removeMember,
   updateStudio,
+  cancelInvitation,
 } from "~/app/dashboard/studio/settings/actions";
 import { useStudioSettings } from "~/app/dashboard/studio/settings/studio-settings-context";
 import { ManagedStudio } from "~/app/dashboard/studio/settings/studios-manager";
@@ -37,6 +38,7 @@ import {
   TableHeader,
   TableRow,
 } from "~/components/ui/table";
+import { dayjs } from "~/lib/dayjs";
 import { UploadButton } from "~/lib/uploadthing";
 import { cn } from "~/lib/utils";
 
@@ -56,6 +58,9 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
   const [isRemoving, startTransition] = useTransition();
   const { userManagableStudios } = useStudioSettings();
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
+  const [cancellingInvitationId, setCancellingInvitationId] = useState<
+    string | null
+  >(null);
   const form = useForm<z.infer<typeof studioFormSchema>>({
     resolver: zodResolver(studioFormSchema),
     defaultValues: {
@@ -140,84 +145,212 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
             )}
           />
 
+          {canManageStudio ? (
+            <div className="space-y-4">
+              <h3 className="text-lg font-medium">Add Member</h3>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter the email address of the member you want to add to this
+                studio.
+              </p>
+
+              <Form {...addMemberForm}>
+                <form
+                  onSubmit={addMemberForm.handleSubmit(async (values) => {
+                    try {
+                      const res = await addMember(studio.id, values.email);
+                      console.log("RES", res);
+                      addMemberForm.reset();
+                      router.refresh();
+                      toast.success("Member added successfully");
+                    } catch (error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : "Failed to add member",
+                      );
+                    }
+                  })}
+                  className="mt-4 flex items-end gap-2"
+                >
+                  <FormField
+                    control={addMemberForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="flex-1">
+                        <FormLabel>Email</FormLabel>
+                        <FormControl>
+                          <Input
+                            placeholder="Enter member's email"
+                            type="email"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={addMemberForm.formState.isSubmitting}
+                  >
+                    {addMemberForm.formState.isSubmitting
+                      ? "Adding..."
+                      : "Add Member"}
+                  </Button>
+                </form>
+              </Form>
+            </div>
+          ) : null}
+
           <div className="space-y-4">
             <h3 className="text-lg font-medium">Studio Members</h3>
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Member</TableHead>
-                  <TableHead>Role</TableHead>
-                  {canManageStudio && (
-                    <TableHead className="w-[100px]">Actions</TableHead>
-                  )}
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {studio.users.map((member) => (
-                  <TableRow key={member.id}>
-                    <TableCell className="flex items-center gap-2">
-                      <Avatar className="size-8">
-                        <AvatarImage
-                          src={member.image ?? undefined}
-                          alt={member.name ?? "Member"}
-                        />
-                        <AvatarFallback>
-                          {member.name?.[0]?.toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{member.name}</span>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant={match(member.role)
-                          .with("owner", () => "destructive" as const)
-                          .with("admin", () => "outline" as const)
-                          .with("member", () => "default" as const)
-                          .exhaustive()}
-                      >
-                        {capitalize(member.role)}
-                      </Badge>
-                    </TableCell>
-                    {canManageStudio ? (
-                      <TableCell>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="size-8 p-0"
-                          disabled={removingMemberId === member.id}
-                          onClick={() => {
-                            setRemovingMemberId(member.id);
-                            startTransition(async () => {
-                              try {
-                                await removeMember(studio.id, member.id);
-                                toast.success(
-                                  `${member.name} removed from studio`,
-                                );
-                              } catch (error) {
-                                toast.error(
-                                  error instanceof Error
-                                    ? error.message
-                                    : "Failed to remove member",
-                                );
-                              } finally {
-                                setRemovingMemberId(null);
-                                router.refresh();
+
+            {studio.pendingInvitations.length > 0 && (
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Pending Invitations</TableHead>
+                      <TableHead>Sent</TableHead>
+                      {canManageStudio && (
+                        <TableHead className="w-[100px]">Actions</TableHead>
+                      )}
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {studio.pendingInvitations.map((invitation) => (
+                      <TableRow key={invitation.id}>
+                        <TableCell>
+                          <div className="flex flex-col">
+                            <span>{invitation.email}</span>
+                            <span className="text-sm text-muted-foreground">
+                              Pending acceptance
+                            </span>
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          {dayjs(invitation.createdAt).fromNow()}
+                        </TableCell>
+                        {canManageStudio && (
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="size-8 p-0"
+                              disabled={
+                                cancellingInvitationId === invitation.id
                               }
-                            });
-                          }}
-                        >
-                          {removingMemberId === member.id ? (
-                            <Loader2 className="size-4 animate-spin" />
-                          ) : (
-                            <X className="size-4" />
-                          )}
-                        </Button>
-                      </TableCell>
-                    ) : null}
+                              onClick={async () => {
+                                setCancellingInvitationId(invitation.id);
+                                try {
+                                  await cancelInvitation(invitation.id);
+                                  toast.success("Invitation cancelled");
+                                  router.refresh();
+                                } catch (error) {
+                                  toast.error(
+                                    error instanceof Error
+                                      ? error.message
+                                      : "Failed to cancel invitation",
+                                  );
+                                } finally {
+                                  setCancellingInvitationId(null);
+                                }
+                              }}
+                            >
+                              {cancellingInvitationId === invitation.id ? (
+                                <Loader2 className="size-4 animate-spin" />
+                              ) : (
+                                <X className="size-4" />
+                              )}
+                            </Button>
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+
+            <div className="rounded-md border">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Member</TableHead>
+                    <TableHead>Role</TableHead>
+                    {canManageStudio && (
+                      <TableHead className="w-[100px]">Actions</TableHead>
+                    )}
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHeader>
+                <TableBody>
+                  {studio.users.map((member) => (
+                    <TableRow key={member.id}>
+                      <TableCell className="flex items-center gap-2">
+                        <Avatar className="size-8">
+                          <AvatarImage
+                            src={member.image ?? undefined}
+                            alt={member.name ?? "Member"}
+                          />
+                          <AvatarFallback>
+                            {member.name?.[0]?.toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span>{member.name}</span>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant={match(member.role)
+                            .with("owner", () => "destructive" as const)
+                            .with("admin", () => "outline" as const)
+                            .with("member", () => "default" as const)
+                            .exhaustive()}
+                        >
+                          {capitalize(member.role)}
+                        </Badge>
+                      </TableCell>
+                      {canManageStudio ? (
+                        <TableCell>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="size-8 p-0"
+                            disabled={removingMemberId === member.id}
+                            onClick={() => {
+                              setRemovingMemberId(member.id);
+                              startTransition(async () => {
+                                try {
+                                  await removeMember(studio.id, member.id);
+                                  toast.success(
+                                    `${member.name} removed from studio`,
+                                  );
+                                } catch (error) {
+                                  toast.error(
+                                    error instanceof Error
+                                      ? error.message
+                                      : "Failed to remove member",
+                                  );
+                                } finally {
+                                  setRemovingMemberId(null);
+                                  router.refresh();
+                                }
+                              });
+                            }}
+                          >
+                            {removingMemberId === member.id ? (
+                              <Loader2 className="size-4 animate-spin" />
+                            ) : (
+                              <X className="size-4" />
+                            )}
+                          </Button>
+                        </TableCell>
+                      ) : null}
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
           </div>
 
           <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -225,61 +358,6 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
           </Button>
         </form>
       </Form>
-
-      {canManageStudio ? (
-        <div>
-          <h3 className="text-lg font-medium">Add Member</h3>
-          <p className="mt-2 text-sm text-muted-foreground">
-            Add a member to this studio.
-          </p>
-
-          <Form {...addMemberForm}>
-            <form
-              onSubmit={addMemberForm.handleSubmit(async (values) => {
-                try {
-                  await addMember(studio.id, values.email);
-                  addMemberForm.reset();
-                  router.refresh();
-                  toast.success("Member added successfully");
-                } catch (error) {
-                  toast.error(
-                    error instanceof Error
-                      ? error.message
-                      : "Failed to add member",
-                  );
-                }
-              })}
-              className="mt-4 flex items-end gap-2"
-            >
-              <FormField
-                control={addMemberForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="flex-1">
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Enter member's email"
-                        type="email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button
-                type="submit"
-                disabled={addMemberForm.formState.isSubmitting}
-              >
-                {addMemberForm.formState.isSubmitting
-                  ? "Adding..."
-                  : "Add Member"}
-              </Button>
-            </form>
-          </Form>
-        </div>
-      ) : null}
     </fieldset>
   );
 }
