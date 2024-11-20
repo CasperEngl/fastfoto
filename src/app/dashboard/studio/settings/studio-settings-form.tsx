@@ -4,18 +4,18 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { capitalize } from "lodash-es";
 import { Loader2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { use, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { match } from "ts-pattern";
 import * as z from "zod";
 import {
   addMember,
+  cancelInvitation,
   removeMember,
   updateStudio,
-  cancelInvitation,
 } from "~/app/dashboard/studio/settings/actions";
-import { useStudioSettings } from "~/app/dashboard/studio/settings/studio-settings-context";
+import { StudioSettingsContext } from "~/app/dashboard/studio/settings/studio-settings-context";
 import { ManagedStudio } from "~/app/dashboard/studio/settings/studios-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
 import { Badge } from "~/components/ui/badge";
@@ -56,7 +56,7 @@ const addMemberSchema = z.object({
 export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
   const router = useRouter();
   const [isRemoving, startTransition] = useTransition();
-  const { userManagableStudios } = useStudioSettings();
+  const { userManagableStudios } = use(StudioSettingsContext);
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
   const [cancellingInvitationId, setCancellingInvitationId] = useState<
     string | null
@@ -322,8 +322,9 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
                         className="size-8 p-0"
                         disabled={removingMemberId === member.id}
                         onClick={() => {
-                          setRemovingMemberId(member.id);
                           startTransition(async () => {
+                            setRemovingMemberId(member.id);
+
                             try {
                               await removeMember(studio.id, member.id);
                               toast.success(

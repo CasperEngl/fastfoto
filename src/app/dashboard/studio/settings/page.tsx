@@ -1,3 +1,4 @@
+import { eq } from "drizzle-orm";
 import invariant from "invariant";
 import { notFound } from "next/navigation";
 import { StudioSettingsProvider } from "~/app/dashboard/studio/settings/studio-settings-context";
@@ -5,9 +6,8 @@ import { StudiosManager } from "~/app/dashboard/studio/settings/studios-manager"
 import { auth } from "~/auth";
 import { db } from "~/db/client";
 import * as studioMembersFilters from "~/db/filters/studio-members";
+import * as schema from "~/db/schema";
 import { hasStudioManagerRole, isPhotographer } from "~/role";
-import { eq } from "drizzle-orm";
-import { UserInvitations } from "~/db/schema";
 
 export default async function StudioSettingsPage() {
   const session = await auth();
@@ -29,7 +29,7 @@ export default async function StudioSettingsPage() {
             },
           },
           userInvitations: {
-            where: eq(UserInvitations.status, "pending"),
+            where: eq(schema.UserInvitations.status, "pending"),
           },
         },
       },

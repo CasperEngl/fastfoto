@@ -1,34 +1,24 @@
 "use client";
 
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode } from "react";
 
 interface StudioSettingsContextType {
   userManagableStudios: string[];
 }
 
-const StudioSettingsContext = createContext<
-  StudioSettingsContextType | undefined
->(undefined);
+export const StudioSettingsContext = createContext<StudioSettingsContextType>({
+  userManagableStudios: [],
+});
 
 export function StudioSettingsProvider({
+  userManagableStudios,
   children,
-  userManagableStudios = [],
-}: {
+}: StudioSettingsContextType & {
   children: ReactNode;
-} & StudioSettingsContextType) {
+}) {
   return (
-    <StudioSettingsContext.Provider value={{ userManagableStudios }}>
+    <StudioSettingsContext value={{ userManagableStudios }}>
       {children}
-    </StudioSettingsContext.Provider>
+    </StudioSettingsContext>
   );
-}
-
-export function useStudioSettings() {
-  const context = useContext(StudioSettingsContext);
-  if (context === undefined) {
-    throw new Error(
-      "useStudioSettings must be used within a StudioSettingsProvider",
-    );
-  }
-  return context;
 }
