@@ -35,12 +35,14 @@ export const env = createEnv({
     POSTGRES_USER: z.string().min(1),
     POSTGRES_DB: z.string().min(1),
     POSTGRES_HOST: z.string().min(1),
+    PAYLOAD_SECRET: z.string().min(1),
   },
   runtimeEnv: {
     POSTGRES_DB: process.env.POSTGRES_DB,
     POSTGRES_HOST: process.env.POSTGRES_HOST,
     POSTGRES_PASSWORD: process.env.POSTGRES_PASSWORD,
     POSTGRES_USER: process.env.POSTGRES_USER,
+    PAYLOAD_SECRET: process.env.PAYLOAD_SECRET,
     APP_DEBUG: process.env.APP_DEBUG === "true",
     APP_URL:
       process.env.NODE_ENV === "production"

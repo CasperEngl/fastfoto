@@ -2,7 +2,7 @@
 
 import { cookies } from "next/headers";
 import "server-only";
-import { STUDIO_COOKIE_NAME } from "~/app/globals";
+import { STUDIO_COOKIE_NAME } from "~/app/(my-app)/globals";
 
 export async function changeStudio(studioId: string) {
   const cookieStore = await cookies();

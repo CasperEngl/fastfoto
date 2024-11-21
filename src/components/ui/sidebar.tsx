@@ -11,7 +11,7 @@ import {
   SIDEBAR_WIDTH,
   SIDEBAR_WIDTH_ICON,
   SIDEBAR_WIDTH_MOBILE,
-} from "~/app/globals";
+} from "~/app/(my-app)/globals";
 
 import { Button } from "~/components/ui/button";
 import { Input } from "~/components/ui/input";

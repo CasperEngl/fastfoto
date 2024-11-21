@@ -8,7 +8,7 @@ import { useActionState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
-import { loginMagicLink } from "~/app/auth/login/actions";
+import { loginMagicLink } from "~/app/(my-app)/auth/login/actions";
 import { Button } from "~/components/ui/button";
 import {
   Card,
