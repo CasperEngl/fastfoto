@@ -139,7 +139,7 @@ export function Pricing() {
             name="Starter"
             price="$9"
             description="Perfect for photographers just starting their journey."
-            href="/register"
+            href="/auth/register"
             features={[
               "Up to 5 client galleries",
               "500 photos per month",
@@ -155,7 +155,7 @@ export function Pricing() {
             name="Professional"
             price="$29"
             description="For growing photography businesses."
-            href="/register"
+            href="/auth/register"
             features={[
               "Unlimited client galleries",
               "2000 photos per month",
@@ -171,7 +171,7 @@ export function Pricing() {
             name="Studio"
             price="$79"
             description="For professional studios."
-            href="/register"
+            href="/auth/register"
             features={[
               "Unlimited everything",
               "Studio collaboration",
