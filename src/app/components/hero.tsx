@@ -28,7 +28,7 @@ export function Hero() {
       </p>
       <div className="mt-10 flex justify-center gap-x-6">
         <Button asChild>
-          <Link href="/auth/login">Start free trial</Link>
+          <Link href="/auth/register">Start free trial</Link>
         </Button>
         <Button variant="outline" asChild>
           <Link href="#features">
