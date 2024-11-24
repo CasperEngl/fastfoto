@@ -9,19 +9,24 @@ expand(
   }),
 );
 
-// console.log(
-//   "process.env",
-//   JSON.stringify(
-//     process.env,
-//     (key, value) => {
-//       if (key.toLowerCase().includes("postgres")) {
-//         return "[redacted]";
-//       }
-//       return value;
-//     },
-//     2,
-//   ),
-// );
+console.log(
+  "process.env",
+  JSON.stringify(
+    process.env,
+    (key, value) => {
+      if (
+        key.toLowerCase().includes("key") ||
+        key.toLowerCase().includes("pass") ||
+        key.toLowerCase().includes("secret") ||
+        key.toLowerCase().includes("token")
+      ) {
+        return "[redacted]";
+      }
+      return value;
+    },
+    2,
+  ),
+);
 
 export const env = createEnv({
   server: {
