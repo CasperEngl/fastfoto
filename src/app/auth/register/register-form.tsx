@@ -60,7 +60,9 @@ export function RegisterForm({ invitation }: Props) {
               } catch (error) {
                 toast.error(
                   error instanceof Error
-                    ? error.message
+                    ? error.message.includes("duplicate")
+                      ? "Email already registered"
+                      : error.message
                     : "Registration failed",
                 );
               }
