@@ -5,6 +5,14 @@ RUN curl -fsSL https://bun.sh/install | bash
 ENV PATH="/root/.bun/bin:$PATH"
 ENV NODE_ENV=production
 
+ARG AUTH_SECRET
+ARG RESEND_KEY
+ARG AXIOM_TOKEN
+ARG POSTGRES_PASSWORD
+ARG POSTGRES_USER
+ARG POSTGRES_DB
+ARG POSTGRES_HOST
+
 WORKDIR /app
 
 COPY package.json bun.lockb ./
