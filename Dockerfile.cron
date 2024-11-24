@@ -8,9 +8,10 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 COPY package.json bun.lockb ./
+COPY scripts/cron ./scripts/cron
 COPY src/db ./src/db
 COPY src/env.ts ./src/env.ts
-COPY scripts/cron ./scripts/cron
+COPY tsconfig.json ./tsconfig.json
 
 RUN bun install
 
