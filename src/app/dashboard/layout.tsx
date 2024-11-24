@@ -1,7 +1,6 @@
 import { eq } from "drizzle-orm";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { Toaster } from "sonner";
 import { DefaultStudioCookie } from "~/app/dashboard/default-studio-cookie";
 import { SIDEBAR_COOKIE_NAME, STUDIO_COOKIE_NAME } from "~/app/globals";
 import { auth } from "~/auth";
@@ -66,8 +65,6 @@ export default async function DashboardLayout({
 
         <main className="container px-4">{children}</main>
       </SidebarInset>
-
-      <Toaster />
     </SidebarProvider>
   );
 }

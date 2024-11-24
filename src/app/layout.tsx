@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import NextTopLoader from "nextjs-toploader";
 import { Providers } from "~/app/providers";
 import { auth } from "~/auth";
+import { Toaster } from "~/components/ui/sonner";
 import { cn } from "~/lib/utils";
 import "./globals.css";
 
@@ -36,6 +37,8 @@ export default async function RootLayout({
         <NextTopLoader color="#047857" />
 
         <Providers session={session}>{children}</Providers>
+
+        <Toaster />
       </body>
     </html>
   );
