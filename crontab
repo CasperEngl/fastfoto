@@ -1,1 +1,1 @@
-* * * * * cd /app && bun scripts/cron/expire-invitations.ts >> /var/log/cron.log 2>&1
+* * * * * cd /app && /root/.bun/bin/bun scripts/cron/expire-invitations.ts >> /var/log/cron.log 2>&1
