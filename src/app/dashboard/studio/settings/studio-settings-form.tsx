@@ -3,6 +3,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { capitalize } from "lodash-es";
 import { Loader2, X } from "lucide-react";
+import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { use, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
@@ -15,6 +16,7 @@ import {
   removeMember,
   updateStudio,
 } from "~/app/dashboard/studio/settings/actions";
+import { DeleteStudioButton } from "~/app/dashboard/studio/settings/delete-studio-button";
 import { StudioSettingsContext } from "~/app/dashboard/studio/settings/studio-settings-context";
 import { ManagedStudio } from "~/app/dashboard/studio/settings/studios-manager";
 import { Avatar, AvatarFallback, AvatarImage } from "~/components/ui/avatar";
@@ -55,6 +57,7 @@ const addMemberSchema = z.object({
 
 export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
   const router = useRouter();
+  const session = useSession();
   const [isRemoving, startTransition] = useTransition();
   const { userManagableStudios } = use(StudioSettingsContext);
   const [removingMemberId, setRemovingMemberId] = useState<string | null>(null);
@@ -75,6 +78,12 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
     },
   });
   const canManageStudio = userManagableStudios.includes(studio.id);
+  const isOwner =
+    session.data?.user?.id &&
+    studio.users.some(
+      (member) =>
+        member.id === session.data?.user?.id && member.role === "owner",
+    );
 
   return (
     <fieldset className="space-y-8" disabled={!canManageStudio}>
@@ -357,6 +366,22 @@ export function StudioSettingsForm({ studio }: { studio: ManagedStudio }) {
           </Table>
         </div>
       </div>
+
+      {canManageStudio && isOwner ? (
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-medium text-destructive">
+                Danger Zone
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Permanently delete this studio and all of its data
+              </p>
+            </div>
+            <DeleteStudioButton studioId={studio.id} studioName={studio.name} />
+          </div>
+        </div>
+      ) : null}
     </fieldset>
   );
 }
