@@ -79,7 +79,8 @@ export function DeleteStudioButton({
               relationships.
             </p>
             <p>
-              Please type <span className="font-medium">{studioName}</span> to
+              Please type{" "}
+              <span className="font-bold text-black">"{studioName}"</span> to
               confirm deletion.
             </p>
           </DialogDescription>

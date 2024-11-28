@@ -102,15 +102,33 @@ export async function deleteStudio(studioId: string) {
   return await db.transaction(async (tx) => {
     invariant(session?.user?.id, "Not authenticated");
 
-    const studioOwner = await tx.query.StudioMembers.findFirst({
-      where: studioMembersFilters.isStudioOwner(studioId, session.user.id),
+    // Get all studios where the user is an owner
+    const ownedStudios = await tx.query.StudioMembers.findMany({
+      where: and(
+        studioMembersFilters.userFilter(session.user.id),
+        studioMembersFilters.hasStudioRole("owner"),
+      ),
       columns: {
         id: true,
+        studioId: true,
       },
     });
 
-    if (!studioOwner) {
-      throw new Error("Not authorized to update studio");
+    console.log("ownedStudios", ownedStudios);
+
+    // Check if user is owner of this studio
+    const isOwnerOfThisStudio = ownedStudios.some(
+      (studio) => studio.studioId === studioId,
+    );
+
+    if (!isOwnerOfThisStudio) {
+      throw new Error("Not authorized to delete studio");
+    }
+
+    if (ownedStudios.length === 1) {
+      throw new Error(
+        "Cannot delete your last studio. You must have at least one studio.",
+      );
     }
 
     // Delete studio members first (due to foreign key constraints)
