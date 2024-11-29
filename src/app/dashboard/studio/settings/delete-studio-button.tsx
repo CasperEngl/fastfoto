@@ -1,9 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useForm } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 import { deleteStudio } from "~/app/dashboard/account/settings/actions";
 import { Button } from "~/components/ui/button";
 import {
@@ -15,13 +18,28 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "~/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "~/components/ui/form";
 import { Input } from "~/components/ui/input";
-import { Label } from "~/components/ui/label";
 
 interface DeleteStudioButtonProps {
   studioId: string;
   studioName: string;
 }
+
+const deleteStudioSchema = z.object({
+  confirmationText: z.string().refine((value) => value.length > 0, {
+    message: "Please type the studio name to confirm deletion",
+  }),
+});
+
+type DeleteStudioFormValues = z.infer<typeof deleteStudioSchema>;
 
 export function DeleteStudioButton({
   studioId,
@@ -29,16 +47,26 @@ export function DeleteStudioButton({
 }: DeleteStudioButtonProps) {
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [confirmationText, setConfirmationText] = useState("");
 
-  const handleDelete = async () => {
-    if (confirmationText !== studioName) {
-      toast.error("Please type the studio name correctly to confirm deletion");
+  const form = useForm<DeleteStudioFormValues>({
+    resolver: zodResolver(deleteStudioSchema),
+    defaultValues: {
+      confirmationText: "",
+    },
+  });
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+  };
+
+  async function onSubmit(data: DeleteStudioFormValues) {
+    if (data.confirmationText !== studioName) {
+      form.setError("confirmationText", {
+        message: "The studio name you typed does not match",
+      });
       return;
     }
 
-    setIsDeleting(true);
     try {
       await deleteStudio(studioId);
       toast.success("Studio deleted successfully");
@@ -49,17 +77,13 @@ export function DeleteStudioButton({
         error instanceof Error ? error.message : "Failed to delete studio",
       );
     } finally {
-      setIsDeleting(false);
       setIsOpen(false);
     }
-  };
+  }
 
-  const handleOpenChange = (open: boolean) => {
-    setIsOpen(open);
-    if (!open) {
-      setConfirmationText("");
-    }
-  };
+  if (!isOpen && form.formState.isDirty) {
+    form.reset();
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
@@ -85,28 +109,43 @@ export function DeleteStudioButton({
             </p>
           </DialogDescription>
         </DialogHeader>
-        <div className="space-y-2">
-          <Label htmlFor="confirmationText">Studio Name</Label>
-          <Input
-            id="confirmationText"
-            value={confirmationText}
-            onChange={(e) => setConfirmationText(e.target.value)}
-            placeholder="Type the studio name to confirm"
-            autoComplete="off"
-          />
-        </div>
-        <DialogFooter>
-          <Button variant="outline" onClick={() => setIsOpen(false)}>
-            Cancel
-          </Button>
-          <Button
-            variant="destructive"
-            onClick={handleDelete}
-            disabled={isDeleting || confirmationText !== studioName}
-          >
-            {isDeleting ? "Deleting..." : "Delete Studio"}
-          </Button>
-        </DialogFooter>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="confirmationText"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Studio Name</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      placeholder="Type the studio name to confirm"
+                      autoComplete="off"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setIsOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="destructive"
+                disabled={form.formState.isSubmitting}
+              >
+                {form.formState.isSubmitting ? "Deleting..." : "Delete Studio"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
