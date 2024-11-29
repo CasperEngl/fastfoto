@@ -49,6 +49,7 @@ export function StudiosManager({ studios }: { studios: Array<ManagedStudio> }) {
   });
 
   const isPersonalStudio = (studio: ManagedStudio) =>
+    studio.users.length === 1 &&
     studio.users.some((member) => {
       if (!session.data?.user?.id) {
         return false;
