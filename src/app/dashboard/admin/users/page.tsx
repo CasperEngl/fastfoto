@@ -1,4 +1,4 @@
-import { and, asc, count, desc, ilike, or, sql, SQL } from "drizzle-orm";
+import { asc, count, desc, ilike, or, sql } from "drizzle-orm";
 import { Plus } from "lucide-react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -26,40 +26,24 @@ export default async function UsersPage({
 
   const offset = (page - 1) * ITEMS_PER_PAGE;
 
-  let whereClause: SQL<unknown> | undefined;
-  let orderByClause: SQL<unknown>[] = [];
-
   const nameFilter = filters.find((filter) => filter.id === "name");
-
-  if (nameFilter) {
-    whereClause = and(
-      whereClause,
-      ilike(schema.Users.name, `%${nameFilter.value}%`),
-    );
-
-    whereClause = or(
-      whereClause,
-      sql`SIMILARITY(${schema.Users.name}, ${nameFilter.value}) > 0.3`,
-    );
-  }
-
-  // Add any user-specified sort criteria after the match priority
-  if (sort.length > 0) {
-    for (const column of sort) {
+  const whereClause = nameFilter
+    ? or(
+        ilike(schema.Users.name, `%${nameFilter.value}%`),
+        sql`SIMILARITY(${schema.Users.name}, ${nameFilter.value}) > 0.3`,
+      )
+    : undefined;
+  const orderByClause = sort
+    .filter((column) => {
+      // @ts-expect-error column.id should be a valid Users column
+      return !!schema.Users[column.id];
+    })
+    .map((column) => {
       // @ts-expect-error column.id should be a valid Users column
       const usersColumn = schema.Users[column.id];
 
-      if (!usersColumn) {
-        console.warn(`Invalid column: ${column.id}`);
-        continue;
-      }
-
-      orderByClause = [
-        ...orderByClause,
-        column.desc ? desc(usersColumn) : asc(usersColumn),
-      ];
-    }
-  }
+      return column.desc ? desc(usersColumn) : asc(usersColumn);
+    });
 
   const users = await db.query.Users.findMany({
     where: whereClause,
